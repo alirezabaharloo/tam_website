@@ -41,25 +41,14 @@ export default function Header() {
                     }`}></span>
                 </Link>
                 <Link 
-                    to="/about" 
+                    to="/news" 
                     className={`font-inter text-[20px] leading-6 text-quinary-tint-800 no-underline hover:text-tertiary transition-all duration-300 ease-in-out relative group ${
-                        location.pathname === '/about' ? 'text-tertiary' : ''
+                        location.pathname === '/news' ? 'text-tertiary' : ''
                     }`}
                 >
-                    About
+                    News
                     <span className={`absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ease-in-out ${
-                        location.pathname === '/about' ? 'w-full bg-tertiary' : 'group-hover:w-full bg-tertiary'
-                    }`}></span>
-                </Link>
-                <Link 
-                    to="/contact" 
-                    className={`font-inter text-[20px] leading-6 text-quinary-tint-800 no-underline hover:text-tertiary transition-all duration-300 ease-in-out relative group ${
-                        location.pathname === '/contact' ? 'text-tertiary' : ''
-                    }`}
-                >
-                    Contact
-                    <span className={`absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ease-in-out ${
-                        location.pathname === '/contact' ? 'w-full bg-tertiary' : 'group-hover:w-full bg-tertiary'
+                        location.pathname === '/news' ? 'w-full bg-tertiary' : 'group-hover:w-full bg-tertiary'
                     }`}></span>
                 </Link>
                 <Link 
@@ -74,14 +63,25 @@ export default function Header() {
                     }`}></span>
                 </Link>
                 <Link 
-                    to="/news" 
+                    to="/contact" 
                     className={`font-inter text-[20px] leading-6 text-quinary-tint-800 no-underline hover:text-tertiary transition-all duration-300 ease-in-out relative group ${
-                        location.pathname === '/news' ? 'text-tertiary' : ''
+                        location.pathname === '/contact' ? 'text-tertiary' : ''
                     }`}
                 >
-                    News
+                    Contact
                     <span className={`absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ease-in-out ${
-                        location.pathname === '/news' ? 'w-full bg-tertiary' : 'group-hover:w-full bg-tertiary'
+                        location.pathname === '/contact' ? 'w-full bg-tertiary' : 'group-hover:w-full bg-tertiary'
+                    }`}></span>
+                </Link>
+                <Link 
+                    to="/about" 
+                    className={`font-inter text-[20px] leading-6 text-quinary-tint-800 no-underline hover:text-tertiary transition-all duration-300 ease-in-out relative group ${
+                        location.pathname === '/about' ? 'text-tertiary' : ''
+                    }`}
+                >
+                    About
+                    <span className={`absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ease-in-out ${
+                        location.pathname === '/about' ? 'w-full bg-tertiary' : 'group-hover:w-full bg-tertiary'
                     }`}></span>
                 </Link>
             </nav>
