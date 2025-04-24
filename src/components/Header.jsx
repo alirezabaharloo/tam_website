@@ -26,7 +26,7 @@ export default function Header() {
   }, [isSearchOpen, isLangOpen]);
 
   return (
-    <div className="w-[1300px] h-24 bg-primary mx-auto mt-4 rounded-2xl shadow-[0_0_16px_rgba(1,22,56,0.5)]">
+    <div className="w-[1300px] h-24 bg-primary mx-auto mt-4 rounded-2xl shadow-[0_0_16px_rgba(1,22,56,0.5)] relative z-10">
         <div className="flex justify-between items-center h-full relative">
             <nav className="flex space-x-6 ml-8">
                 <Link 
