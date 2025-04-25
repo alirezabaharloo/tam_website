@@ -158,20 +158,24 @@ export default function Header() {
                                     select your language
                                 </span>
                             </div>
-                            <div className="h-px w-full bg-secondary/50"></div>
+                            <div className="h-px w-[calc(100%-32px)] bg-secondary/50 mx-4"></div>
                             <div className="flex flex-col space-y-6 p-4">
                                 <div className="flex items-center">
-                                    <span className="text-[24px]">
-                                        🇮🇷
-                                    </span>
+                                    <img 
+                                        src="/images/icons/IranFlag.svg" 
+                                        alt="فارسی" 
+                                        className="w-9 h-6"
+                                    />
                                     <span className="ml-2 text-secondary font-inter">
                                         فارسی
                                     </span>
                                 </div>
                                 <div className="flex items-center">
-                                    <span className="text-[24px]">
-                                        🇬🇧
-                                    </span>
+                                    <img 
+                                        src="/images/icons/UKFlag.svg" 
+                                        alt="English" 
+                                        className="w-9 h-6"
+                                    />
                                     <span className="ml-2 text-secondary font-inter">
                                         English
                                     </span>
