@@ -7,6 +7,7 @@ import ShopSection from '../components/ShopSection';
 import PlayerSection from '../components/PlayerSection';
 import Divider from '../components/Divider';
 import ContactBoxes from '../components/ContactBoxes';
+import Footer from '../components/Footer';
 
 const Home = () => {
   return (
@@ -20,6 +21,7 @@ const Home = () => {
       <Divider />
       <ContactBoxes />
       <Divider />
+      <Footer />
     </div>
   );
 };
