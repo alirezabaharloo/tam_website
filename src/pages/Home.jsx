@@ -3,6 +3,7 @@ import Slider from '../components/Slider';
 import LatestNews from '../components/LatestNews';
 import LatestVideos from '../components/LatestVideos';
 import TeamBoxes from '../components/TeamBoxes';
+import ShopSection from '../components/ShopSection';
 
 const Home = () => {
   return (
@@ -11,47 +12,7 @@ const Home = () => {
       <LatestNews />
       <LatestVideos />
       <TeamBoxes />
-      <div className="w-full h-[500px] mt-8 relative">
-        <img 
-          src="/images/banners/ShopBackGround.png" 
-          alt="Teams Background" 
-          className="w-full h-full object-cover blur-sm"
-        />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div className="absolute top-6 left-0 right-0">
-          <div className="w-[1080px] mx-auto flex justify-between items-center">
-            <h2 className="text-[48px] font-regular text-quinary-tint-800">TAM'S SHOP</h2>
-            <a 
-              href="#" 
-              className="flex items-center gap-1 text-[24px] text-quinary-tint-800 hover:text-quinary-tint-200 transition-colors duration-300 no-underline group"
-            >
-              VIEW ALL
-              <svg 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-quinary-tint-800 group-hover:text-quinary-tint-200 transition-colors duration-300"
-              >
-                <path 
-                  d="M5 12H19M19 12L12 5M19 12L12 19" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </a>
-          </div>
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <h3 className="text-[64px] font-bold text-quinary-tint-800 mb-4">COMING SOON</h3>
-            <p className="text-[24px] text-quinary-tint-800">Our shop is under construction. Stay tuned!</p>
-          </div>
-        </div>
-      </div>
+      <ShopSection />
     </div>
   );
 };
