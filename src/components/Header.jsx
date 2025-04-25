@@ -9,6 +9,13 @@ export default function Header() {
   const searchBarRef = useRef(null);
   const langRef = useRef(null);
 
+  const scrollToContact = () => {
+    const contactSection = document.getElementById('contact-us');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isSearchOpen && searchBarRef.current && !searchBarRef.current.contains(event.target)) {
@@ -62,17 +69,13 @@ export default function Header() {
                         location.pathname === '/shop' ? 'w-full bg-tertiary' : 'group-hover:w-full bg-tertiary'
                     }`}></span>
                 </Link>
-                <Link 
-                    to="/contact" 
-                    className={`font-inter text-[20px] leading-6 text-quinary-tint-800 no-underline hover:text-tertiary transition-all duration-300 ease-in-out relative group ${
-                        location.pathname === '/contact' ? 'text-tertiary' : ''
-                    }`}
+                <button 
+                    onClick={scrollToContact}
+                    className={`font-inter text-[20px] leading-6 text-quinary-tint-800 no-underline hover:text-tertiary transition-all duration-300 ease-in-out relative group`}
                 >
                     Contact
-                    <span className={`absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ease-in-out ${
-                        location.pathname === '/contact' ? 'w-full bg-tertiary' : 'group-hover:w-full bg-tertiary'
-                    }`}></span>
-                </Link>
+                    <span className={`absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ease-in-out group-hover:w-full bg-tertiary`}></span>
+                </button>
                 <Link 
                     to="/about" 
                     className={`font-inter text-[20px] leading-6 text-quinary-tint-800 no-underline hover:text-tertiary transition-all duration-300 ease-in-out relative group ${

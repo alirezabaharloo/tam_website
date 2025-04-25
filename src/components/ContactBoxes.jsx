@@ -9,8 +9,7 @@ const ContactBoxes = () => {
         </svg>
       ),
       title: 'FC TAM WHATSAPP',
-      subtitle: '@fc_tamsport',
-      bgColor: '#DD2C2C'
+      subtitle: '@fc_tamsport'
     },
     {
       icon: (
@@ -19,8 +18,7 @@ const ContactBoxes = () => {
         </svg>
       ),
       title: 'FC TAM INSTAGRAM',
-      subtitle: '@fc_tamsport',
-      bgColor: '#DD2C2C'
+      subtitle: '@fc_tamsport'
     },
     {
       icon: (
@@ -29,8 +27,7 @@ const ContactBoxes = () => {
         </svg>
       ),
       title: 'FC TAM DISCORD',
-      subtitle: '@fc_tamsport',
-      bgColor: '#DD2C2C'
+      subtitle: '@fc_tamsport'
     },
     {
       icon: (
@@ -39,8 +36,7 @@ const ContactBoxes = () => {
         </svg>
       ),
       title: 'FC TAM TWITTER',
-      subtitle: '@fc_tamsport',
-      bgColor: '#DD2C2C'
+      subtitle: '@fc_tamsport'
     },
     {
       icon: (
@@ -49,8 +45,7 @@ const ContactBoxes = () => {
         </svg>
       ),
       title: 'FC TAM YOUTUBE',
-      subtitle: '@fc_tamsport',
-      bgColor: '#DD2C2C'
+      subtitle: '@fc_tamsport'
     },
     {
       icon: (
@@ -59,18 +54,16 @@ const ContactBoxes = () => {
         </svg>
       ),
       title: 'FC TAM FACEBOOK',
-      subtitle: '@fctamsport',
-      bgColor: '#DD2C2C'
+      subtitle: '@fctamsport'
     }
   ];
 
   return (
-    <div className="w-[1300px] mx-auto mt-6 flex justify-between">
+    <div id="contact-us" className="w-[1300px] mx-auto mt-6 flex justify-between">
       {contactItems.map((item, index) => (
         <div 
           key={index}
-          className="relative w-[200px] h-[96px] rounded-lg shadow-[2px_2px_16px_rgba(0,0,0,0.25)]"
-          style={{ backgroundColor: item.bgColor }}
+          className="relative w-[200px] h-[96px] bg-quaternary rounded-lg shadow-[2px_2px_16px_rgba(0,0,0,0.25)] transition-colors duration-300 ease-in-out hover:bg-quaternary-tint-200"
         >
           <div className="absolute top-2 left-2 text-quinary-tint-800">
             {item.icon}
