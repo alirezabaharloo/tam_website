@@ -4,6 +4,7 @@ import LatestNews from '../components/LatestNews';
 import LatestVideos from '../components/LatestVideos';
 import TeamBoxes from '../components/TeamBoxes';
 import ShopSection from '../components/ShopSection';
+import PlayerSection from '../components/PlayerSection';
 
 const Home = () => {
   return (
@@ -13,6 +14,7 @@ const Home = () => {
       <LatestVideos />
       <TeamBoxes />
       <ShopSection />
+      <PlayerSection />
     </div>
   );
 };
