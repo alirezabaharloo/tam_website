@@ -8,6 +8,7 @@ import PlayerSection from '../components/PlayerSection';
 import Divider from '../components/Divider';
 import ContactBoxes from '../components/ContactBoxes';
 import Footer from '../components/Footer';
+import LogoSection from '../components/LogoSection';
 
 const Home = () => {
   return (
@@ -22,6 +23,7 @@ const Home = () => {
       <ContactBoxes />
       <Divider />
       <Footer />
+      <LogoSection />
     </div>
   );
 };
