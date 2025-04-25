@@ -19,6 +19,7 @@ const Home = () => {
       <PlayerSection />
       <Divider />
       <ContactBoxes />
+      <Divider />
     </div>
   );
 };

@@ -10,7 +10,7 @@ const ContactBoxes = () => {
       ),
       title: 'FC TAM WHATSAPP',
       subtitle: '@fc_tamsport',
-      bgColor: '#25D366'
+      bgColor: '#DD2C2C'
     },
     {
       icon: (
@@ -20,7 +20,7 @@ const ContactBoxes = () => {
       ),
       title: 'FC TAM INSTAGRAM',
       subtitle: '@fc_tamsport',
-      bgColor: '#E4405F'
+      bgColor: '#DD2C2C'
     },
     {
       icon: (
@@ -30,7 +30,7 @@ const ContactBoxes = () => {
       ),
       title: 'FC TAM DISCORD',
       subtitle: '@fc_tamsport',
-      bgColor: '#0088CC'
+      bgColor: '#DD2C2C'
     },
     {
       icon: (
@@ -40,7 +40,7 @@ const ContactBoxes = () => {
       ),
       title: 'FC TAM TWITTER',
       subtitle: '@fc_tamsport',
-      bgColor: '#1DA1F2'
+      bgColor: '#DD2C2C'
     },
     {
       icon: (
@@ -50,7 +50,7 @@ const ContactBoxes = () => {
       ),
       title: 'FC TAM YOUTUBE',
       subtitle: '@fc_tamsport',
-      bgColor: '#FF0000'
+      bgColor: '#DD2C2C'
     },
     {
       icon: (
@@ -60,7 +60,7 @@ const ContactBoxes = () => {
       ),
       title: 'FC TAM FACEBOOK',
       subtitle: '@fctamsport',
-      bgColor: '#EA4335'
+      bgColor: '#DD2C2C'
     }
   ];
 
@@ -75,7 +75,7 @@ const ContactBoxes = () => {
           <div className="absolute top-2 left-2 text-quinary-tint-800">
             {item.icon}
           </div>
-          <div className="absolute bottom-0 left-3">
+          <div className="absolute bottom-[4px] left-3">
             <span className="text-[16px] font-medium text-quinary-tint-800 block leading-none">{item.title}</span>
             <span className="text-[10px] font-medium text-tertiary leading-none">{item.subtitle}</span>
           </div>
