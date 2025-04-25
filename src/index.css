@@ -10,7 +10,6 @@
     font-family: 'Inter', 'Vazirmatn', sans-serif;
   }
   
-  /* Apply Vazir font to Persian/Arabic text */
   :lang(fa) {
     font-family: 'Vazirmatn', 'Inter', sans-serif;
   }
