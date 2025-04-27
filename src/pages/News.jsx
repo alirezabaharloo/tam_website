@@ -2,8 +2,8 @@ import React from 'react'
 
 export default function News() {
   return (
-    <div>
-      news
+    <div className="container mx-auto px-4 py-8">
+      {/* Content will go here */}
     </div>
   )
 }

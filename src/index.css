@@ -13,4 +13,8 @@
   :lang(fa) {
     font-family: 'Vazirmatn', 'Inter', sans-serif;
   }
+
+  body {
+    @apply bg-quinary-tint-600;
+  }
 } 
