@@ -9,7 +9,7 @@ export default function News() {
 
   const filters = [
     { id: 'all', label: 'All' },
-    { id: 'article', label: 'Articles' },
+    { id: 'basic', label: 'Articles' },
     { id: 'video', label: 'Videos' },
     { id: 'slideshow', label: 'Slideshows' }
   ];

@@ -3,7 +3,7 @@ import React from 'react';
 const NewsFilter = ({ activeFilter, onFilterChange }) => {
   const filters = [
     { id: 'all', label: 'All' },
-    { id: 'article', label: 'Articles' },
+    { id: 'basic', label: 'Articles' },
     { id: 'video', label: 'Videos' },
     { id: 'slideshow', label: 'Slideshows' }
   ];

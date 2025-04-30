@@ -153,5 +153,49 @@ export const newsData = [
     views: 1200,
     likes: 78,
     dislikes: 4
+  },
+  {
+    id: 8,
+    title: "Stadium Tour: Behind the Scenes",
+    image: "/images/banners/ArticlePicture2.png",
+    type: "slideshow",
+    date: "5H",
+    category: "CLUB NEWS",
+    description: "Take an exclusive tour of our newly renovated stadium through this photo gallery showcasing the state-of-the-art facilities.",
+    keywords: ["stadium", "tour", "facilities"],
+    content: `Join us on a visual journey through our newly renovated stadium. This photo gallery showcases the state-of-the-art facilities that have been added to enhance the matchday experience for both players and fans.`,
+    slideshowImages: [
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png"
+    ],
+    views: 850,
+    likes: 62,
+    dislikes: 3
+  },
+  {
+    id: 9,
+    title: "Training Ground Evolution",
+    image: "/images/banners/ArticlePicture2.png",
+    type: "slideshow",
+    date: "3H",
+    category: "FIRST TEAM",
+    description: "A visual journey through the evolution of our training facilities over the years, showcasing the improvements and modern additions.",
+    keywords: ["training", "facilities", "evolution"],
+    content: `Explore the transformation of our training facilities through this photo gallery. From humble beginnings to world-class facilities, see how our training ground has evolved to meet the needs of modern football.`,
+    slideshowImages: [
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png",
+      "/images/banners/ArticlePicture2.png"
+    ],
+    views: 720,
+    likes: 48,
+    dislikes: 2
   }
 ];
