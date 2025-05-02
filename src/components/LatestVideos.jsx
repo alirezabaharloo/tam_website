@@ -1,12 +1,33 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { newsData } from '../data/newsData';
 
 const LatestVideos = () => {
+  const navigate = useNavigate();
+
+  // Get the latest 5 video news items
+  const latestVideos = [...newsData]
+    .filter(news => news.type === 'video')
+    .sort((a, b) => {
+      // Convert time strings to numbers for comparison
+      const timeA = parseInt(a.date.replace('H', ''));
+      const timeB = parseInt(b.date.replace('H', ''));
+      return timeA - timeB;
+    })
+    .slice(0, 5);
+
+  // Split into two groups: first two and last three
+  const [firstTwo, lastThree] = [
+    latestVideos.slice(0, 2),
+    latestVideos.slice(2)
+  ];
+
   return (
     <>
       <div className="w-[1300px] mx-auto mt-8 flex justify-between items-center">
         <h2 className="text-[48px] font-regular text-secondary">Latest Videos</h2>
-        <a 
-          href="#" 
+        <button 
+          onClick={() => navigate('/news?type=video')}
           className="flex items-center gap-1 text-[24px] text-secondary-tint-200 hover:text-secondary-tint-600 transition-colors duration-300 no-underline group"
         >
           VIEW ALL
@@ -26,18 +47,26 @@ const LatestVideos = () => {
               strokeLinejoin="round"
             />
           </svg>
-        </a>
+        </button>
       </div>
 
       <div className="w-[1300px] mx-auto mt-8 flex justify-between">
-        {[1, 2].map((index) => (
-          <div key={index} className="w-[640px] h-[380px] rounded-lg overflow-hidden relative group cursor-pointer">
+        {firstTwo.map((video) => (
+          <div 
+            key={video.id} 
+            className="w-[640px] h-[380px] rounded-lg overflow-hidden relative group cursor-pointer"
+            onClick={() => navigate(`/news/${video.id}`)}
+          >
             {/* Background Image with Overlay */}
             <div className="absolute inset-0">
               <img 
-                src="/images/banners/VideoPicture3.png" 
-                alt="Video Thumbnail" 
+                src={video.image} 
+                alt={video.title} 
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                onError={(e) => {
+                  console.error('Error loading image:', video.image)
+                  e.target.src = "/images/banners/ArticlePicture2.png"
+                }}
               />
               <div className="absolute inset-0 bg-black/50"></div>
             </div>
@@ -49,9 +78,9 @@ const LatestVideos = () => {
 
             {/* Top Info */}
             <div className="absolute top-[18px] right-6 flex items-center">
-              <span className="text-[14px] font-medium text-quinary-tint-800">10H</span>
+              <span className="text-[14px] font-medium text-quinary-tint-800">{video.date}</span>
               <div className="mx-2 h-4 w-[1px] bg-quinary-tint-800"></div>
-              <span className="text-[14px] font-medium text-tertiary-tint-200">FIRST TEAM</span>
+              <span className="text-[14px] font-medium text-tertiary-tint-200">{video.category}</span>
             </div>
 
             {/* Play Button */}
@@ -79,7 +108,7 @@ const LatestVideos = () => {
 
             {/* Bottom Title */}
             <div className="absolute bottom-8 left-6">
-              <h3 className="text-[32px] font-bold text-quinary-tint-800">Amorim hails Dorgu's debut</h3>
+              <h3 className="text-[32px] font-bold text-quinary-tint-800">{video.title}</h3>
             </div>
           </div>
         ))}
@@ -87,14 +116,22 @@ const LatestVideos = () => {
 
       {/* Small Video Boxes */}
       <div className="w-[1300px] mx-auto mt-8 flex justify-between">
-        {[1, 2, 3].map((index) => (
-          <div key={index} className="w-[420px] h-[220px] rounded-lg overflow-hidden relative group cursor-pointer">
+        {lastThree.map((video) => (
+          <div 
+            key={video.id} 
+            className="w-[420px] h-[220px] rounded-lg overflow-hidden relative group cursor-pointer"
+            onClick={() => navigate(`/news/${video.id}`)}
+          >
             {/* Background Image with Overlay */}
             <div className="absolute inset-0">
               <img 
-                src="/images/banners/VideoPicture4.png" 
-                alt="Video Thumbnail" 
+                src={video.image} 
+                alt={video.title} 
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                onError={(e) => {
+                  console.error('Error loading image:', video.image)
+                  e.target.src = "/images/banners/ArticlePicture2.png"
+                }}
               />
               <div className="absolute inset-0 bg-black/50"></div>
             </div>
@@ -106,9 +143,9 @@ const LatestVideos = () => {
 
             {/* Top Info */}
             <div className="absolute top-4 right-4 flex items-center">
-              <span className="text-[12px] font-regular text-quinary-tint-800">10H</span>
+              <span className="text-[12px] font-regular text-quinary-tint-800">{video.date}</span>
               <div className="mx-2 h-4 w-[1px] bg-quinary-tint-800"></div>
-              <span className="text-[12px] font-regular text-tertiary-tint-200">FIRST TEAM</span>
+              <span className="text-[12px] font-regular text-tertiary-tint-200">{video.category}</span>
             </div>
 
             {/* Play Button */}
@@ -136,7 +173,7 @@ const LatestVideos = () => {
 
             {/* Bottom Title */}
             <div className="absolute bottom-4 left-4">
-              <h3 className="text-[20px] font-bold text-quinary-tint-800">Amorim hails Dorgu's debut</h3>
+              <h3 className="text-[20px] font-bold text-quinary-tint-800">{video.title}</h3>
             </div>
           </div>
         ))}
