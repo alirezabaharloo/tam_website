@@ -27,10 +27,10 @@ const Footer = () => {
     {
       title: 'Shop',
       items: [
-        "Full Set",
-        "Sweater",
-        "Backpack",
-        "Offers"
+        { label: "Coming Soon", path: "/shop" },
+        { label: "Coming Soon", path: "/shop" },
+        { label: "Coming Soon", path: "/shop" },
+        { label: "Coming Soon", path: "/shop" }
       ]
     },
     {
@@ -64,10 +64,12 @@ const Footer = () => {
                       navigateToNewsWithFilter(item.filter, navigate);
                     } else if (column.title === 'About' && item.sectionId) {
                       scrollToAboutSection(item.sectionId, navigate);
+                    } else if (column.title === 'Shop' && item.path) {
+                      navigate(item.path);
                     }
                   }}
                 >
-                  {item.label || item}
+                  {item.label}
                 </span>
               ))}
             </div>
