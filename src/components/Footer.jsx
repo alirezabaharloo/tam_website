@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { scrollToSection, navigateToNewsWithFilter } from '../utils/navigation';
+import { scrollToSection, navigateToNewsWithFilter, scrollToAboutSection } from '../utils/navigation';
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -36,10 +36,10 @@ const Footer = () => {
     {
       title: "About",
       items: [
-        "Team Name",
-        "Team Logo",
-        "Team descriptions",
-        "Team Honors"
+        { label: "Team Name", sectionId: "team-name" },
+        { label: "Team Logo", sectionId: "team-descriptions" },
+        { label: "Team descriptions", sectionId: "team-descriptions" },
+        { label: "Team Honors", sectionId: "team-honors" }
       ]
     }
   ];
@@ -62,6 +62,8 @@ const Footer = () => {
                       scrollToSection(item.sectionId, navigate);
                     } else if (column.title === 'News' && item.filter) {
                       navigateToNewsWithFilter(item.filter, navigate);
+                    } else if (column.title === 'About' && item.sectionId) {
+                      scrollToAboutSection(item.sectionId, navigate);
                     }
                   }}
                 >
