@@ -9,12 +9,24 @@ import PlayerSection from '../components/PlayerSection';
 const Home = () => {
   return (
     <div className="relative mt-4">
-      <Slider />
-      <LatestNews />
-      <LatestVideos />
-      <TeamBoxes />
-      <ShopSection />
-      <PlayerSection />
+      <div id="slider">
+        <Slider />
+      </div>
+      <div id="latest-news">
+        <LatestNews />
+      </div>
+      <div id="latest-videos">
+        <LatestVideos />
+      </div>
+      <div id="team-boxes">
+        <TeamBoxes />
+      </div>
+      <div id="shop-section">
+        <ShopSection />
+      </div>
+      <div id="player-section">
+        <PlayerSection />
+      </div>
     </div>
   );
 };

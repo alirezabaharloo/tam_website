@@ -1,14 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { scrollToSection } from '../utils/navigation';
 
 const Footer = () => {
+  const navigate = useNavigate();
+  
   const footerColumns = [
     {
       title: 'Home',
       items: [
-        'Latest News',
-        "Tam's Team",
-        "Tam's Shop",
-        'Players'
+        { label: 'Latest News', sectionId: 'latest-news' },
+        { label: "Tam's Team", sectionId: 'team-boxes' },
+        { label: "Tam's Shop", sectionId: 'shop-section' },
+        { label: 'Players', sectionId: 'player-section' }
       ]
     },
     {
@@ -53,8 +57,13 @@ const Footer = () => {
                 <span 
                   key={itemIndex} 
                   className="text-[16px] font-normal text-secondary cursor-pointer hover:opacity-80"
+                  onClick={() => {
+                    if (column.title === 'Home' && item.sectionId) {
+                      scrollToSection(item.sectionId, navigate);
+                    }
+                  }}
                 >
-                  {item}
+                  {column.title === 'Home' ? item.label : item}
                 </span>
               ))}
             </div>
