@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { scrollToSection } from '../utils/navigation';
+import { scrollToSection, navigateToNewsWithFilter } from '../utils/navigation';
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -18,10 +18,10 @@ const Footer = () => {
     {
       title: "News",
       items: [
-        "All Content",
-        "Article Content",
-        'Video Content',
-        'Slideshow Content'
+        { label: "All Content", filter: "all" },
+        { label: "Article Content", filter: "basic" },
+        { label: "Video Content", filter: "video" },
+        { label: "Slideshow Content", filter: "slideshow" }
       ]
     },
     {
@@ -60,10 +60,12 @@ const Footer = () => {
                   onClick={() => {
                     if (column.title === 'Home' && item.sectionId) {
                       scrollToSection(item.sectionId, navigate);
+                    } else if (column.title === 'News' && item.filter) {
+                      navigateToNewsWithFilter(item.filter, navigate);
                     }
                   }}
                 >
-                  {column.title === 'Home' ? item.label : item}
+                  {item.label || item}
                 </span>
               ))}
             </div>

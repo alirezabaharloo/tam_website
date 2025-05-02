@@ -1,11 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import NewsFilter from '../components/NewsFilter'
 import NewsBox from '../components/NewsBox'
 import { newsData } from '../data/newsData'
 
 export default function News() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeFilter, setActiveFilter] = useState('all');
   const [displayCount, setDisplayCount] = useState(12);
+
+  useEffect(() => {
+    // Get filter from URL parameter
+    const filterFromUrl = searchParams.get('type');
+    if (filterFromUrl && ['all', 'basic', 'video', 'slideshow'].includes(filterFromUrl)) {
+      setActiveFilter(filterFromUrl);
+      // Scroll to top when filter changes from URL
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [searchParams]);
 
   const filters = [
     { id: 'all', label: 'All' },
@@ -27,7 +42,13 @@ export default function News() {
 
   const handleFilterChange = (filterId) => {
     setActiveFilter(filterId);
+    setSearchParams({ type: filterId });
     setDisplayCount(12);
+    // Scroll to top of the page
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   return (

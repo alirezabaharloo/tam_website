@@ -14,4 +14,16 @@ export const scrollToSection = (sectionId, navigate) => {
       });
     }
   }, 100);
+};
+
+export const navigateToNewsWithFilter = (filter, navigate) => {
+  navigate(`/news?type=${filter}`);
+  
+  // Wait for the page to load and then scroll to top
+  setTimeout(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, 100);
 }; 
