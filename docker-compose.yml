@@ -1,0 +1,74 @@
+
+services:
+  database:
+    container_name: database
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    ports:
+      - "5432:5432"     
+    volumes:
+      - tam_pg_data:/var/lib/postgresql/data
+    networks:
+      - tam-network
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    ports:
+      - 8000:8000
+    command: >
+          sh -c "python manage.py runserver 0.0.0.0:8000"  
+    volumes:
+      - ./backend/tam_website:/app
+    depends_on:
+      - database
+    networks:
+      - tam-network
+    restart: always
+    env_file:
+      - ./backend/tam_website/core/.env
+
+  redis:
+    container_name: redis
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - tam-network
+    restart: always
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    depends_on:
+      - database
+      - backend
+
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: ./docker/react/Dockerfile
+    ports:
+      - 5173:5173
+    volumes:
+      - ./frontend/tam_website:/app
+    depends_on:
+      - database
+      - backend
+      - redis
+    networks:
+      - tam-network
+    restart: always
+
+
+volumes:
+  tam_pg_data:
+  redis_data:
+
+networks:
+  tam-network:
