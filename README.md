@@ -2,8 +2,6 @@
 
 Welcome to **Tam Website** – a modern sports web application built to deliver sports news, highlight top athletes, and provide an online platform for user interaction. The project also includes a shop module (coming soon) and a powerful admin panel for management.
 
-GitHub Repository: [tam_website](https://github.com/alirezabaharloo/tam_website)
-
 ---
 
 ## ⚙️ Tech Stack
