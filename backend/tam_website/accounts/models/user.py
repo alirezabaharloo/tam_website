@@ -40,18 +40,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     @property
     def get_profile(self):
-        profiles = []
-
-        if user_profile:=getattr(self, 'user_profile', None):
-            profiles.append(user_profile)
-
-        if user_profile:=getattr(self, 'seller_profile', None):
-            profiles.append(user_profile)
-        
-        if not profiles:
-            raise User.DoesNotExist("This user doesn't have any profile!")
-        
-        return profiles[0] if len(profiles) == 0 else "admin_profile"
+        """
+        Returns the appropriate profile for the user.
+        For admin users, returns both user_profile and seller_profile.
+        For other users, returns their user_profile.
+        """
+        if self.is_superuser:
+            return {
+                'user_profile': getattr(self, 'user_profile', None),
+                'seller_profile': getattr(self, 'seller_profile', None)
+            }
+        return getattr(self, 'user_profile', None) or getattr(self, 'seller_profile', None)
 
 
 
