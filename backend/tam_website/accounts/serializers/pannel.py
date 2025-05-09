@@ -1,55 +1,96 @@
 from rest_framework import serializers
-from .models import User, UserProfile, SellerProfile
+from ..models import User, UserProfile, SellerProfile
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class BaseProfileSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+
     class Meta:
+        fields = ['first_name', 'last_name']
+
+class UserProfileSerializer(BaseProfileSerializer):
+    class Meta(BaseProfileSerializer.Meta):
         model = UserProfile
-        fields = ['first_name', 'last_name']
 
-class SellerProfileSerializer(serializers.ModelSerializer):
-    class Meta:
+class SellerProfileSerializer(BaseProfileSerializer):
+    class Meta(BaseProfileSerializer.Meta):
         model = SellerProfile
-        fields = ['first_name', 'last_name']
 
 class UserSerializer(serializers.ModelSerializer):
-    user_profile = UserProfileSerializer(required=False)
-    seller_profile = SellerProfileSerializer(required=False)
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'phone_number', 'is_active', 'is_staff', 'is_author', 'is_seller', 'user_profile', 'seller_profile']
+        fields = ['id', 'phone_number', 'is_active', 'is_staff', 'is_author', 'is_seller', 'first_name', 'last_name']
         read_only_fields = ['phone_number']
 
-class UserUpdateSerializer(serializers.ModelSerializer):
-    user_profile = UserProfileSerializer(required=False)
-    seller_profile = SellerProfileSerializer(required=False)
+    def get_first_name(self, obj):
+        profile = obj.get_profile
+        return profile.first_name if profile != "admin_profile" else None
+
+    def get_last_name(self, obj):
+        profile = obj.get_profile
+        return profile.last_name if profile != "admin_profile" else None
+
+class AdminProfileUpdateSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
 
     class Meta:
         model = User
-        fields = ['is_active', 'is_staff', 'is_author', 'is_seller', 'user_profile', 'seller_profile']
-
-class ProfileUpdateSerializer(serializers.ModelSerializer):
-    user_profile = UserProfileSerializer(required=False)
-    seller_profile = SellerProfileSerializer(required=False)
-
-    class Meta:
-        model = User
-        fields = ['user_profile', 'seller_profile']
+        fields = ['is_active', 'is_staff', 'is_author', 'is_seller', 'first_name', 'last_name']
 
     def update(self, instance, validated_data):
-        user_profile_data = validated_data.pop('user_profile', None)
-        seller_profile_data = validated_data.pop('seller_profile', None)
+        first_name = validated_data.pop('first_name', None)
+        last_name = validated_data.pop('last_name', None)
 
-        if user_profile_data:
-            UserProfile.objects.update_or_create(
-                user=instance,
-                defaults=user_profile_data
-            )
+        # Update user fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
 
-        if seller_profile_data and instance.is_seller:
-            SellerProfile.objects.update_or_create(
-                user=instance,
-                defaults=seller_profile_data
-            )
+        # Update profile
+        if first_name is not None or last_name is not None:
+            profile = instance.get_profile
+            if profile != "admin_profile":
+                if first_name is not None:
+                    profile.first_name = first_name
+                if last_name is not None:
+                    profile.last_name = last_name
+                profile.save()
+
+        return instance
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']
+        read_only_fields = ['is_active', 'is_staff', 'is_author', 'is_seller']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        profile = instance.get_profile
+        if profile != "admin_profile":
+            data['first_name'] = profile.first_name
+            data['last_name'] = profile.last_name
+        return data
+
+    def update(self, instance, validated_data):
+        first_name = validated_data.pop('first_name', None)
+        last_name = validated_data.pop('last_name', None)
+
+        # Update profile
+        if first_name is not None or last_name is not None:
+            profile = instance.get_profile
+            if profile != "admin_profile":
+                if first_name is not None:
+                    profile.first_name = first_name
+                if last_name is not None:
+                    profile.last_name = last_name
+                profile.save()
 
         return instance

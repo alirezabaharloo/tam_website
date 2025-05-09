@@ -40,14 +40,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     @property
     def get_profile(self):
-        profile = getattr(self, 'user_profile', None) or \
-                  getattr(self, 'author_profile', None) or \
-                  getattr(self, 'seller_profile', None)
+        profiles = []
+
+        if user_profile:=getattr(self, 'user_profile', None):
+            profiles.append(user_profile)
+
+        if user_profile:=getattr(self, 'seller_profile', None):
+            profiles.append(user_profile)
         
-        if profile is None:
+        if not profiles:
             raise User.DoesNotExist("This user doesn't have any profile!")
         
-        return profile
+        return profiles[0] if len(profiles) == 0 else "admin_profile"
 
 
 
