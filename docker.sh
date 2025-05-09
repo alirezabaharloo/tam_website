@@ -11,5 +11,8 @@ fi
 if [ "$(docker ps -aq -f name=database)" ]; then
     docker rm -f database
 fi
+if [ "$(docker ps -aq -f name=redis)" ]; then
+    docker rm -f database
+fi
 docker start database 
 docker-compose up --build

@@ -7,11 +7,10 @@ WORKDIR /app
 # Copy package files first for better layer caching  
 COPY ./frontend/tam_website/package*.json ./  
 
-# Install dependencies, including Vite if it's in package.json  
-RUN npm install
-RUN npm install framer-motion
-RUN npm install react-icons 
-RUN npm install vite --save-dev  
+# Install dependencies and add node_modules/.bin to PATH
+RUN npm install && \
+    npm install -g vite && \
+    export PATH=$PATH:/app/node_modules/.bin
 
 # Copy application code  
 COPY ./frontend/tam_website .  
@@ -19,5 +18,5 @@ COPY ./frontend/tam_website .
 # Expose Vite development server port  
 EXPOSE 5173  
 
-# Start Vite development server  
-CMD ["npm", "run", "dev", "--", "--host"] 
+# Start Vite development server with host flag
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
