@@ -59,6 +59,14 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('phone_number',)
 
 
+<<<<<<< HEAD
+=======
+@admin.register(AuthorProfile)
+class AuthorProfileAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'user')
+    search_fields = ('full_name', 'user__phone_number')
+
+>>>>>>> b1a5e812018095525d7f735359a9e7d1b4461180
 
 @admin.register(SellerProfile)
 class SellerProfileAdmin(admin.ModelAdmin):

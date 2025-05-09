@@ -40,6 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     @property
     def get_profile(self):
+<<<<<<< HEAD
         """
         Returns the appropriate profile for the user.
         For admin users, returns both user_profile and seller_profile.
@@ -51,6 +52,16 @@ class User(AbstractBaseUser, PermissionsMixin):
                 'seller_profile': getattr(self, 'seller_profile', None)
             }
         return getattr(self, 'user_profile', None) or getattr(self, 'seller_profile', None)
+=======
+        profile = getattr(self, 'user_profile', None) or \
+                  getattr(self, 'author_profile', None) or \
+                  getattr(self, 'seller_profile', None)
+        
+        if profile is None:
+            raise User.DoesNotExist("This user doesn't have any profile!")
+        
+        return profile
+>>>>>>> b1a5e812018095525d7f735359a9e7d1b4461180
 
 
 
