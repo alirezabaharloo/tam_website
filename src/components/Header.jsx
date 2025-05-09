@@ -1,13 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import React, { useState, useRef, useEffect, useContext } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { AuthContext } from '../App'
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [searchContent, setSearchContent] = useState('');
   const searchBarRef = useRef(null);
   const langRef = useRef(null);
+  const { user } = useContext(AuthContext);
 
   const scrollToContact = () => {
     const contactSection = document.getElementById('contact-us');
@@ -31,6 +34,15 @@ export default function Header() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isSearchOpen, isLangOpen]);
+
+  // Account button click handler
+  const handleAccountClick = () => {
+    if (user) {
+      navigate('/dashboard'); // or '/profile' if you have a profile page
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="sticky top-2 z-50">
@@ -90,7 +102,7 @@ export default function Header() {
                 </Link>
             </nav>
             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <img src="/images/logos/HeaderLogo.svg" alt="Logo" className="h-[95px] w-[48px] object-contain" />
+              <img src="/images/logos/HeaderLogo.svg" alt="Logo" className="h-[95px] w-[48px] object-contain" />
             </div>
             <div className="flex items-center mr-8">
                 <div className="flex items-center space-x-6">
@@ -131,7 +143,18 @@ export default function Header() {
                         </div>
                     </div>
                     <div className="h-12 w-px bg-[#F2FAFF] opacity-50"></div>
-                    <img src="/images/icons/UserLogo.svg" alt="User" className="text-quinary-tint-800" />
+                    <button onClick={handleAccountClick} className="flex items-center group focus:outline-none">
+                      {user ? (
+                        <>
+                          <span className="text-quinary-tint-800 text-[20px] font-normal mr-1" style={{marginLeft: 4}}>{user.phone}</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800">
+                            <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                          </svg>
+                        </>
+                      ) : (
+                        <img src="/images/icons/UserLogo.svg" alt="User" className="w-6 h-6 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
+                      )}
+                    </button>
                     <div className="h-12 w-px bg-[#F2FAFF] opacity-50"></div>
                     <div className="relative">
                         <button 
