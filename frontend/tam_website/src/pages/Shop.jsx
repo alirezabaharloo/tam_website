@@ -10,9 +10,9 @@ export default function Shop() {
       <div className="container w-[1300px] mx-auto px-4">
         <div className="pt-16">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.8 }}
             className="text-center"
           >
             <h1 className="text-[48px] font-bold text-primary mb-4">
@@ -26,16 +26,16 @@ export default function Shop() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
             className="flex justify-center mb-12"
           >
             <div className="w-[2px] h-32 bg-quaternary"></div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
+            transition={{ delay: 0.8, duration: 0.8 }}
             className="text-center"
           >
             <h2 className="text-[32px] font-medium text-primary mb-6">
@@ -49,7 +49,7 @@ export default function Shop() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
+            transition={{ delay: 1.2, duration: 0.8 }}
             className="flex justify-center"
           >
             <button

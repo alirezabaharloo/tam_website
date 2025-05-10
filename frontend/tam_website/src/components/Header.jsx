@@ -1,13 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import React, { useState, useRef, useEffect, useContext } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { AuthContext } from '../App'
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [searchContent, setSearchContent] = useState('');
   const searchBarRef = useRef(null);
   const langRef = useRef(null);
+  const { user } = useContext(AuthContext);
 
   const scrollToContact = () => {
     const contactSection = document.getElementById('contact-us');
@@ -31,6 +34,15 @@ export default function Header() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isSearchOpen, isLangOpen]);
+
+  // Account button click handler
+  const handleAccountClick = () => {
+    if (user) {
+      navigate('/dashboard'); // or '/profile' if you have a profile page
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="sticky top-2 z-50">
@@ -90,7 +102,7 @@ export default function Header() {
                 </Link>
             </nav>
             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <img src="/images/logos/HeaderLogo.svg" alt="Logo" className="h-[95px] w-[48px] object-contain" />
+              <img src="/images/logos/HeaderLogo.svg" alt="Logo" className="h-[95px] w-[48px] object-contain" />
             </div>
             <div className="flex items-center mr-8">
                 <div className="flex items-center space-x-6">
@@ -124,14 +136,23 @@ export default function Header() {
                             <input 
                                 type="text" 
                                 placeholder="Search..." 
-                                className="flex-1 h-full pl-2 bg-transparent outline-none text-secondary placeholder-secondary/50"
+                                className="flex-1 h-full px-4 bg-transparent outline-none text-secondary placeholder-secondary/50"
                                 value={searchContent}
                                 onChange={(e) => setSearchContent(e.target.value)}
                             />
                         </div>
                     </div>
                     <div className="h-12 w-px bg-[#F2FAFF] opacity-50"></div>
-                    <img src="/images/icons/UserLogo.svg" alt="User" className="text-quinary-tint-800" />
+                    <button onClick={handleAccountClick} className="flex items-center group h-12 focus:outline-none">
+                      {user ? (
+                        <>
+                          <span className="text-quinary-tint-800 text-[20px] font-normal mr-1">{user.phone}</span>
+                          <img src="/images/icons/UserLogo2.svg" alt="User" className="w-[32px] h-[32px] transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
+                        </>
+                      ) : (
+                        <img src="/images/icons/UserLogo.svg" alt="User" className="w-[23px] h-[30px] transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
+                      )}
+                    </button>
                     <div className="h-12 w-px bg-[#F2FAFF] opacity-50"></div>
                     <div className="relative">
                         <button 
