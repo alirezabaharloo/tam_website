@@ -119,7 +119,7 @@ export default function Header() {
                         </button>
                         <div 
                             ref={searchBarRef}
-                            className={`absolute right-0 top-1/2 -translate-y-1/2 h-12 w-[300px] bg-quinary-tint-600 rounded-lg flex items-center transition-all duration-300 ease-out ${
+                            className={`absolute right-[-16px] top-1/2 -translate-y-1/2 h-12 w-[300px] bg-quinary-tint-600 rounded-lg flex items-center transition-all duration-300 ease-out ${
                                 isSearchOpen 
                                     ? 'translate-x-0 opacity-100' 
                                     : 'translate-x-8 opacity-0 pointer-events-none'
