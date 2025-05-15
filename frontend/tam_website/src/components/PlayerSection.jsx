@@ -4,13 +4,12 @@ import PlayerBoxes from './PlayerBoxes';
 const PlayerSection = () => {
   return (
     <>
-      <div className="w-[1300px] mx-auto mt-8 flex justify-between items-center">
-        <div className="flex-1"></div>
-        <h2 className="text-[40px] font-bold text-secondary absolute left-1/2 transform -translate-x-1/2">PLAYER</h2>
-        <div className="flex items-center gap-4">
+      <div className="w-full max-w-[1300px] mx-auto mt-8 flex flex-row justify-between items-center px-2 sm:px-4 relative">
+        <h2 className="text-[28px] sm:text-[32px] md:text-[40px] font-bold text-secondary">PLAYER</h2>
+        <div className="flex items-center gap-2 sm:gap-4">
           <button 
             onClick={() => document.dispatchEvent(new CustomEvent('prevSlide'))}
-            className="w-12 h-12 rounded-full hover:bg-secondary-tint-800 transition-colors duration-300 flex items-center justify-center group"
+            className="w-8 h-8 sm:w-12 sm:h-12 rounded-full hover:bg-secondary-tint-800 transition-colors duration-300 flex items-center justify-center group"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
@@ -18,7 +17,7 @@ const PlayerSection = () => {
               viewBox="0 0 24 24" 
               strokeWidth={1.5} 
               stroke="currentColor" 
-              className="w-6 h-6 text-secondary group-hover:text-secondary-tint-200 transition-colors duration-300"
+              className="w-4 h-4 sm:w-6 sm:h-6 text-secondary group-hover:text-secondary-tint-200 transition-colors duration-300"
             >
               <path 
                 strokeLinecap="round" 
@@ -29,7 +28,7 @@ const PlayerSection = () => {
           </button>
           <button 
             onClick={() => document.dispatchEvent(new CustomEvent('nextSlide'))}
-            className="w-12 h-12 rounded-full hover:bg-secondary-tint-800 transition-colors duration-300 flex items-center justify-center group"
+            className="w-8 h-8 sm:w-12 sm:h-12 rounded-full hover:bg-secondary-tint-800 transition-colors duration-300 flex items-center justify-center group"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
@@ -37,7 +36,7 @@ const PlayerSection = () => {
               viewBox="0 0 24 24" 
               strokeWidth={1.5} 
               stroke="currentColor" 
-              className="w-6 h-6 text-secondary group-hover:text-secondary-tint-200 transition-colors duration-300"
+              className="w-4 h-4 sm:w-6 sm:h-6 text-secondary group-hover:text-secondary-tint-200 transition-colors duration-300"
             >
               <path 
                 strokeLinecap="round" 
