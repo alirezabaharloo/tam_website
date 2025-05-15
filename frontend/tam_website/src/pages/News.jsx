@@ -7,7 +7,17 @@ import { newsData } from '../data/newsData'
 export default function News() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeFilter, setActiveFilter] = useState('all');
-  const [displayCount, setDisplayCount] = useState(12);
+  const [displayCount, setDisplayCount] = useState(6);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Get filter from URL parameter
@@ -37,13 +47,13 @@ export default function News() {
   const hasMoreNews = displayCount < filteredNews.length;
 
   const handleLearnMore = () => {
-    setDisplayCount(prev => prev + 12);
+    setDisplayCount(prev => prev + (windowWidth < 640 ? 4 : windowWidth < 1024 ? 6 : 9));
   };
 
   const handleFilterChange = (filterId) => {
     setActiveFilter(filterId);
     setSearchParams({ type: filterId });
-    setDisplayCount(12);
+    setDisplayCount(windowWidth < 640 ? 4 : windowWidth < 1024 ? 6 : 9);
     // Scroll to top of the page
     window.scrollTo({
       top: 0,
@@ -52,32 +62,27 @@ export default function News() {
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="mt-8">
+    <div className="w-full max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
+      <div className="flex flex-col gap-6 sm:gap-8 md:gap-10">
         <NewsFilter 
           activeFilter={activeFilter} 
           onFilterChange={handleFilterChange} 
         />
-      </div>
-      <div className="mt-8">
-        <div className="w-[1300px] mx-auto">
-          <div className="grid grid-cols-3 gap-5">
-            {displayedNews.map((news) => (
-              <NewsBox key={news.id} news={news} />
-            ))}
-          </div>
-          {hasMoreNews && (
-            <div className="mt-5 flex justify-center">
-              <button
-                onClick={handleLearnMore}
-                className="text-[32px] font-medium text-secondary-tint-500 relative group"
-              >
-                Learn More
-                <span className="absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-500 ease-in-out group-hover:w-full bg-secondary-tint-500"></span>
-              </button>
-            </div>
-          )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+          {displayedNews.map((news) => (
+            <NewsBox key={news.id} news={news} />
+          ))}
         </div>
+        {hasMoreNews && (
+          <div className="mt-6 sm:mt-8 flex justify-center">
+            <button
+              onClick={handleLearnMore}
+              className="px-6 py-2 sm:px-8 sm:py-3 bg-quinary-tint-800 hover:bg-quinary-tint-700 rounded-lg text-secondary hover:text-quaternary transition-colors duration-300"
+            >
+              <span className="text-[16px] sm:text-[18px] md:text-[20px] font-medium">Load More</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
