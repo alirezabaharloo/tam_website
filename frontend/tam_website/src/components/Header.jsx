@@ -106,7 +106,8 @@ export default function Header() {
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4 sm:space-x-6">
+          <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-6">
+            {/* Search Box */}
             <div className="relative">
               <button 
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -120,45 +121,47 @@ export default function Header() {
               </button>
               <div 
                 ref={searchBarRef}
-                className={`absolute right-[-16px] top-1/2 -translate-y-1/2 h-10 sm:h-12 w-[200px] sm:w-[300px] bg-quinary-tint-600 rounded-lg flex items-center transition-all duration-300 ease-out ${
+                className={`absolute right-[-16px] top-1/2 -translate-y-1/2 h-8 sm:h-9 md:h-10 w-[140px] sm:w-[180px] md:w-[220px] bg-quinary-tint-600 rounded-lg flex items-center transition-all duration-300 ease-out ${
                   isSearchOpen 
                     ? 'translate-x-0 opacity-100' 
                     : 'translate-x-8 opacity-0 pointer-events-none'
                 }`}
               >
-                <div className="flex items-center">
+                <div className="flex items-center h-full">
                   <img 
                     src="/images/icons/SearchLogoBlack.svg" 
                     alt="Search" 
-                    className="ml-4 h-5 w-5 sm:h-6 sm:w-6"
+                    className="ml-2 sm:ml-3 h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5"
                   />
-                  <div className="h-8 sm:h-9 border-l-[1px] border-secondary ml-4"></div>
+                  <div className="h-4 sm:h-5 md:h-6 border-l-[1px] border-secondary ml-2 sm:ml-3"></div>
                 </div>
                 <input 
                   type="text" 
                   placeholder="Search..." 
-                  className="flex-1 h-full px-4 bg-transparent outline-none text-secondary placeholder-secondary/50 text-sm sm:text-base"
+                  className="w-[80px] sm:w-[100px] md:w-[120px] h-full pl-3 sm:pl-4 pr-2 sm:pr-3 bg-transparent outline-none text-secondary placeholder-secondary/50 text-xs sm:text-sm md:text-base"
                   value={searchContent}
                   onChange={(e) => setSearchContent(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="h-8 sm:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
+            <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
 
-            <button onClick={handleAccountClick} className="flex items-center group h-8 sm:h-12 focus:outline-none">
+            {/* Account Button */}
+            <button onClick={handleAccountClick} className="flex items-center group h-8 sm:h-10 md:h-12 focus:outline-none">
               {user ? (
                 <>
-                  <span className="text-quinary-tint-800 text-[14px] sm:text-[20px] font-normal mr-1">{user.phone}</span>
-                  <img src="/images/icons/UserLogo2.svg" alt="User" className="w-6 h-6 sm:w-8 sm:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
+                  <span className="text-quinary-tint-800 text-[14px] sm:text-[16px] md:text-[20px] font-normal mr-1">{user.phone}</span>
+                  <img src="/images/icons/UserLogo2.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
                 </>
               ) : (
-                <img src="/images/icons/UserLogo.svg" alt="User" className="w-5 h-6 sm:w-6 sm:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
+                <img src="/images/icons/UserLogo.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
               )}
             </button>
 
-            <div className="h-8 sm:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
+            <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
 
+            {/* Language Selector */}
             <div className="relative">
               <button 
                 onClick={() => setIsLangOpen(!isLangOpen)}
@@ -172,31 +175,31 @@ export default function Header() {
               </button>
               <div 
                 ref={langRef}
-                className={`absolute right-0 top-0 h-[150px] sm:h-[175px] w-[240px] sm:w-[280px] bg-quinary-tint-600 rounded-lg transition-all duration-300 ease-out ${
+                className={`absolute right-0 top-0 h-[100px] sm:h-[110px] md:h-[120px] w-[180px] sm:w-[200px] md:w-[220px] bg-quinary-tint-600 rounded-lg transition-all duration-300 ease-out ${
                   isLangOpen 
                     ? 'translate-y-0 opacity-100' 
                     : 'translate-y-2 opacity-0 pointer-events-none'
                 }`}
               >
-                <div className="flex items-center pt-3 pb-3 sm:pt-4 sm:pb-4 pl-3 pr-3 sm:pl-4 sm:pr-4">
+                <div className="flex items-center pt-2 pb-2 sm:pt-2.5 sm:pb-2.5 pl-2 pr-2 sm:pl-3 sm:pr-3">
                   <img 
                     src="/images/icons/LangLogoBlack.svg" 
                     alt="Language" 
-                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5"
                   />
-                  <span className="ml-1.5 text-[16px] sm:text-[20px] leading-[24px] sm:leading-[30px] text-secondary font-inter">
+                  <span className="ml-1.5 text-xs sm:text-sm md:text-base leading-[18px] sm:leading-[20px] md:leading-[24px] text-secondary font-inter">
                     select your language
                   </span>
                 </div>
-                <div className="h-px w-[calc(100%-24px)] sm:w-[calc(100%-32px)] bg-secondary/50 mx-3 sm:mx-4"></div>
-                <div className="flex flex-col space-y-4 sm:space-y-6 p-3 sm:p-4">
+                <div className="h-px w-[calc(100%-16px)] sm:w-[calc(100%-24px)] bg-secondary/50 mx-2 sm:mx-3"></div>
+                <div className="flex flex-col space-y-1.5 sm:space-y-2 p-2 sm:p-2.5">
                   <div className="flex items-center">
                     <img 
                       src="/images/icons/IranFlag.svg" 
                       alt="فارسی" 
-                      className="w-8 h-5 sm:w-9 sm:h-6"
+                      className="w-6 h-3.5 sm:w-7 sm:h-4 md:w-8 md:h-5"
                     />
-                    <span className="ml-2 text-secondary font-inter text-sm sm:text-base">
+                    <span className="ml-2 text-secondary font-inter text-xs sm:text-sm md:text-base">
                       فارسی
                     </span>
                   </div>
@@ -204,9 +207,9 @@ export default function Header() {
                     <img 
                       src="/images/icons/UKFlag.svg" 
                       alt="English" 
-                      className="w-8 h-5 sm:w-9 sm:h-6"
+                      className="w-6 h-3.5 sm:w-7 sm:h-4 md:w-8 md:h-5"
                     />
-                    <span className="ml-2 text-secondary font-inter text-sm sm:text-base">
+                    <span className="ml-2 text-secondary font-inter text-xs sm:text-sm md:text-base">
                       English
                     </span>
                   </div>
@@ -253,5 +256,5 @@ export default function Header() {
         </div>
       </div>
     </div>
-  )
+  );
 }

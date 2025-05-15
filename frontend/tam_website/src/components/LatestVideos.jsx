@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { newsData } from '../data/newsData';
 
 const LatestVideos = () => {
   const navigate = useNavigate();
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Get the latest 5 video news items
   const latestVideos = [...newsData]
@@ -50,11 +60,11 @@ const LatestVideos = () => {
         </button>
       </div>
 
-      <div className="w-full max-w-[1300px] mx-auto mt-4 flex flex-col md:flex-row justify-between gap-4 px-2 sm:px-4">
-        {firstTwo.slice(0, window.innerWidth < 640 ? 1 : 2).map((video) => (
+      <div className="w-full max-w-[1300px] mx-auto mt-4 flex flex-col lg:flex-row justify-between gap-4 px-2 sm:px-4">
+        {firstTwo.slice(0, windowWidth < 1024 ? 1 : 2).map((video) => (
           <div 
             key={video.id} 
-            className="w-full md:w-1/2 h-[180px] sm:h-[260px] md:h-[380px] rounded-lg overflow-hidden relative group cursor-pointer"
+            className="w-full lg:w-1/2 h-[180px] sm:h-[260px] md:h-[380px] rounded-lg overflow-hidden relative group cursor-pointer"
             onClick={() => navigate(`/news/${video.id}`)}
           >
             {/* Background Image with Overlay */}
@@ -112,10 +122,10 @@ const LatestVideos = () => {
 
       {/* Small Video Boxes */}
       <div className="w-full max-w-[1300px] mx-auto mt-4 flex flex-col sm:flex-row justify-between gap-4 px-2 sm:px-4">
-        {window.innerWidth >= 640 && lastThree.map((video) => (
+        {lastThree.slice(0, windowWidth < 640 ? 0 : windowWidth < 1024 ? 2 : 3).map((video) => (
           <div 
             key={video.id} 
-            className="w-full sm:w-1/3 h-[120px] sm:h-[180px] md:h-[220px] rounded-lg overflow-hidden relative group cursor-pointer"
+            className="w-full sm:w-1/2 lg:w-1/3 h-[120px] sm:h-[180px] md:h-[220px] rounded-lg overflow-hidden relative group cursor-pointer"
             onClick={() => navigate(`/news/${video.id}`)}
           >
             {/* Background Image with Overlay */}
