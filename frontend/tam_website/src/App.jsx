@@ -13,6 +13,7 @@ import NewsDetail from "./components/NewsDetail"
 import LogoSection from "./components/LogoSection"
 import Error from "./pages/Error"
 import Login from "./pages/Login"
+import Dashboard from "./pages/Dashboard"
 
 // AuthContext setup (move to its own file in a real project)
 const AuthContext = React.createContext();
@@ -39,22 +40,6 @@ function ScrollToTop() {
   }, [pathname]);
 
   return null;
-}
-
-function Dashboard() {
-  const { setUser } = React.useContext(AuthContext);
-  const navigate = useNavigate();
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('rememberedUser');
-    navigate('/login');
-  };
-  return (
-    <div className="w-[1300px] mx-auto mt-16 text-center text-3xl text-primary flex flex-col items-center gap-8">
-      <div>Welcome to your dashboard!</div>
-      <button onClick={handleLogout} className="px-8 py-3 bg-quaternary-tint-800 text-primary text-lg font-medium rounded-lg hover:bg-quaternary-tint-600 transition-colors duration-300">Logout</button>
-    </div>
-  );
 }
 
 function App() {
