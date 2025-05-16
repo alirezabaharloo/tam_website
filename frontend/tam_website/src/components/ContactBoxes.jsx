@@ -64,13 +64,13 @@ const ContactBoxes = () => {
         {contactItems.map((item, index) => (
           <div 
             key={index}
-            className="relative w-full h-[64px] sm:h-[72px] md:h-[80px] bg-quaternary rounded-lg shadow-[2px_2px_16px_rgba(0,0,0,0.25)] transition-colors duration-300 ease-in-out hover:bg-quaternary-tint-200"
+            className="relative w-full h-[64px] sm:h-[72px] md:h-[80px] lg:h-auto lg:min-h-[80px] bg-quaternary rounded-lg shadow-[2px_2px_16px_rgba(0,0,0,0.25)] transition-colors duration-300 ease-in-out hover:bg-quaternary-tint-200"
           >
-            <div className="flex items-center h-full px-3">
+            <div className="flex items-center h-full px-3 lg:flex-col lg:items-start lg:justify-center lg:py-3">
               <div className="flex-shrink-0">
                 {item.icon}
               </div>
-              <div className="ml-3 flex-grow">
+              <div className="ml-3 lg:ml-0 lg:mt-2 flex-grow">
                 <span className="text-[12px] sm:text-[13px] md:text-[14px] font-medium text-quinary-tint-800 block leading-none truncate">{item.title}</span>
                 <span className="text-[8px] sm:text-[9px] md:text-[10px] font-medium text-tertiary leading-none block mt-1 truncate sm:hidden md:block">{item.subtitle}</span>
               </div>

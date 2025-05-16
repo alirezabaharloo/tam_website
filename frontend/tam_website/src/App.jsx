@@ -6,7 +6,6 @@ import Divider from "./components/Divider"
 import ContactBoxes from "./components/ContactBoxes"
 import Home from "./pages/Home"
 import About from "./pages/About"
-import Contact from "./pages/Contact"
 import Shop from "./pages/Shop"
 import News from "./pages/News"
 import NewsDetail from "./components/NewsDetail"
@@ -52,7 +51,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/news" element={<News />} />
             <Route path="/news/:id" element={<NewsDetail />} />
