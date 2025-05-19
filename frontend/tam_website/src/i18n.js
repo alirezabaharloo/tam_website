@@ -1,0 +1,162 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+const resources = {
+  en: {
+    translation: {
+      // Header Navigation
+      home: 'Home',
+      news: 'News',
+      shop: 'Shop',
+      contact: 'Contact',
+      about: 'About',
+      search: 'Search...',
+      selectLanguage: 'Select your language',
+      persian: 'فارسی',
+      english: 'English',
+      // Latest News Section
+      latestNews: 'Latest News',
+      latestVideos: 'Latest Videos',
+      viewAll: 'VIEW ALL',
+      // Team Section
+      tamsTeam: "TAM'S TEAM",
+      football: "FOOTBALL",
+      // Shop Section
+      tamsShop: "TAM'S SHOP",
+      comingSoon: "COMING SOON",
+      shopUnderConstruction: "Our shop is under construction. Stay tuned!",
+      // Shop Page
+      shopPageComingSoon: "Coming Soon",
+      shopPagePreparing: "We're preparing something special for you",
+      shopPageTitle: "TamSport Shop",
+      shopPageDescription: "Our online store is currently under development. We're working hard to bring you the best selection of team merchandise and exclusive items.",
+      shopPageBackToHome: "Back to Home",
+      // About Page
+      aboutTeamName: "Tam Cultural and Sports Club",
+      aboutTeamDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas purus viverra accumsan in nisl nisi. Arcu cursus vitae congue mauris rhoncus aenean vel elit scelerisque. In egestas erat imperdiet sed euismod nisi porta lorem mollis. Morbi tristique senectus et netus. Mattis pellentesque id nibh tortor id aliquet lectus proin. Sapien faucibus et molestie ac feugiat sed lectus vestibulum. Ullamcorper velit sed ullamcorper morbi tincidunt ornare massa eget. Dictum varius duis at consectetur lorem. Nisi vitae suscipit tellus mauris a diam maecenas sed enim. Velit ut tortor pretium viverra suspendisse potenti nullam. Et molestie ac feugiat sed lectus. Non nisi est sit amet facilisis magna. Dignissim diam quis enim lobortis...",
+      aboutReadMore: "Read More",
+      aboutShowLess: "Show Less",
+      aboutImportantHonors: "Important Honors",
+      aboutPremierLeagueChampionship: "Premier League Championship 2008/09",
+      // Player Section
+      player: "PLAYER",
+      forward: "Forward",
+      // Contact Section
+      whatsapp: "FC TAM WHATSAPP",
+      instagram: "FC TAM INSTAGRAM",
+      discord: "FC TAM DISCORD",
+      twitter: "FC TAM TWITTER",
+      youtube: "FC TAM YOUTUBE",
+      facebook: "FC TAM FACEBOOK",
+      // Footer Section
+      footerHome: "Home",
+      footerNews: "News",
+      footerShop: "Shop",
+      footerAbout: "About",
+      footerLatestNews: "Latest News",
+      footerTamsTeam: "Tam's Team",
+      footerTamsShop: "Tam's Shop",
+      footerPlayers: "Players",
+      footerAllContent: "All Content",
+      footerArticleContent: "Article Content",
+      footerVideoContent: "Video Content",
+      footerSlideshowContent: "Slideshow Content",
+      footerComingSoon: "Coming Soon",
+      footerTeamName: "Team Name",
+      footerTeamLogo: "Team Logo",
+      footerTeamDescriptions: "Team Descriptions",
+      footerTeamHonors: "Team Honors",
+      // News Page
+      newsAll: "All",
+      newsArticles: "Articles",
+      newsVideos: "Videos",
+      newsSlideshows: "Slideshows",
+      newsLoadMore: "Load More",
+    }
+  },
+  fa: {
+    translation: {
+      // Header Navigation
+      home: 'خانه',
+      news: 'اخبار',
+      shop: 'فروشگاه',
+      contact: 'ارتباط با ما',
+      about: 'درباره ما',
+      search: 'جستجو...',
+      selectLanguage: 'زبان خود را انتخاب کنید',
+      persian: 'فارسی',
+      english: 'English',
+      // Latest News Section
+      latestNews: 'جدیدترین اخبار',
+      latestVideos: 'جدیدترین ویدیوها',
+      viewAll: 'مشاهده همه',
+      // Team Section
+      tamsTeam: "تیم‌های تام",
+      football: "فوتبال",
+      // Shop Section
+      tamsShop: "فروشگاه تام",
+      comingSoon: "به زودی",
+      shopUnderConstruction: "فروشگاه ما در حال ساخت است. با ما همراه باشید!",
+      // Shop Page
+      shopPageComingSoon: "به زودی",
+      shopPagePreparing: "ما در حال آماده‌سازی چیزی خاص برای شما هستیم",
+      shopPageTitle: "فروشگاه تام اسپرت",
+      shopPageDescription: "فروشگاه آنلاین ما در حال توسعه است. ما سخت در تلاش هستیم تا بهترین انتخاب از محصولات تیم و اقلام انحصاری را برای شما فراهم کنیم.",
+      shopPageBackToHome: "بازگشت به خانه",
+      // About Page
+      aboutTeamName: "باشگاه فرهنگی ورزشی تام",
+      aboutTeamDescription: "لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد. کتابهای زیادی در شصت و سه درصد گذشته، حال و آینده شناخت فراوان جامعه و متخصصان را می طلبد تا با نرم افزارها شناخت بیشتری را برای طراحان رایانه ای علی الخصوص طراحان خلاقی و فرهنگ پیشرو در زبان فارسی ایجاد کرد. در این صورت می توان امید داشت که تمام و دشواری موجود در ارائه راهکارها و شرایط سخت تایپ به پایان رسد و زمان مورد نیاز شامل حروفچینی دستاوردهای اصلی و جوابگوی سوالات پیوسته اهل دنیای موجود طراحی اساسا مورد استفاده قرار گیرد...",
+      aboutReadMore: "ادامه مطلب",
+      aboutShowLess: "کمتر",
+      aboutImportantHonors: "افتخارات مهم",
+      aboutPremierLeagueChampionship: "قهرمانی لیگ برتر 2008/09",
+      // Player Section
+      player: "بازیکن",
+      forward: "مهاجم",
+      // Contact Section
+      whatsapp: "واتساپ تام",
+      instagram: "اینستاگرام تام",
+      discord: "دیسکورد تام",
+      twitter: "توییتر تام",
+      youtube: "یوتیوب تام",
+      facebook: "فیسبوک تام",
+      // Footer Section
+      footerHome: "خانه",
+      footerNews: "اخبار",
+      footerShop: "فروشگاه",
+      footerAbout: "درباره ما",
+      footerLatestNews: "جدیدترین اخبار",
+      footerTamsTeam: "تیم تام",
+      footerTamsShop: "فروشگاه تام",
+      footerPlayers: "بازیکنان",
+      footerAllContent: "همه محتوا",
+      footerArticleContent: "محتوا متنی",
+      footerVideoContent: "محتوا ویدیویی",
+      footerSlideshowContent: "محتوا اسلایدشو",
+      footerComingSoon: "به زودی",
+      footerTeamName: "نام تیم",
+      footerTeamLogo: "لوگوی تیم",
+      footerTeamDescriptions: "توضیحات تیم",
+      footerTeamHonors: "افتخارات تیم",
+      // News Page
+      newsAll: "همه",
+      newsArticles: "مقالات",
+      newsVideos: "ویدیوها",
+      newsSlideshows: "اسلایدشوها",
+      newsLoadMore: "بارگذاری بیشتر",
+    }
+  }
+};
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources,
+    lng: localStorage.getItem('language') || 'en',
+    fallbackLng: 'en',
+    interpolation: {
+      escapeValue: false
+    }
+  });
+
+export default i18n; 

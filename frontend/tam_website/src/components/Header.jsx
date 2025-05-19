@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect, useContext } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../App'
+import { useTranslation } from 'react-i18next';
 
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,6 +15,12 @@ export default function Header() {
   const langRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const { user } = useContext(AuthContext);
+  const isRTL = i18n.language === 'fa';
+
+  // Set document direction on mount and language change
+  useEffect(() => {
+    document.documentElement.dir = i18n.language === 'fa' ? 'rtl' : 'ltr';
+  }, [i18n.language]);
 
   const scrollToContact = () => {
     const contactSection = document.getElementById('contact-us');
@@ -49,12 +57,19 @@ export default function Header() {
     }
   };
 
+  const handleLanguageChange = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('language', lang);
+    document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+    setIsLangOpen(false);
+  };
+
   const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/news', label: 'News' },
-    { to: '/shop', label: 'Shop' },
-    { to: '#contact', label: 'Contact', onClick: scrollToContact },
-    { to: '/about', label: 'About' }
+    { to: '/', label: t('home') },
+    { to: '/news', label: t('news') },
+    { to: '/shop', label: t('shop') },
+    { to: '#contact', label: t('contact'), onClick: scrollToContact },
+    { to: '/about', label: t('about') }
   ];
 
   return (
@@ -81,7 +96,7 @@ export default function Header() {
                   className={`font-inter text-[16px] xl:text-[20px] leading-6 text-quinary-tint-800 no-underline hover:text-tertiary transition-all duration-300 ease-in-out relative group`}
                 >
                   {link.label}
-                  <span className="absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ease-in-out group-hover:w-full bg-tertiary"></span>
+                  <span className={`absolute -bottom-0 ${isRTL ? 'right-0' : 'left-0'} w-0 h-0.5 transition-all duration-300 ease-in-out group-hover:w-full bg-tertiary`}></span>
                 </button>
               ) : (
                 <Link 
@@ -92,7 +107,7 @@ export default function Header() {
                   }`}
                 >
                   {link.label}
-                  <span className={`absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ease-in-out ${
+                  <span className={`absolute -bottom-0 ${isRTL ? 'right-0' : 'left-0'} w-0 h-0.5 transition-all duration-300 ease-in-out ${
                     location.pathname === link.to ? 'w-full bg-tertiary' : 'group-hover:w-full bg-tertiary'
                   }`}></span>
                 </Link>
@@ -121,23 +136,23 @@ export default function Header() {
               </button>
               <div 
                 ref={searchBarRef}
-                className={`absolute right-[-16px] top-1/2 -translate-y-1/2 h-8 sm:h-9 md:h-10 w-[140px] sm:w-[180px] md:w-[220px] bg-quinary-tint-600 rounded-lg flex items-center transition-all duration-300 ease-out ${
+                className={`absolute ${isRTL ? 'left-[-16px]' : 'right-[-16px]'} top-1/2 -translate-y-1/2 h-8 sm:h-9 md:h-10 w-[140px] sm:w-[180px] md:w-[220px] bg-quinary-tint-600 rounded-lg flex items-center transition-all duration-300 ease-out ${
                   isSearchOpen 
                     ? 'translate-x-0 opacity-100' 
-                    : 'translate-x-8 opacity-0 pointer-events-none'
+                    : isRTL ? 'translate-x-[-8px] opacity-0 pointer-events-none' : 'translate-x-8 opacity-0 pointer-events-none'
                 }`}
               >
                 <div className="flex items-center h-full">
                   <img 
                     src="/images/icons/SearchLogoBlack.svg" 
                     alt="Search" 
-                    className="ml-2 sm:ml-3 h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5"
+                    className={`${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'} h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5`}
                   />
-                  <div className="h-4 sm:h-5 md:h-6 border-l-[1px] border-secondary ml-2 sm:ml-3"></div>
+                  <div className={`h-4 sm:h-5 md:h-6 border-l-[1px] border-secondary ${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'}`}></div>
                 </div>
                 <input 
                   type="text" 
-                  placeholder="Search..." 
+                  placeholder={t('search')}
                   className="w-[80px] sm:w-[100px] md:w-[120px] h-full pl-3 sm:pl-4 pr-2 sm:pr-3 bg-transparent outline-none text-secondary placeholder-secondary/50 text-xs sm:text-sm md:text-base"
                   value={searchContent}
                   onChange={(e) => setSearchContent(e.target.value)}
@@ -175,7 +190,7 @@ export default function Header() {
               </button>
               <div 
                 ref={langRef}
-                className={`absolute right-0 top-0 h-[100px] sm:h-[110px] md:h-[120px] w-[180px] sm:w-[200px] md:w-[220px] bg-quinary-tint-600 rounded-lg transition-all duration-300 ease-out ${
+                className={`absolute ${isRTL ? 'left-0' : 'right-0'} top-0 h-[124px] sm:h-[134px] md:h-[144px] w-[180px] sm:w-[200px] md:w-[220px] bg-quinary-tint-600 rounded-lg transition-all duration-300 ease-out ${
                   isLangOpen 
                     ? 'translate-y-0 opacity-100' 
                     : 'translate-y-2 opacity-0 pointer-events-none'
@@ -187,32 +202,38 @@ export default function Header() {
                     alt="Language" 
                     className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5"
                   />
-                  <span className="ml-1.5 text-xs sm:text-sm md:text-base leading-[18px] sm:leading-[20px] md:leading-[24px] text-secondary font-inter">
-                    select your language
+                  <span className={`${isRTL ? 'mr-1.5' : 'ml-1.5'} text-xs sm:text-sm md:text-base leading-[18px] sm:leading-[20px] md:leading-[24px] text-secondary font-inter`}>
+                    {t('selectLanguage')}
                   </span>
                 </div>
                 <div className="h-px w-[calc(100%-16px)] sm:w-[calc(100%-24px)] bg-secondary/50 mx-2 sm:mx-3"></div>
-                <div className="flex flex-col space-y-1.5 sm:space-y-2 p-2 sm:p-2.5">
-                  <div className="flex items-center">
+                <div className="flex flex-col space-y-2 sm:space-y-2.5 p-2 sm:p-2.5">
+                  <button 
+                    onClick={() => handleLanguageChange('fa')}
+                    className="flex items-center hover:bg-quaternary-tint-200 rounded-lg p-1.5"
+                  >
                     <img 
                       src="/images/icons/IranFlag.svg" 
                       alt="فارسی" 
                       className="w-6 h-3.5 sm:w-7 sm:h-4 md:w-8 md:h-5"
                     />
-                    <span className="ml-2 text-secondary font-inter text-xs sm:text-sm md:text-base">
-                      فارسی
+                    <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-secondary font-inter text-xs sm:text-sm md:text-base`}>
+                      {t('persian')}
                     </span>
-                  </div>
-                  <div className="flex items-center">
+                  </button>
+                  <button 
+                    onClick={() => handleLanguageChange('en')}
+                    className="flex items-center hover:bg-quaternary-tint-200 rounded-lg p-1.5"
+                  >
                     <img 
                       src="/images/icons/UKFlag.svg" 
                       alt="English" 
                       className="w-6 h-3.5 sm:w-7 sm:h-4 md:w-8 md:h-5"
                     />
-                    <span className="ml-2 text-secondary font-inter text-xs sm:text-sm md:text-base">
-                      English
+                    <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-secondary font-inter text-xs sm:text-sm md:text-base`}>
+                      {t('english')}
                     </span>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -235,7 +256,7 @@ export default function Header() {
                     link.onClick();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-colors duration-300 text-left"
+                  className={`font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-colors duration-300 ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   {link.label}
                 </button>
@@ -246,7 +267,7 @@ export default function Header() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-colors duration-300 ${
                     location.pathname === link.to ? 'text-tertiary' : ''
-                  }`}
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   {link.label}
                 </Link>

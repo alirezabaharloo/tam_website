@@ -13,6 +13,7 @@ import LogoSection from "./components/LogoSection"
 import Error from "./pages/Error"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
+import './i18n';
 
 // AuthContext setup (move to its own file in a real project)
 const AuthContext = React.createContext();
