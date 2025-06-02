@@ -31,14 +31,19 @@ export default function Header() {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Check if click is outside both the menu and the toggle button
+      const isClickInsideMenu = mobileMenuRef.current && mobileMenuRef.current.contains(event.target);
+      const isClickOnToggleButton = event.target.closest('button[aria-label="Toggle mobile menu"]');
+      
+      if (isMobileMenuOpen && !isClickInsideMenu && !isClickOnToggleButton) {
+        setIsMobileMenuOpen(false);
+      }
+      
       if (isSearchOpen && searchBarRef.current && !searchBarRef.current.contains(event.target)) {
         setIsSearchOpen(false);
       }
       if (isLangOpen && langRef.current && !langRef.current.contains(event.target)) {
         setIsLangOpen(false);
-      }
-      if (isMobileMenuOpen && mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
-        setIsMobileMenuOpen(false);
       }
     };
 
@@ -80,9 +85,14 @@ export default function Header() {
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden text-quinary-tint-800 hover:text-tertiary transition-colors duration-300"
+            aria-label="Toggle mobile menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              {isMobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              )}
             </svg>
           </button>
 
