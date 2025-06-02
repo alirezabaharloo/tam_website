@@ -133,7 +133,7 @@ export default function Header() {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-6">
             {/* Search Box */}
-            <div className="relative">
+            <div className="relative w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8">
               <button 
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className={`focus:outline-none transition-all duration-300 ${isSearchOpen ? 'opacity-0' : 'opacity-100'}`}
@@ -141,7 +141,7 @@ export default function Header() {
                 <img 
                   src="/images/icons/SearchLogo.svg" 
                   alt="Search" 
-                  className="w-5 h-5 sm:w-6 sm:h-6 text-quinary-tint-800 hover:text-secondary transition-colors duration-300"
+                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-secondary transition-colors duration-300"
                 />
               </button>
               <div 
@@ -187,7 +187,7 @@ export default function Header() {
             <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
 
             {/* Language Selector */}
-            <div className="relative">
+            <div className="relative w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8">
               <button 
                 onClick={() => setIsLangOpen(!isLangOpen)}
                 className="focus:outline-none"
@@ -195,7 +195,7 @@ export default function Header() {
                 <img 
                   src="/images/icons/LangLogo.svg" 
                   alt="lang" 
-                  className="w-5 h-5 sm:w-6 sm:h-6 text-quinary-tint-800 hover:text-secondary transition-colors duration-300"
+                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-secondary transition-colors duration-300"
                 />
               </button>
               <div 
@@ -253,37 +253,66 @@ export default function Header() {
         {/* Mobile Menu */}
         <div 
           ref={mobileMenuRef}
-          className={`lg:hidden absolute top-full left-0 right-0 mt-2 bg-primary rounded-lg shadow-lg transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
+          className={`lg:hidden absolute top-full left-0 right-0 mt-2 bg-gradient-to-b from-primary/80 to-primary/90 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_8px_32px_rgba(1,22,56,0.2)] transition-all duration-500 ease-in-out transform origin-top ${
+            isMobileMenuOpen 
+              ? 'opacity-100 translate-y-0 scale-y-100' 
+              : 'opacity-0 -translate-y-4 scale-y-0 pointer-events-none'
           }`}
+          style={{
+            backgroundImage: `
+              linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)),
+              linear-gradient(to bottom, var(--color-primary) 80%, var(--color-primary) 90%)
+            `,
+            boxShadow: '0 8px 32px rgba(1, 22, 56, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
+          }}
         >
-          <nav className="flex flex-col p-4 space-y-4">
-            {navLinks.map((link) => (
-              link.to === '#contact' ? (
-                <button 
+          <div className="relative overflow-hidden">
+            {/* Decorative top border with glass effect */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+            
+            <nav className="flex flex-col p-4 space-y-4">
+              {navLinks.map((link, index) => (
+                <div
                   key={link.label}
-                  onClick={() => {
-                    link.onClick();
-                    setIsMobileMenuOpen(false);
+                  className={`transform transition-all duration-500 ease-out ${
+                    isMobileMenuOpen 
+                      ? 'translate-y-0 opacity-100' 
+                      : 'translate-y-4 opacity-0'
+                  }`}
+                  style={{
+                    transitionDelay: `${index * 100}ms`
                   }}
-                  className={`font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-colors duration-300 ${isRTL ? 'text-right' : 'text-left'}`}
                 >
-                  {link.label}
-                </button>
-              ) : (
-                <Link 
-                  key={link.label}
-                  to={link.to}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-colors duration-300 ${
-                    location.pathname === link.to ? 'text-tertiary' : ''
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
-                >
-                  {link.label}
-                </Link>
-              )
-            ))}
-          </nav>
+                  {link.to === '#contact' ? (
+                    <button 
+                      onClick={() => {
+                        link.onClick();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-all duration-300 ${
+                        isRTL ? 'text-right' : 'text-left'
+                      } hover:bg-white/5 rounded-lg px-4 py-2 backdrop-blur-sm`}
+                    >
+                      {link.label}
+                    </button>
+                  ) : (
+                    <Link 
+                      to={link.to}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`block w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-all duration-300 ${
+                        location.pathname === link.to ? 'text-tertiary' : ''
+                      } ${isRTL ? 'text-right' : 'text-left'} hover:bg-white/5 rounded-lg px-4 py-2 backdrop-blur-sm`}
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </nav>
+
+            {/* Decorative bottom border with glass effect */}
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+          </div>
         </div>
       </div>
     </div>
