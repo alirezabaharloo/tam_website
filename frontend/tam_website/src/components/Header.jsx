@@ -87,7 +87,7 @@ export default function Header() {
             className="lg:hidden text-quinary-tint-800 hover:text-tertiary transition-colors duration-300"
             aria-label="Toggle mobile menu"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 sm:w-8 sm:h-8">
               {isMobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -253,24 +253,19 @@ export default function Header() {
         {/* Mobile Menu */}
         <div 
           ref={mobileMenuRef}
-          className={`lg:hidden absolute top-full left-0 right-0 mt-2 bg-gradient-to-b from-primary/80 to-primary/90 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_8px_32px_rgba(1,22,56,0.2)] transition-all duration-500 ease-in-out transform origin-top ${
+          className={`lg:hidden absolute top-full left-0 right-0 mt-2 rounded-lg transition-all duration-500 ease-in-out transform origin-top backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(var(--color-primary-rgb),0.4),0_0_20px_rgba(var(--color-tertiary-rgb),0.2)] bg-[rgba(var(--color-primary-rgb),0.8)] ${
             isMobileMenuOpen 
               ? 'opacity-100 translate-y-0 scale-y-100' 
               : 'opacity-0 -translate-y-4 scale-y-0 pointer-events-none'
           }`}
-          style={{
-            backgroundImage: `
-              linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)),
-              linear-gradient(to bottom, var(--color-primary) 80%, var(--color-primary) 90%)
-            `,
-            boxShadow: '0 8px 32px rgba(1, 22, 56, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
-          }}
         >
           <div className="relative overflow-hidden">
             {/* Decorative top border with glass effect */}
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+            <div 
+              className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[rgba(var(--color-tertiary-rgb),0.5)] to-transparent"
+            ></div>
             
-            <nav className="flex flex-col p-4 space-y-4">
+            <nav className="flex flex-col p-4 space-y-3">
               {navLinks.map((link, index) => (
                 <div
                   key={link.label}
@@ -289,9 +284,9 @@ export default function Header() {
                         link.onClick();
                         setIsMobileMenuOpen(false);
                       }}
-                      className={`w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-all duration-300 ${
+                      className={`w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary hover:text-shadow-[0_0_8px_rgba(var(--color-tertiary-rgb),0.3)] transition-all duration-300 ${
                         isRTL ? 'text-right' : 'text-left'
-                      } hover:bg-white/5 rounded-lg px-4 py-2 backdrop-blur-sm`}
+                      } px-2 py-1.5`}
                     >
                       {link.label}
                     </button>
@@ -299,9 +294,9 @@ export default function Header() {
                     <Link 
                       to={link.to}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`block w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-all duration-300 ${
+                      className={`block w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary hover:text-shadow-[0_0_8px_rgba(var(--color-tertiary-rgb),0.3)] transition-all duration-300 ${
                         location.pathname === link.to ? 'text-tertiary' : ''
-                      } ${isRTL ? 'text-right' : 'text-left'} hover:bg-white/5 rounded-lg px-4 py-2 backdrop-blur-sm`}
+                      } ${isRTL ? 'text-right' : 'text-left'} px-2 py-1.5`}
                     >
                       {link.label}
                     </Link>
@@ -311,7 +306,9 @@ export default function Header() {
             </nav>
 
             {/* Decorative bottom border with glass effect */}
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[rgba(var(--color-tertiary-rgb),0.5)] to-transparent"
+            ></div>
           </div>
         </div>
       </div>
