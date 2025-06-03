@@ -1,0 +1,65 @@
+# Development Environment
+.env*
+.vscode/
+.idea/
+*.sublime*
+.DS_Store
+
+# Frontend
+## Dependencies
+/frontend/tam_website/node_modules/
+/frontend/tam_website/bower_components/
+
+## Build outputs
+/frontend/tam_website/build/
+/frontend/tam_website/dist/
+
+## Logs and debugging
+/frontend/tam_website/npm-debug.log*
+/frontend/tam_website/yarn-debug.log*
+/frontend/tam_website/yarn-error.log*
+/frontend/tam_website/*.log
+/frontend/tam_website/logs/
+
+## Environment files
+/frontend/tam_website/.env*
+
+# Backend
+## Python
+*.py[cod]
+__pycache__/
+*.so
+.Python
+*.egg*
+*.egg-info/
+
+## Django
+/backend/media/
+/backend/static/
+/backend/*.log
+/backend/db.sqlite3*
+/backend/local_settings.py
+
+## Virtual Environment
+/backend/venv/
+/backend/.env/
+/backend/.venv/
+
+## Test coverage
+/backend/.coverage
+/backend/htmlcov/
+/backend/.pytest_cache/
+
+## Documentation
+/backend/docs/_build/
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Database
+postgres_data/
+*.sqlite3
+
+# Others
+env
