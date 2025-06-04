@@ -107,6 +107,7 @@ const commonResources = {
       somethingWentWrongTryAgain: "Try Again",
       somethingWentWrongContactSupport: "Contact Support",
       somethingWentWrongErrorCode: "Error Code",
+      imageNotProvided: "Image not available",
     },
     // Form and validation related translations - loaded when needed
     validation: {
@@ -269,6 +270,7 @@ const commonResources = {
       somethingWentWrongTryAgain: "تلاش مجدد",
       somethingWentWrongContactSupport: "تماس با پشتیبانی",
       somethingWentWrongErrorCode: "کد خطا",
+      imageNotProvided: "تصویر در دسترس نیست",
     },
     validation: {
       // Login Page

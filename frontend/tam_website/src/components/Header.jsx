@@ -69,13 +69,15 @@ export default function Header() {
   };
 
   const handleLanguageChange = (lang) => {
-    // First set the language in localStorage
-    localStorage.setItem('language', lang);
-    
-    // Then dispatch the event which will trigger the page reload
-    window.dispatchEvent(new Event('languageChange'));
-    
-    // Close the language selector
+    if (lang != localStorage.getItem("language")) {
+      // First set the language in localStorage
+      localStorage.setItem('language', lang);
+      
+      // Then dispatch the event which will trigger the page reload
+      window.dispatchEvent(new Event('languageChange'));
+      
+      // Close the language selector
+    }
     setIsLangOpen(false);
   };
 

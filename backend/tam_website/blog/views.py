@@ -11,6 +11,25 @@ from accounts.mixins import LocalizationMixin, IpAddressMixin
 from .models import IpAddress
 from django_filters import rest_framework as filters
 from django.db.models import Count
+from rest_framework.pagination import PageNumberPagination
+
+
+class ArticlePagination(PageNumberPagination):
+    page_size = 18
+    page_query_param = 'page'
+
+    def get_paginated_response(self, data):
+        next_url = None
+        if self.page.has_next():
+            next_url = self.request.build_absolute_uri(
+                self.get_next_link()
+            )
+        return Response({
+            'articles': data,
+            'next': next_url,
+            'total_pages': self.page.paginator.num_pages,
+            'current_page': self.page.number
+        })
 
 
 class ArticleFilter(filters.FilterSet):
@@ -42,33 +61,19 @@ class ArticleListView(ListAPIView):
     """
     View for listing all published articles.
     Supports filtering by type, status, most viewed and most popular.
-    Supports pagination with offset and limit parameters.
+    Supports pagination with page parameter.
     """
     serializer_class = ArticleSerializer
     queryset = Article.objects.accepted()
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ArticleFilter
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        offset = int(self.request.query_params.get('offset', 0))
-        limit = int(self.request.query_params.get('limit', 20))
-        return queryset[offset:offset + limit]
+    pagination_class = ArticlePagination
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['list'] = True
         return context
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        total_count = Article.objects.accepted().count()
-        
-        serializer = self.get_serializer(queryset, many=True)
-        return Response({
-            'articles': serializer.data,
-            'total_count': total_count
-        })
 
 
 class ArticleDetailView(IpAddressMixin, RetrieveAPIView):

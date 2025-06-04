@@ -1,0 +1,48 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- You are an experienced full-stack developer specialized in React (frontend) and Django REST Framework (backend).  
+I am building a bilingual sports blog (English and Persian) where users can read posts, switch languages, and possibly register in the future.
+
+Please write clean, modular, scalable, and production-ready code.
+
+The backend should follow Django REST best practices (e.g., serializers, viewsets, permissions).  
+The frontend should be React with good structure and performance (preferably using hooks and reusable components).
+
+Make sure the code supports bilingual content (English and Persian) using appropriate i18n/l10n practices.  
+If needed, explain where to store translations or how to structure multilingual data in the database.
+
+If the implementation requires splitting into multiple files or modules, feel free to organize it accordingly and explain the structure.
+
+⚠️ If any part of my request is unclear, ambiguous, or incomplete, **please ask clarifying questions before writing any code.**  
+I prefer a correct and thoughtful response over a fast but inaccurate one.
+
+Also, if you detect any potential issues or room for improvement in my request, feel free to mention them before implementation.
+
+---
+
+- Search GitHub for high-quality open-source repositories using React (frontend) and Django (backend), prioritizing:
+
+1. Multilingual blog websites  
+2. Multilingual websites of any type  
+3. Single-language blog websites
+
+Select well-maintained repositories with good documentation, stars, and recent activity.  
+Exclude low-quality or abandoned projects.
+
+Analyze the repositories focusing on:  
+- Project structure and organization  
+- Implementation of internationalization (i18n)  
+- Content models and data handling  
+- Communication between React frontend and Django backend (API design, authentication, data flow)
+
+Extract best practices and patterns relevant for coding a bilingual blog website.
+
+Provide links to these repositories.
+
+Use this analysis to assist me in writing and improving my code.
+
+- Please run your commands in CMD, not PowerShell.  
+- Please answer your responses in English if I ask you in persian.

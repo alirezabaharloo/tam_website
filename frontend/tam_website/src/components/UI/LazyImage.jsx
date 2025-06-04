@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const LazyImage = ({ src, alt, className }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const img = new Image();
@@ -25,7 +27,7 @@ const LazyImage = ({ src, alt, className }) => {
   if (error) {
     return (
       <div className={`${className} bg-quinary-tint-800 flex items-center justify-center`}>
-        <span className="text-secondary">تصویر در دسترس نیست</span>
+        <span className="text-secondary">{t('imageNotProvided')}</span>
       </div>
     );
   }
