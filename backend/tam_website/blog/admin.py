@@ -32,19 +32,30 @@ class ArticleAdmin(TranslatableAdmin):
     readonly_fields = ('get_created_date', 'get_updated_date', 'slug')
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(TranslatableAdmin):
     list_display = ('name', 'description')
-    search_fields = ('name', 'description')
-    ordering = ('name',)
+    search_fields = ('translations__name', 'translations__description')
+    ordering = ('translations__name',)
+    # fieldsets = (
+    #     (None, {
+    #         'fields': ('image', 'name', 'description')
+    #     }),
+    # )
 
 
 @admin.register(Player)
-class PlayerAdmin(admin.ModelAdmin):
+class PlayerAdmin(TranslatableAdmin):
     list_display = ('name', 'number', 'position', 'goals', 'games')
     search_fields = ('name', 'position')
     ordering = ('name',)
 
 
+    def get_category_slug(self, obj: Article):
+        if obj.slug:
+            return obj.safe_translation_getter("slug", language_code="en", default="")
+        return None
+
+    get_category_slug.short_description = 'category slug'
 
 admin.site.register(IpAddress)
 admin.site.register(MiddleArticleIpAddress)

@@ -52,6 +52,7 @@ const useHttp = (url, options = null) => {
         responseData = await customFetchFunction(url);
       }
       setData(responseData);
+      
       return responseData
     } catch (err) {
       let errorMessage;

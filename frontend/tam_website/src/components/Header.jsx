@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext.jsx'
 import { useTranslation } from 'react-i18next';
 import { loadNamespaces } from '../i18n';
+import { useSearch } from '../context/SearchContext';
 
 export default function Header() {
   const location = useLocation();
@@ -17,6 +18,8 @@ export default function Header() {
   const mobileMenuRef = useRef(null);
   const { isAuthenticated } = useContext(AuthContext);
   const isRTL = i18n.language === 'fa';
+  const searchInputRef = useRef(null);
+  const { updateSearchQuery } = useSearch();
 
   // Load the blog namespace for translations
   useEffect(() => {
@@ -88,6 +91,23 @@ export default function Header() {
     { to: '#contact', label: t('contact', { ns: 'blog' }), onClick: scrollToContact },
     { to: '/about', label: t('about', { ns: 'blog' }) }
   ];
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchContent.trim()) {
+      updateSearchQuery(searchContent);
+      navigate(`/news?search=${encodeURIComponent(searchContent.trim())}`);
+      setIsSearchOpen(false);
+      setSearchContent('');
+      window.location.reload()
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(e);
+    }
+  };
 
   return (
     <div className="sticky top-2 z-50">
@@ -164,21 +184,26 @@ export default function Header() {
                     : isRTL ? 'translate-x-[-8px] opacity-0 pointer-events-none' : 'translate-x-8 opacity-0 pointer-events-none'
                 }`}
               >
-                <div className="flex items-center h-full">
-                  <img 
-                    src="/images/icons/SearchLogoBlack.svg" 
-                    alt="Search" 
-                    className={`${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'} h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5`}
+                <form  className="flex items-center h-full w-full">
+                  <div className="flex items-center h-full">
+                    <img 
+                      src="/images/icons/SearchLogoBlack.svg" 
+                      alt="Search" 
+                      className={`${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'} h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5`}
+                      onClick={handleSearch}
+                    />
+                    <div className={`h-4 sm:h-5 md:h-6 border-l-[1px] border-secondary ${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'}`}></div>
+                  </div>
+                  <input 
+                    ref={searchInputRef}
+                    type="text" 
+                    placeholder={t('search', { ns: 'blog' })}
+                    className="w-[80px] sm:w-[100px] md:w-[120px] h-full pl-3 sm:pl-4 pr-2 sm:pr-3 bg-transparent outline-none text-secondary placeholder-secondary/50 text-xs sm:text-sm md:text-base"
+                    value={searchContent}
+                    onChange={(e) => setSearchContent(e.target.value)}
+                    onKeyPress={handleKeyPress}
                   />
-                  <div className={`h-4 sm:h-5 md:h-6 border-l-[1px] border-secondary ${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'}`}></div>
-                </div>
-                <input 
-                  type="text" 
-                  placeholder={t('search', { ns: 'blog' })}
-                  className="w-[80px] sm:w-[100px] md:w-[120px] h-full pl-3 sm:pl-4 pr-2 sm:pr-3 bg-transparent outline-none text-secondary placeholder-secondary/50 text-xs sm:text-sm md:text-base"
-                  value={searchContent}
-                  onChange={(e) => setSearchContent(e.target.value)}
-                />
+                </form>
               </div>
             </div>
 

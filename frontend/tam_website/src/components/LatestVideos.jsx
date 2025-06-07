@@ -49,7 +49,7 @@ const LatestVideos = () => {
       <div className="w-full max-w-[1300px] mx-auto mt-8 flex flex-row justify-between items-center px-2 sm:px-4">
         <h2 className="text-[28px] sm:text-[36px] md:text-[48px] font-regular text-secondary order-1">{t('latestVideos')}</h2>
         <button 
-          onClick={() => navigate('/news?type=video')}
+          onClick={() => navigate('/news?type=VD')}
           className="flex items-center gap-1 text-[16px] sm:text-[20px] md:text-[24px] text-secondary-tint-200 hover:text-secondary-tint-600 transition-colors duration-300 no-underline group order-2"
         >
           {t('viewAll')}

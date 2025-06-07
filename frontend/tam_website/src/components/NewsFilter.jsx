@@ -30,6 +30,7 @@ const NewsFilter = ({ activeFilter, onFilterChange }) => {
     setIsMobileMenuOpen(false);
   };
 
+
   return (
     <div className="w-full relative" ref={menuRef}>
       {/* Mobile Menu Button */}
@@ -63,9 +64,9 @@ const NewsFilter = ({ activeFilter, onFilterChange }) => {
         {filters.map((filter) => (
           <button
             key={filter.id}
-            onClick={() => handleFilterClick(filter.id)}
+            onClick={() => activeFilter != filter.id ? handleFilterClick(filter.id) : undefined}
             className={`w-full px-4 py-2 text-left text-[16px] font-medium transition-colors ${
-              activeFilter === filter.id
+              activeFilter === filter.id || (filter.id === 'all' && !activeFilter) 
                 ? 'text-quaternary bg-quinary-tint-700'
                 : 'text-secondary hover:text-quaternary hover:bg-quinary-tint-700'
             }`}
@@ -82,12 +83,12 @@ const NewsFilter = ({ activeFilter, onFilterChange }) => {
             key={filter.id}
             onClick={() => handleFilterClick(filter.id)}
             className={`text-[16px] md:text-[18px] lg:text-[20px] font-medium transition-all duration-300 relative group ${
-              activeFilter === filter.id ? 'text-quaternary' : 'text-secondary hover:text-quaternary'
+              activeFilter === filter.id || (filter.id === 'all' && !activeFilter) ? 'text-quaternary' : 'text-secondary hover:text-quaternary'
             }`}
           >
             {filter.label}
             <span className={`absolute -bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ${
-              activeFilter === filter.id ? 'w-full bg-quaternary' : 'group-hover:w-full bg-quaternary'
+              activeFilter === filter.id || (filter.id === 'all' && !activeFilter)  ? 'w-full bg-quaternary' : 'group-hover:w-full bg-quaternary'
             }`}></span>
           </button>
         ))}

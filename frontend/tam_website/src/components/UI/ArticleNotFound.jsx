@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const ArticleNotFound = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="text-center">
@@ -68,7 +71,7 @@ const ArticleNotFound = () => {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            Back to Home
+            {t('backToHome')}
           </Link>
         </motion.div>
       </div>

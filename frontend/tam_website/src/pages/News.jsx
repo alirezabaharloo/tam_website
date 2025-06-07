@@ -1,117 +1,196 @@
 import React, { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useSearch } from '../context/SearchContext'
+import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import NewsFilter from '../components/NewsFilter'
 import NewsBox from '../components/NewsBox'
-import useHttp from '../hooks/useHttp'
 import SpinLoader from '../components/UI/SpinLoader'
 import SomethingWentWrong from '../components/UI/SomethingWentWrong'
 import NoArticlesFound from '../components/UI/NoArticlesFound'
+import useHttp from '../hooks/useHttp'
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      when: "beforeChildren",
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { 
+    opacity: 0,
+    y: 20
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  }
+};
 
 export default function News() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [requestUrl, setRequestUrl] = useState(`http://localhost:8000/api/blog/articles`);
-  const [allArticles, setAllArticles] = useState([]);
-  const [displayedArticles, setDisplayedArticles] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
+  const { searchQuery } = useSearch();
+  const navigate = useNavigate();
+
+  const [requestUrl, setRequestUrl] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const searchParam = params.get('search');
+    const typeParam = params.get('type');
+    const pageParam = params.get('page');
+    
+    const searchUrl = new URL('http://localhost:8000/api/blog/articles');
+    if (searchParam) {
+      searchUrl.searchParams.set('search', searchParam);
+    }
+    if (typeParam) {
+      searchUrl.searchParams.set('type', typeParam);
+    }
+    if (pageParam) {
+      searchUrl.searchParams.set('page', pageParam);
+      searchUrl.searchParams.set('fetch-all', 'true');
+    }
+    return searchUrl.toString();
+  });
+  const [allArticles, setAllArticles] = useState([]);
+
+
+  const activeFilter = new URLSearchParams(window.location.search).get("type");
+  const searchParam = new URLSearchParams(window.location.search).get("search");
+  const currentPage = new URLSearchParams(window.location.search).get("page") || "1";
 
   const {
     isLoading,
     isError,
     data: response,
     sendRequest
-  } = useHttp(requestUrl);
+  } = useHttp(requestUrl, false);
 
-  // Update allArticles when new data comes from the backend
   useEffect(() => {
     if (response?.articles) {
       setAllArticles(prev => [...prev, ...response.articles]);
     }
   }, [response]);
 
-  
-
-  // Update displayed articles whenever allArticles changes
-  useEffect(() => {
-    const startIndex = 0;
-    const endIndex = currentPage * 6;
-    setDisplayedArticles(allArticles.slice(startIndex, endIndex));
-  }, [allArticles, currentPage]);
-
   const hasNext = response?.next || false;
-  const hasMoreToDisplay = displayedArticles.length < allArticles.length;
 
-  // Handle URL filter changes
-  useEffect(() => {
-    const filterFromUrl = searchParams.get('type');
-    if (filterFromUrl && ['all', 'TX', 'VD', 'SS'].includes(filterFromUrl)) {
-      setActiveFilter(filterFromUrl);
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-  }, [searchParams]);
-
-  const filters = [
-    { id: 'all', label: t('newsAll') },
-    { id: 'TX', label: t('newsArticles') },
-    { id: 'VD', label: t('newsVideos') },
-    { id: 'SS', label: t('newsSlideshows') }
-  ];
-
-  const handleLoadMore = async () => {
-    if (hasMoreToDisplay) {
-      // Load more from existing articles
-      setCurrentPage(prev => prev + 1);
-    } else if (hasNext) {
-      // Fetch more articles from backend
+  const handleLoadMore = () => {
+    if (hasNext) {
+      const nextPage = parseInt(currentPage) + 1;
+      const params = new URLSearchParams(window.location.search);
+      params.set('page', nextPage.toString());
+      window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
       setRequestUrl(response.next);
-      setCurrentPage(prev=>prev + 1)
-      // The currentPage will be incremented in the useEffect when new articles arrive
     }
+  };
+
+  const handleClearSearch = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete('search');
+    params.delete('page');
+    if (params.get('type')) {
+      navigate(`/news?type=${params.get('type')}`);
+    } else {
+      navigate('/news');
+    }
+    window.location.reload();
+    setAllArticles([]);
   };
 
   const handleFilterChange = (filterId) => {
-    setActiveFilter(filterId);
-    setSearchParams({ type: filterId });
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    const searchUrl = new URL('http://localhost:8000/api/blog/articles');
+    const searchParam = new URLSearchParams(window.location.search).get('search');
+    
+    if (searchParam) {
+      searchUrl.searchParams.set('search', searchParam);
+    }
+    if (filterId !== 'all') {
+      searchUrl.searchParams.set('type', filterId);
+    }
+    
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("type") === filterId) {
+      return;
+    }
+    if (filterId !== 'all') {
+      params.set('type', filterId);
+    } else {
+      params.delete('type');
+    }
+    params.delete('page'); // Reset page when changing filter
+    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    
+    setRequestUrl(searchUrl.toString());
+    setAllArticles([]);
   };
 
-  // Show error state
   if (isError) {
     return <SomethingWentWrong />;
   }
-
-  // Show loading state for initial load
-  if (isLoading && requestUrl === `http://localhost:8000/api/blog/articles`) {
-    return <SpinLoader />;
-  }
-
-  const filteredNews = activeFilter === 'all' 
-    ? displayedArticles 
-    : displayedArticles.filter(article => article.type === activeFilter);
-
+  
   return (
     <div className="w-full max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
       <div className="flex flex-col gap-6 sm:gap-8 md:gap-10">
+        {searchParam && (
+          <div className="flex items-center justify-between bg-quinary-tint-600/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-quinary-tint-800/20">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="text-secondary text-sm sm:text-base md:text-lg">
+                {t('searchResultsFor')}:
+              </span>
+              <span className="text-quaternary font-medium text-sm sm:text-base md:text-lg">
+                {searchParam}
+              </span>
+            </div>
+            <button
+              onClick={handleClearSearch}
+              className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-quinary-tint-800 hover:bg-quinary-tint-700 rounded-lg text-secondary hover:text-quaternary transition-colors duration-300"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm sm:text-base">{t('clearSearch')}</span>
+            </button>
+          </div>
+        )}
+        
         <NewsFilter 
           activeFilter={activeFilter} 
           onFilterChange={handleFilterChange} 
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-          {filteredNews.length > 0 && filteredNews.map((article) => (
-            <NewsBox key={article.id} {...article} />
-          ))}
-          {filteredNews.length <= 0 && <NoArticlesFound />}
-        </div>
-        {(hasNext || hasMoreToDisplay) && filteredNews.length > 0 && (
+        {
+          (((isLoading || allArticles.length == 0) && response?.detail !== 'no articles found!' && (!requestUrl.includes("page") || (requestUrl.includes("page") && requestUrl.includes("fetch-all"))))) ?  <SpinLoader /> :(
+            <motion.div 
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <AnimatePresence mode="wait">
+                {allArticles.length > 0 && allArticles.map((article) => (
+                  <motion.div
+                    key={article.id}
+                    variants={itemVariants}
+                    layout
+                  >
+                    <NewsBox {...article} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              {(response?.detail === 'no articles found!') && <NoArticlesFound />}
+            </motion.div>
+          )
+        }
+        
+        {hasNext && allArticles.length > 0 && (
           <div className="mt-6 sm:mt-8 flex justify-center">
             <button
               onClick={handleLoadMore}

@@ -6,7 +6,8 @@ from parler.models import TranslatableModel, TranslatedFields
 from django.utils.translation import gettext_lazy as _
 from uuid import uuid4
 from .managers import ArticleManager
- 
+
+
 
 class Article(TranslatableModel):
 
@@ -28,6 +29,11 @@ class Article(TranslatableModel):
         related_name='articles',
         null=True,
         help_text="The user who wrote this article"
+    )
+
+    category = models.ManyToManyField(
+        "Category",
+        help_text="The category of this article"
     )
 
     # Translated fields
@@ -129,3 +135,23 @@ class Image(models.Model):
 
     def __str__(self) -> str:
         return f"{self.image}"
+    
+
+class Category(TranslatableModel):
+    translations = TranslatedFields(
+        name=models.CharField(max_length=250),
+        description=models.TextField(),
+    )
+    image=models.ImageField(upload_to='categories/', null=True, blank=True)
+    slug = models.SlugField(max_length=250, unique=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        title_en = self.safe_translation_getter("name", language_code='en', default="")
+        slugified_title = slugify(title_en)
+        if not self.slug or slugified_title != self.slug:
+            self.slug = slugified_title or self.slug or uuid4()
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name

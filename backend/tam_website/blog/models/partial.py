@@ -3,40 +3,33 @@ from accounts.models import User
 from django_jalali.db import models as jmodels
 from parler.models import TranslatableModel
 from django.utils.translation import gettext_lazy as _
-from .article import Article
 
-class Category(TranslatableModel):
-    name = models.CharField(max_length=250)
-    description = models.TextField()
-    image = models.ImageField(upload_to='categories/', null=True, blank=True)
-    
-    def __str__(self):
-        return self.name
 
-class Comment(models.Model):
-    # relational fields
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='comments', null=True)
 
-    # information fields
-    content = models.TextField(help_text="The content of the comment")
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies', help_text="Parent comment if this is a reply")
+# class Comment(models.Model):
+#     # relational fields
+#     article = models.ForeignKey('Article', on_delete=models.CASCADE, related_name='comments')
+#     author = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='comments', null=True)
 
-    # date information
-    created_date = jmodels.jDateTimeField(auto_now_add=True, help_text="Date when the comment was created")
-    last_updated = jmodels.jDateTimeField(auto_now=True, help_text="Date when the comment was last modified")
+#     # information fields
+#     content = models.TextField(help_text="The content of the comment")
+#     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies', help_text="Parent comment if this is a reply")
 
-    class Meta:
-        ordering = ['created_date']
-        verbose_name = 'Comment'
-        verbose_name_plural = 'Comments'
+#     # date information
+#     created_date = jmodels.jDateTimeField(auto_now_add=True, help_text="Date when the comment was created")
+#     last_updated = jmodels.jDateTimeField(auto_now=True, help_text="Date when the comment was last modified")
 
-    def __str__(self):
-        return f"Comment by {self.author} on {self.article.title}"
+#     class Meta:
+#         ordering = ['created_date']
+#         verbose_name = 'Comment'
+#         verbose_name_plural = 'Comments'
 
-    def get_replies(self):
-        """Get all replies to this comment"""
-        return self.replies.filter(is_active=True)
+#     def __str__(self):
+#         return f"Comment by {self.author} on {self.article.title}"
+
+#     def get_replies(self):
+#         """Get all replies to this comment"""
+#         return self.replies.filter(is_active=True)
 
 
 class Player(models.Model):

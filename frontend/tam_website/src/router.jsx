@@ -1,4 +1,5 @@
-import { Route } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import Home from './pages/Home';
 import About from './pages/About';
 import Shop from './pages/Shop';
@@ -7,28 +8,83 @@ import NewsDetail from './components/NewsDetail';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Error from './pages/Error';
-import { Routes } from 'react-router-dom';
 import OtpVerification from './pages/OtpVerification';
 import Register from './pages/Register';
-import SpinLoader from './components/UI/SpinLoader'
+import SpinLoader from './components/UI/SpinLoader';
 
+const PageTransition = ({ children }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 const BlogRoutes = () => {
+  const location = useLocation();
+
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/shop" element={<Shop />} />
-      <Route path="/news" element={<News />} />
-      <Route path="/news/:slug" element={<NewsDetail />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/otp-code" element={<OtpVerification />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="*" element={<Error />} />      
-    </Routes>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={
+          <PageTransition>
+            <Home />
+          </PageTransition>
+        } />
+        <Route path="/about" element={
+          <PageTransition>
+            <About />
+          </PageTransition>
+        } />
+        <Route path="/shop" element={
+          <PageTransition>
+            <Shop />
+          </PageTransition>
+        } />
+        <Route path="/news" element={
+          <PageTransition>
+            <News />
+          </PageTransition>
+        } />
+        <Route path="/news/:slug" element={
+          <PageTransition>
+            <NewsDetail />
+          </PageTransition>
+        } />
+        <Route path="/login" element={
+          <PageTransition>
+            <Login />
+          </PageTransition>
+        } />
+        <Route path="/register" element={
+          <PageTransition>
+            <Register />
+          </PageTransition>
+        } />
+        <Route path="/otp-code" element={
+          <PageTransition>
+            <OtpVerification />
+          </PageTransition>
+        } />
+        <Route path="/profile" element={
+          <PageTransition>
+            <Profile />
+          </PageTransition>
+        } />
+        <Route path="*" element={
+          <PageTransition>
+            <Error />
+          </PageTransition>
+        } />
+      </Routes>
+    </AnimatePresence>
   );
-}
+};
 
 // const AdminRoutes = () => {
 //   return (

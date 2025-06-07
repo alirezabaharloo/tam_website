@@ -28,9 +28,9 @@ const Footer = () => {
       title: t('footerNews', { ns: 'blog' }),
       items: [
         { label: t('footerAllContent', { ns: 'blog' }), filter: "all" },
-        { label: t('footerArticleContent', { ns: 'blog' }), filter: "basic" },
-        { label: t('footerVideoContent', { ns: 'blog' }), filter: "video" },
-        { label: t('footerSlideshowContent', { ns: 'blog' }), filter: "slideshow" }
+        { label: t('footerArticleContent', { ns: 'blog' }), filter: "TX" },
+        { label: t('footerVideoContent', { ns: 'blog' }), filter: "VD" },
+        { label: t('footerSlideshowContent', { ns: 'blog' }), filter: "SS" }
       ]
     },
     {

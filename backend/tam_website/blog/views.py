@@ -10,12 +10,13 @@ from blog.models import Article
 from accounts.mixins import LocalizationMixin, IpAddressMixin
 from .models import IpAddress
 from django_filters import rest_framework as filters
-from django.db.models import Count
+from django.db.models import Count, Q, Case, When, Value, F
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from rest_framework.pagination import PageNumberPagination
 
 
 class ArticlePagination(PageNumberPagination):
-    page_size = 18
+    page_size = 12
     page_query_param = 'page'
 
     def get_paginated_response(self, data):
@@ -37,10 +38,11 @@ class ArticleFilter(filters.FilterSet):
     status = filters.ChoiceFilter(choices=Article.Status.choices)
     most_viewed = filters.BooleanFilter(method='filter_most_viewed')
     most_popular = filters.BooleanFilter(method='filter_most_popular')
+    search = filters.CharFilter(method='filter_search')
 
     class Meta:
         model = Article
-        fields = ['type', 'status', 'most_viewed', 'most_popular']
+        fields = ['type', 'status', 'most_viewed', 'most_popular', 'search']
 
     def filter_most_viewed(self, queryset, name, value):
         if value:
@@ -56,12 +58,52 @@ class ArticleFilter(filters.FilterSet):
             ).order_by('-like_count')
         return queryset
 
+    def filter_search(self, queryset, name, value):
+        if value:
+            try:
+                # Get the current language from the request
+                language = self.request.META.get('HTTP_ACCEPT_LANGUAGE', 'fa')
+                
+                # Use 'simple' configuration as a fallback if language-specific config doesn't exist
+                config = 'simple'
+                
+                # Create search vectors for title and body
+                title_vector = SearchVector('translations__title', weight='A', config=config)
+                body_vector = SearchVector('translations__body', weight='B', config=config)
+                
+                # Combine vectors
+                search_vector = title_vector + body_vector
+                
+                # Create search query with proper escaping
+                search_query = SearchQuery(value, config=config)
+                
+                # Perform the search with ranking
+                return queryset.filter(
+                    translations__language_code=language
+                ).annotate(
+                    rank=SearchRank(search_vector, search_query)
+                ).filter(
+                    rank__gt=0.3
+                ).order_by(
+                    '-rank',  # Sort by search rank first
+                    '-created_date'  # Then by creation date
+                ).distinct()
+            except Exception as e:
+                # If search fails, fall back to simple contains search
+                return queryset.filter(
+                    Q(translations__title__icontains=value) |
+                    Q(translations__body__icontains=value)
+                ).distinct()
+            
+        return queryset
+
 
 class ArticleListView(ListAPIView):
     """
     View for listing all published articles.
     Supports filtering by type, status, most viewed and most popular.
     Supports pagination with page parameter.
+    Supports search by title and body in the current language.
     """
     serializer_class = ArticleSerializer
     queryset = Article.objects.accepted()
@@ -69,11 +111,65 @@ class ArticleListView(ListAPIView):
     filterset_class = ArticleFilter
     pagination_class = ArticlePagination
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Optimize category prefetching for list view
+        return queryset.prefetch_related(
+            'category',
+            'category__translations',
+            'article_images',
+            'hits',
+            'likes'
+        )
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['list'] = True
         return context
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        if not queryset.exists():
+            return Response({
+                'detail': 'no articles found!',
+                'articles': [],
+                'next': None,
+                'total_pages': 0,
+                'current_page': 1
+            }, status=status.HTTP_200_OK)
+        
+        # Check if fetch-all parameter is present
+        fetch_all = request.query_params.get('fetch-all', 'false').lower() == 'true'
+        if fetch_all:
+            # Get the requested page number
+            page_number = int(request.query_params.get('page', 1))
+            # Calculate the number of items to return (page_size * page_number)
+            items_to_return = self.pagination_class.page_size * page_number
+            # Get articles up to the requested page
+            articles = queryset[:items_to_return]
+            serializer = self.get_serializer(articles, many=True)
+            
+            # Calculate next URL if there are more pages
+            next_url = None
+            if queryset.count() > items_to_return:
+                next_page = page_number + 1
+                next_url = request.build_absolute_uri(f"{request.path}?page={next_page}")
+            
+            return Response({
+                'articles': serializer.data,
+                'next': next_url,
+                'total_pages': page_number,
+                'current_page': page_number
+            })
+            
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class ArticleDetailView(IpAddressMixin, RetrieveAPIView):

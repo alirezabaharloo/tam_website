@@ -14,7 +14,8 @@ const NewsBox = ({
   likes,
   images,
   type,
-  video_url
+  video_url,
+  first_category
  }) => {
   const navigate = useNavigate();
   const { i18n } = useTranslation();
@@ -81,7 +82,7 @@ const NewsBox = ({
           <div className="flex items-center">
             <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-secondary-tint-200">{time_ago}</span>
             <div className="h-3 w-[1px] bg-secondary mx-2"></div>
-            <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary">{author_name}</span>
+            <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary">{first_category?.name || ''}</span>
           </div>
           <div>
             <svg 

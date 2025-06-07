@@ -83,10 +83,14 @@ const commonResources = {
       noArticlesFoundDescription: "We couldn't find any articles matching your current filter. Try changing the filter or check back later for new content.",
       tryDifferentFilter: "Try Different Filter",
       refreshPage: "Refresh Page",
+      // Search Results
+      searchResultsFor: "Search results for",
+      clearSearch: "Clear Search",
       // Error Page
       errorPageNotFound: "Page Not Found",
       errorPageDescription: "The page you are looking for doesn't exist or has been moved.",
       errorBackToHome: "Back to Home",
+      backToNews: "Back to News",
       // Modal
       modalAccept: "Accept",
       modalReject: "Reject",
@@ -108,6 +112,8 @@ const commonResources = {
       somethingWentWrongContactSupport: "Contact Support",
       somethingWentWrongErrorCode: "Error Code",
       imageNotProvided: "Image not available",
+      // about search
+      searchResultsFor: 'search results for',
     },
     // Form and validation related translations - loaded when needed
     validation: {
@@ -246,10 +252,14 @@ const commonResources = {
       noArticlesFoundDescription: "متأسفانه هیچ مقاله‌ای با فیلتر فعلی شما یافت نشد. لطفاً فیلتر را تغییر دهید یا بعداً برای محتوای جدید مراجعه کنید.",
       tryDifferentFilter: "تغییر فیلتر",
       refreshPage: "بارگذاری مجدد",
+      // Search Results
+      searchResultsFor: "نتیجه جستجو برای",
+      clearSearch: "پاک کردن جستجو",
       // Error Page
       errorPageNotFound: "صفحه یافت نشد",
       errorPageDescription: "صفحه‌ای که به دنبال آن هستید وجود ندارد یا منتقل شده است.",
       errorBackToHome: "بازگشت به خانه",
+      backToHome: "بازگشت به خبر ها",
       // Modal
       modalAccept: "تایید",
       modalReject: "رد",
@@ -271,6 +281,8 @@ const commonResources = {
       somethingWentWrongContactSupport: "تماس با پشتیبانی",
       somethingWentWrongErrorCode: "کد خطا",
       imageNotProvided: "تصویر در دسترس نیست",
+      // about search
+      searchResultsFor: 'نتیجه جست و جو برای',
     },
     validation: {
       // Login Page

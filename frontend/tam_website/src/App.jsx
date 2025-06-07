@@ -14,6 +14,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from 'react-i18next';
 import { Suspense } from 'react';
 import useLanguageChange from './hooks/useLanguageChange';
+import { SearchProvider } from './context/SearchContext';
+import SpinLoader from './components/UI/SpinLoader.jsx';
+
 
 // Scroll to top component
 function ScrollToTop() {
@@ -46,23 +49,25 @@ function App() {
   useLanguageChange();
 
   return (
-    <Router>
-      <AuthProvider>
-        <ToastContainer rtl={isRTL} />
-        <ScrollToTop />
-        <div className="min-h-screen bg-quinary-tint-600">
-          <Header />
-          <Suspense fallback={<div>Loading...</div>}>
-            <BlogRoutes />
-          </Suspense>
-          <Divider />
-          <ContactBoxes />
-          <Divider />
-          <Footer />
-          <LogoSection />
-        </div>
-      </AuthProvider>
-    </Router>
+    <SearchProvider>
+      <Router>
+        <AuthProvider>
+          <ToastContainer rtl={isRTL} />
+          <ScrollToTop />
+          <div className="min-h-screen bg-quinary-tint-600">
+            <Header />
+            <Suspense fallback={SpinLoader}>
+              <BlogRoutes />
+            </Suspense>
+            <Divider />
+            <ContactBoxes />
+            <Divider />
+            <Footer />
+            <LogoSection />
+          </div>
+        </AuthProvider>
+      </Router>
+    </SearchProvider>
   );
 }
 

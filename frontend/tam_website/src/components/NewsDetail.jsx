@@ -145,9 +145,16 @@ export default function NewsDetail() {
 
                 {/* Keywords and interactive elements row */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mt-4 sm:mt-6">
-                  {/* Author name */}
-                  <div className="flex items-center">
-                    <span className="text-[14px] sm:text-[16px] font-regular text-quaternary">{article.author_name}</span>
+                  {/* Categories */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {article.categories?.map((category, index) => (
+                      <span key={index} className="text-[14px] sm:text-[16px] font-regular text-quaternary">
+                        {category.name}
+                        {index < article.categories.length - 1 && (
+                          <span className="mx-2 text-secondary">•</span>
+                        )}
+                      </span>
+                    ))}
                   </div>
                   {/* Interactive elements */}
                   <div className="flex items-center gap-2">
