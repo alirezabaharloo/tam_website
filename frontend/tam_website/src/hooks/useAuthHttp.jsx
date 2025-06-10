@@ -14,18 +14,14 @@ const useAuthHttp = (url, options = null) => {
   const handleUnauthorized = useCallback(async () => {
     try {
       const newTokens = await refreshToken();
+      
       if (newTokens && newTokens.access) {
         // Update tokens in localStorage and context
-        localStorage.setItem('tokens', JSON.stringify({
-          access: newTokens.access,
-          refresh: newTokens.refresh
-        }));
+        localStorage.setItem('tokens', JSON.stringify(newTokens));
         return true;
       }
     } catch (error) {
-      // If refresh token fails, logout the user
-      logout();
-      return false;
+      console.log('some error occurd!', error.message);
     }
     return false;
   }, [refreshToken, tokens, logout]);
@@ -48,37 +44,46 @@ const useAuthHttp = (url, options = null) => {
     };
     let res = await fetch(url, requestOptions);
     
-    // if (res.status === 401) {
-    //   // Try to refresh the token
-    //   const refreshSuccess = await handleUnauthorized();
-    //   if (refreshSuccess) {
-    //     // Retry the original request with new token
-    //     const newOptions = {
-    //       ...requestOptions,
-    //       headers: {
-    //         ...requestOptions.headers,
-    //         ...getAuthHeader()
-    //       }   
-    //     };
-    //     res = await fetch(url, newOptions);
-    //   } else {
-    //     throw new Error('Authentication failed');
-    //   }
-    // }
-    
-    if (res.status === 401){
-      logout();
-    }
     
     const resData = await res.json();
     
-    if (res.status === 400 && requestOptions.method !== 'GET') {
+    console.log(resData);
+    
+    if (res.status === 401 && resData?.messages[0].message === "Token is expired") {
+      // Try to refresh the token
+      
+      const refreshSuccess = await handleUnauthorized();
+      console.log(refreshSuccess);
+      
+      if (refreshSuccess) {
+        // Retry the original request with new token
+        const newOptions = {
+          ...requestOptions,
+          headers: {
+            ...requestOptions.headers,
+          }   
+        };
+        res = await fetch(url, newOptions);
+      } else {
+        throw new Error('Authentication failed');
+      }
+    }
+
+    if (res.status === 401 && resData.messages[0].message === "Token is expired") {
+      window.location.reload();
+    } 
+
+    if (res.status === 401 && resData.messages[0].message === "Token is invalid") {
+      logout();
+    }
+
+    if (!res.ok) {
       return {
         isError: true,
         errorContent: resData
       };
     }
-    
+   
     if (!res.ok) { 
       setError({
         isError: true,

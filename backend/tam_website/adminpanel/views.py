@@ -1,4 +1,4 @@
-from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -30,7 +30,7 @@ class AdminUserManagementView(RetrieveUpdateAPIView):
     permission_classes = [IsSuperUser]
     lookup_field = 'pk'
 
-class UserProfileView(RetrieveUpdateAPIView):
+class UserProfileView(RetrieveAPIView):
     """
     View for users to manage their own profile
     Accessible by all authenticated users
@@ -42,5 +42,5 @@ class UserProfileView(RetrieveUpdateAPIView):
 
     def get_serializer_class(self):
         if self.request.user.is_superuser:
-            return AdminProfileSerializer
+            return UserProfileUpdateSerializer
         return UserProfileUpdateSerializer

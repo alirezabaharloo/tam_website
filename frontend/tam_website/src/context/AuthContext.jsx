@@ -66,7 +66,6 @@ export const AuthProvider = ({ children }) => {
         } else if (response.ok) {
           setIsAdmin(true);
         } else {
-          console.error('Failed to check admin access');
           setIsAdmin(false);
         }
       } catch (error) {
@@ -152,17 +151,21 @@ export const AuthProvider = ({ children }) => {
       if (!storedTokens) {
         throw new Error('No tokens found');
       }
-
-      const accessToken = JSON.parse(storedTokens).access;
+      const refreshToken = JSON.parse(storedTokens).refresh;
       const res = await fetch('http://localhost:8000/api/auth/get-refresh-token/', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
           ...authHeader(),
         },
+        body: JSON.stringify({
+          refresh:refreshToken
+        })
       });
-      
       const data = await res.json();
+      
+      if (data?.code === "token_not_valid") {
+        logout();
+      }
       return data;
     } catch (error) {
       console.error('Error refreshing token:', error);

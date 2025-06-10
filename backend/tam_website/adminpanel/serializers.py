@@ -77,38 +77,8 @@ class AdminProfileSerializer(serializers.ModelSerializer):
         return instance
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
-    """
-    Serializer for regular users to view and update their profile
-    """
-    first_name = serializers.CharField(required=False)
-    last_name = serializers.CharField(required=False)
+    
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name']
-        read_only_fields = ['is_active', 'is_staff', 'is_author', 'is_seller']
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        profile = instance.get_profile
-        if not isinstance(profile, dict):  # Regular user
-            if profile:
-                data['first_name'] = profile.first_name
-                data['last_name'] = profile.last_name
-        return data
-
-    def update(self, instance, validated_data):
-        first_name = validated_data.pop('first_name', None)
-        last_name = validated_data.pop('last_name', None)
-
-        # Update profile
-        profile = instance.get_profile
-        if not isinstance(profile, dict):  # Regular user
-            if profile:
-                if first_name is not None:
-                    profile.first_name = first_name
-                if last_name is not None:
-                    profile.last_name = last_name
-                profile.save()
-
-        return instance
+        fields = "__all__"

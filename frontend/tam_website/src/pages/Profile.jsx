@@ -6,6 +6,9 @@ import { successNotif, errorNotif } from '../utils/customNotifs.jsx';
 import useAuthHttp from '../hooks/useAuthHttp.jsx';
 import ChangePassword from '../components/authentication/ChangePassword.jsx';
 import { loadNamespaces } from '../i18n';
+import useAuth from '../hooks/useAuth.jsx';
+import SpinLoader from '../components/UI/SpinLoader.jsx';
+import SomethingWentWrong from '../components/UI/SomethingWentWrong.jsx';
 
 const Profile = () => {
   const { user, logout } = React.useContext(AuthContext);
@@ -19,6 +22,14 @@ const Profile = () => {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const fileInputRef = useRef(null);
+
+  const {
+    isLoading,
+    isError,
+    data: profile
+  } = useAuthHttp("http://localhost:8000/api/admin/profile")
+
+  
 
   // Load necessary namespaces
   useEffect(() => {
@@ -68,6 +79,18 @@ const Profile = () => {
     { id: 'settings', label: t('profileSettings', { ns: 'blog' }) }
   ];
 
+  if (isLoading) {
+    <SpinLoader />
+  }
+  
+  console.log(isError);
+  
+
+  if (isError) {
+    <SomethingWentWrong />
+  }
+
+
   return (
     <div className="min-h-screen bg-quinary-tint-600">
       <div className="w-full max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8 py-8">
@@ -89,7 +112,7 @@ const Profile = () => {
                   ) : (
                     <div className="w-full h-full bg-primary flex items-center justify-center">
                       <span className="text-[24px] sm:text-[32px] font-bold text-quinary-tint-800">
-                        {user?.phone?.charAt(0).toUpperCase()}
+                        {profile?.phone_number?.charAt(0).toUpperCase()}
                       </span>
                     </div>
                   )}
@@ -109,7 +132,7 @@ const Profile = () => {
                 </div>
               </div>
               <div className={`ml-4 ${isRTL ? 'text-right mr-4' : 'text-left'}`}>
-                <h1 className="text-[24px] sm:text-[32px] font-bold text-primary">{t('profileWelcomeBack', { ns: 'blog' })}</h1>
+                <h1 className="text-[24px] sm:text-[32px] font-bold text-primary"></h1>
                 <p className="text-[16px] sm:text-[18px] text-secondary">{user?.phone}</p>
               </div>
             </div>

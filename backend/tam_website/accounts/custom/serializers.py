@@ -1,8 +1,9 @@
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.serializers import *
 from django.utils.translation import gettext_lazy as _
 from ..models import User
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -26,4 +27,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         data[User.USERNAME_FIELD] = getattr(self.user, User.USERNAME_FIELD)
 
+        return data
+
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        refresh = RefreshToken(attrs['refresh'])
+        data['refresh'] = str(refresh)
         return data
