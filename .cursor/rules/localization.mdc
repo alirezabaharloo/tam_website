@@ -1,0 +1,25 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+=== You are an experienced full-stack developer specialized in React (frontend) and Django REST Framework (backend).
+I am building a bilingual sports blog (English and Persian) where users can read posts, switch languages, and possibly register in the future.
+
+=== For backend and frontend, if my task includes generating text for error messages (in the backend) or adding static text that doesn't require fetching from the backend (in the frontend), please follow the instructions below to ensure the texts are available in both English and Persian:
+
+frontend:
+- I am using the `react-i18next` library to manage multilingual support (English and Persian).
+- Please store all static frontend texts in `src/i18n.js`.
+- Before adding any new text, read the existing `i18n.js` file carefully to understand the current structure and approach for storing translations in both languages.
+- Follow the same pattern when inserting new entries.
+
+backend:
+- For server-side messages (like error responses), use Django’s internationalization system.
+- Store bilingual text like this:
+  ```python
+  from django.utils.translation import gettext_lazy as _
+  _("Your message here")
+
+- This ensures that messages can be translated properly depending on the user's language.
+

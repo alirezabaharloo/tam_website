@@ -1,0 +1,17 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+=== If the implementation requires splitting into multiple files or modules, feel free to organize it accordingly and explain the structure.
+
+
+=== If any part of my request is unclear, ambiguous, or incomplete, please ask clarifying questions before writing any code and I prefer a correct and thoughtful response over a fast but inaccurate one.
+
+=== Also, if you detect any potential issues or room for improvement in my request, feel free to mention them before implementation.
+
+- I'm using Docker, so for running commands first read these files (you can find the files in the root directory where the `backend` and `frontend` directories are located): 
+  - `docker-compose.yml`
+  - `docker/django/Dockerfile`
+  - `docker/react/Dockerfile`
+  Then run commands inside the appropriate Docker containers.
