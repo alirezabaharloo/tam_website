@@ -53,4 +53,4 @@ docker-compose up --build
 # 3. The app will be available at:
 > Backend API: http://localhost:8000/
 > 
-> Frontend: http://localhost:3000/
+> Frontend: http://localhost:5173/
