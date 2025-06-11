@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from "./components/Header"
 import Footer from "./components/Footer"
 import Divider from "./components/Divider"
@@ -13,26 +13,15 @@ import LogoSection from "./components/LogoSection"
 import Error from "./pages/Error"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
+import Admin from './pages/Admin';
+import { AuthProvider } from './contexts/AuthContext';
 import './i18n';
-
-// AuthContext setup (move to its own file in a real project)
-const AuthContext = React.createContext();
-
-export function AuthProvider({ children }) {
-  // In a real app, you would check localStorage, cookies, or an API
-  const [user, setUser] = useState(null); // null means not logged in
-  return (
-    <AuthContext.Provider value={{ user, setUser }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
 
 // Scroll to top component
 function ScrollToTop() {
   const { pathname } = useLocation();
 
-  useEffect(() => {
+  React.useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -44,8 +33,8 @@ function ScrollToTop() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <ScrollToTop />
         <div className="min-h-screen bg-quinary-tint-600">
           <Header />
@@ -57,6 +46,7 @@ function App() {
             <Route path="/news/:id" element={<NewsDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<Error />} />
           </Routes>
           <Divider />
@@ -65,10 +55,9 @@ function App() {
           <Footer />
           <LogoSection />
         </div>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
 export default App;
-export { AuthContext };

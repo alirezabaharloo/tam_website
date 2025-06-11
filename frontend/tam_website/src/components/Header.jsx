@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useContext } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { AuthContext } from '../App'
+import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from 'react-i18next';
 
 export default function Header() {
@@ -14,7 +14,7 @@ export default function Header() {
   const searchBarRef = useRef(null);
   const langRef = useRef(null);
   const mobileMenuRef = useRef(null);
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const isRTL = i18n.language === 'fa';
 
   // Set document direction on mount and language change

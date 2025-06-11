@@ -1,9 +1,9 @@
-import React, { useState, useContext, useEffect, useCallback, useMemo, useReducer } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthContext } from '../App'
 import { fakeUsers } from '../data/fakeUsers'
 import Modal from '../components/Modal'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '../contexts/AuthContext'
 
 // Validation functions
 const validatePhone = (phone) => {
@@ -198,6 +198,8 @@ const Button = React.memo(({ onClick, children, variant = 'primary', className =
 export default function Login() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
+  const { login, register: registerUser, user, setUser } = useAuth();
+  const navigate = useNavigate();
   
   // Login states
   const [loginState, setLoginState] = useState({
@@ -236,8 +238,6 @@ export default function Login() {
   const otpInputs = [0, 1, 2, 3, 4]
   const otpRefs = useMemo(() => otpInputs.map(() => React.createRef()), [])
   const OTP_CODE = '12345'
-  const navigate = useNavigate()
-  const { setUser } = useContext(AuthContext)
 
   // Memoized validation
   const registerValidation = useMemo(() => ({
@@ -258,7 +258,7 @@ export default function Login() {
       setUser(JSON.parse(rememberedUser))
       navigate('/')
     }
-  }, [])
+  }, [setUser, navigate])
 
   useEffect(() => {
     if (!otpState.step) return
@@ -281,30 +281,31 @@ export default function Login() {
     dispatchRegister({ type: 'VALIDATE' })
   }, [isRegister, registerState.phone, registerState.password, registerState.confirm])
 
-  const handleLogin = useCallback((e) => {
-    e.preventDefault()
-    const user = fakeUsers.find(u => u.phone === loginState.phone && u.password === loginState.password)
-    if (user) {
-      setUser({ phone: user.phone })
+  const handleLogin = useCallback(async (e) => {
+    e.preventDefault();
+    const success = await login(loginState.phone, loginState.password);
+    if (success) {
       if (loginState.rememberMe) {
-        localStorage.setItem('rememberedUser', JSON.stringify({ phone: user.phone }))
+        localStorage.setItem('rememberedUser', JSON.stringify({ phone: loginState.phone }));
       } else {
-        localStorage.removeItem('rememberedUser')
+        localStorage.removeItem('rememberedUser');
       }
-      setIsModalOpen(true)
-      setLoginState(prev => ({ ...prev, error: false }))
+      setIsModalOpen(true);
+      setLoginState(prev => ({ ...prev, error: false }));
     } else {
-      setLoginState(prev => ({ ...prev, error: true }))
+      setLoginState(prev => ({ ...prev, error: true }));
     }
-  }, [loginState.phone, loginState.password, loginState.rememberMe, setUser])
+  }, [loginState.phone, loginState.password, loginState.rememberMe, login]);
 
-  const handleRegister = useCallback((e) => {
-    e.preventDefault()
-    if (registerValidation.hasErrors()) return
+  const handleRegister = useCallback(async (e) => {
+    e.preventDefault();
+    if (registerValidation.hasErrors()) return;
     
-    fakeUsers.push({ phone: registerState.phone, password: registerState.password })
-    dispatchOtp({ type: 'SET_STEP', value: true })
-  }, [registerState, registerValidation])
+    const success = await registerUser(registerState.phone, registerState.password);
+    if (success) {
+      dispatchOtp({ type: 'SET_STEP', value: true });
+    }
+  }, [registerState, registerValidation, registerUser]);
 
   const handleOtpSubmit = useCallback((e) => {
     e.preventDefault()

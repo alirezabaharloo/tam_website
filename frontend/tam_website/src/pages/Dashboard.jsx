@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../App';
+import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 const Dashboard = () => {
-  const { user, setUser } = React.useContext(AuthContext);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
@@ -19,10 +19,8 @@ const Dashboard = () => {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('rememberedUser');
-    navigate('/login');
+  const handleLogout = async () => {
+    await logout();
   };
 
   const handleImageUpload = (event) => {
