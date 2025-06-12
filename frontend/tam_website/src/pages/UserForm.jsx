@@ -7,8 +7,8 @@ import { fakeUsers } from '../data/fakeUsers';
 
 // Icons
 const Icons = {
-  Back: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  Back: ({ isRTL }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-6 h-6 ${isRTL ? 'rotate-180' : ''}`}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
     </svg>
   ),
@@ -189,7 +189,7 @@ const UserForm = () => {
                 onClick={handleBack}
                 className="p-2 text-secondary hover:text-primary transition-colors duration-300"
               >
-                <Icons.Back />
+                <Icons.Back isRTL={isRTL} />
               </button>
               <div className={`ml-4 ${isRTL ? 'text-right mr-4' : 'text-left'}`}>
                 <h1 className="text-[24px] sm:text-[32px] font-bold text-primary">

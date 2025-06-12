@@ -15,6 +15,7 @@ import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
 import Admin from './pages/Admin';
 import UserForm from './pages/UserForm';
+import ArticleForm from './pages/ArticleForm';
 import { AuthProvider } from './contexts/AuthContext';
 import './i18n';
 
@@ -50,6 +51,8 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/user/add" element={<UserForm />} />
             <Route path="/admin/user/edit/:userId" element={<UserForm />} />
+            <Route path="/admin/article/add" element={<ArticleForm />} />
+            <Route path="/admin/article/edit/:id" element={<ArticleForm />} />
             <Route path="*" element={<Error />} />
           </Routes>
           <Divider />

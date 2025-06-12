@@ -87,6 +87,14 @@ const Admin = () => {
     navigate(`/admin/user/edit/${userId}`);
   };
 
+  const handleAddArticle = () => {
+    navigate('/admin/article/add');
+  };
+
+  const handleEditArticle = (articleId) => {
+    navigate(`/admin/article/edit/${articleId}`);
+  };
+
   const handleToggleUserStatus = (userId) => {
     // Update local state for immediate UI feedback
     const newStatus = !getUserStatus(userId);
@@ -291,7 +299,10 @@ const Admin = () => {
                       <h2 className={`text-[24px] font-bold text-primary ${isRTL ? 'text-right' : 'text-left'}`}>
                         {t('adminNewsManagement')}
                       </h2>
-                      <button className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300">
+                      <button 
+                        onClick={handleAddArticle}
+                        className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300"
+                      >
                         {t('adminAddNews')}
                       </button>
                     </div>
@@ -316,7 +327,10 @@ const Admin = () => {
                                 <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{news.views}</td>
                                 <td className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
                                   <div className="flex gap-2 justify-end">
-                                    <button className="px-3 py-1 bg-primary text-quinary-tint-800 rounded hover:bg-primary-tint-100 transition-colors duration-300">
+                                    <button 
+                                      onClick={() => handleEditArticle(news.id)}
+                                      className="px-3 py-1 bg-primary text-quinary-tint-800 rounded hover:bg-primary-tint-100 transition-colors duration-300"
+                                    >
                                       {t('adminEdit')}
                                     </button>
                                     <button className="px-3 py-1 bg-quaternary text-quinary-tint-800 rounded hover:bg-quaternary-tint-100 transition-colors duration-300">
