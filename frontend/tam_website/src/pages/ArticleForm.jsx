@@ -55,7 +55,7 @@ const Icons = {
   ),
   Likes: () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a1.902 1.902 0 0 1 2.516-.063m6.267 8.744c.61 0 1.16-.247 1.554-.58a1.6 1.6 0 0 0 1.763-.023m-8.49-3.823c-.816.028-1.649.279-2.476.785a6.59 6.59 0 0 0-1.596 1.336 1.603 1.603 0 0 0 2.388 2.146c.956-.961 1.753-1.688 2.684-2.18Zm6.267 8.744c.61 0 1.16-.247 1.554-.58a1.6 1.6 0 0 0 1.763-.023m-8.49-3.823c-.816.028-1.649.279-2.476.785a6.59 6.59 0 0 0-1.596 1.336 1.603 1.603 0 0 0 2.388 2.146c.956-.961 1.753-1.688 2.684-2.18Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
     </svg>
   ),
   ArrowLeft: ({ isRTL }) => (
@@ -144,7 +144,7 @@ const ArticleForm = () => {
           type: article.type || 'TX',
           slug: article.slug || '',
           video_url: article.video_url || '',
-          hits: article.hits || 0,
+          hits: article.views || 0,
           likes: article.likes || 0
         });
       }
@@ -252,11 +252,11 @@ const ArticleForm = () => {
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="p-2 bg-quinary-tint-600 rounded-lg hover:bg-quinary-tint-500 transition-colors duration-300 mr-4"
+                className={`p-2 bg-quinary-tint-600 rounded-lg hover:bg-quinary-tint-500 transition-colors duration-300 ${isRTL ? 'ml-4' : 'mr-4'}`}
               >
                 <Icons.ArrowLeft isRTL={isRTL} />
               </button>
-              <div className={isRTL ? 'text-right' : 'text-left'}>
+              <div className={`${isRTL ? 'mr-4 text-right' : 'ml-4 text-left'}`}>
                 <h1 className="text-[24px] sm:text-[32px] font-bold text-primary">
                   {isEditing ? t('articleEdit') : t('articleAddNew')}
                 </h1>

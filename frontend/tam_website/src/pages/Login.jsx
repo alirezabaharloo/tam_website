@@ -198,7 +198,7 @@ const Button = React.memo(({ onClick, children, variant = 'primary', className =
 export default function Login() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
-  const { login, register: registerUser, user, setUser } = useAuth();
+  const { login, register: registerUser, user, setUser, clearAllData } = useAuth();
   const navigate = useNavigate();
   
   // Login states
@@ -378,20 +378,7 @@ export default function Login() {
         </button>
       </div>
 
-      <Button onClick={handleLogin} className="mt-8">LOGIN</Button>
-
-      {/* Quick Admin Login */}
-      <div className="mt-4">
-        <button 
-          onClick={() => {
-            setLoginState(prev => ({ ...prev, phone: '09123456789', password: 'admin123' }));
-            setTimeout(() => handleLogin({ preventDefault: () => {} }), 100);
-          }}
-          className="px-4 py-2 bg-yellow-500 text-white text-[14px] font-semibold rounded-lg hover:bg-yellow-600 transition-colors duration-300"
-        >
-          Quick Admin Login
-        </button>
-      </div>
+      <Button onClick={handleLogin} className="mt-8">{t('login')}</Button>
 
       <div className="flex items-center w-[400px] mt-8">
         <div className="h-[1px] w-[180px] bg-primary opacity-40" />
@@ -600,19 +587,6 @@ export default function Login() {
                 </div>
 
                 <Button onClick={handleLogin} className="mt-8">{t('login')}</Button>
-
-                {/* Quick Admin Login */}
-                <div className="mt-4">
-                  <button 
-                    onClick={() => {
-                      setLoginState(prev => ({ ...prev, phone: '09123456789', password: 'admin123' }));
-                      setTimeout(() => handleLogin({ preventDefault: () => {} }), 100);
-                    }}
-                    className="px-4 py-2 bg-yellow-500 text-white text-[14px] font-semibold rounded-lg hover:bg-yellow-600 transition-colors duration-300"
-                  >
-                    Quick Admin Login
-                  </button>
-                </div>
 
                 {/* OR Separator */}
                 <div className="flex items-center w-full mt-8">

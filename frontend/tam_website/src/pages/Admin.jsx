@@ -5,6 +5,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { fakeUsers } from '../data/fakeUsers';
 import { newsData } from '../data/newsData';
+import { 
+  getAccessibleTabs, 
+  canAccessTab, 
+  canEditUser, 
+  canManageRoles,
+  getUserRole,
+  ROLES 
+} from '../utils/roles';
 
 // Icons
 const Icons = {
@@ -55,13 +63,26 @@ const Admin = () => {
   const [userStatuses, setUserStatuses] = useState({});
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  const tabs = [
+  // Get accessible tabs for current user
+  const accessibleTabs = getAccessibleTabs(user);
+  
+  // Set initial active tab to first accessible tab
+  React.useEffect(() => {
+    if (accessibleTabs.length > 0 && !accessibleTabs.includes(activeTab)) {
+      setActiveTab(accessibleTabs[0]);
+    }
+  }, [accessibleTabs, activeTab]);
+
+  const allTabs = [
     { id: 'dashboard', label: t('adminDashboard'), icon: Icons.Dashboard },
     { id: 'users', label: t('adminUsers'), icon: Icons.Users },
     { id: 'news', label: t('adminNews'), icon: Icons.News },
     { id: 'shop', label: t('adminShop'), icon: Icons.Shop },
     { id: 'settings', label: t('adminSettings'), icon: Icons.Settings },
   ];
+
+  // Filter tabs based on user permissions
+  const tabs = allTabs.filter(tab => canAccessTab(user, tab.id));
 
   // Calculate statistics
   const stats = {
@@ -126,7 +147,10 @@ const Admin = () => {
       : fakeUsers.find(u => u.id === userId)?.is_active || false;
   };
 
-  if (!user?.isAdmin) {
+  if (!user || (getUserRole(user) !== ROLES.SUPER_ADMIN && 
+                getUserRole(user) !== ROLES.ADMIN && 
+                getUserRole(user) !== ROLES.AUTHOR && 
+                getUserRole(user) !== ROLES.SELLER)) {
     navigate('/');
     return null;
   }
@@ -235,12 +259,14 @@ const Admin = () => {
                       <h2 className={`text-[24px] font-bold text-primary ${isRTL ? 'text-right' : 'text-left'}`}>
                         {t('adminUsersManagement')}
                       </h2>
-                      <button 
-                        onClick={handleAddUser}
-                        className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300"
-                      >
-                        {t('adminAddUser')}
-                      </button>
+                      {canManageRoles(user) && (
+                        <button 
+                          onClick={handleAddUser}
+                          className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300"
+                        >
+                          {t('adminAddUser')}
+                        </button>
+                      )}
                     </div>
                     <div className="bg-quinary-tint-600 rounded-xl overflow-hidden">
                       <div className="overflow-x-auto">
@@ -251,41 +277,77 @@ const Admin = () => {
                               <th className={`px-6 py-3 text-[16px] font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('adminPhoneNumber')}</th>
                               <th className={`px-6 py-3 text-[16px] font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('adminFirstName')}</th>
                               <th className={`px-6 py-3 text-[16px] font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('adminLastName')}</th>
+                              <th className={`px-6 py-3 text-[16px] font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('adminRole')}</th>
                               <th className={`px-6 py-3`}></th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-quinary-tint-500">
-                            {fakeUsers.map((user, index) => (
-                              <tr key={index} className="hover:bg-quinary-tint-500 transition-colors duration-200">
-                                <td className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                  <button
-                                    onClick={() => handleToggleUserStatus(user.id)}
-                                    className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                                      getUserStatus(user.id)
-                                        ? 'bg-emerald-400 border-emerald-500 hover:bg-emerald-500 shadow-sm'
-                                        : 'bg-rose-400 border-rose-500 hover:bg-rose-500 shadow-sm'
-                                    }`}
-                                    title={`${getUserStatus(user.id) ? t('adminActive') : t('adminInactive')} - ${t('adminClickToToggle')}`}
-                                  />
-                                </td>
-                                <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{user.phone}</td>
-                                <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{user.first_name}</td>
-                                <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{user.last_name}</td>
-                                <td className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                  <div className="flex gap-2 justify-end">
-                                    <button 
-                                      onClick={() => handleEditUser(user.id)}
-                                      className="px-3 py-1 bg-primary text-quinary-tint-800 rounded hover:bg-primary-tint-100 transition-colors duration-300"
-                                    >
-                                      {t('adminEdit')}
-                                    </button>
-                                    <button className="px-3 py-1 bg-quaternary text-quinary-tint-800 rounded hover:bg-quaternary-tint-100 transition-colors duration-300">
-                                      {t('adminDelete')}
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
+                            {fakeUsers.map((userItem, index) => {
+                              const userRole = getUserRole(userItem);
+                              const canEdit = canEditUser(user, userItem);
+                              const canToggleStatus = canManageRoles(user);
+                              
+                              return (
+                                <tr key={index} className="hover:bg-quinary-tint-500 transition-colors duration-200">
+                                  <td className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                    {canToggleStatus ? (
+                                      <button
+                                        onClick={() => handleToggleUserStatus(userItem.id)}
+                                        className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                                          getUserStatus(userItem.id)
+                                            ? 'bg-emerald-400 border-emerald-500 hover:bg-emerald-500 shadow-sm'
+                                            : 'bg-rose-400 border-rose-500 hover:bg-rose-500 shadow-sm'
+                                        }`}
+                                        title={`${getUserStatus(userItem.id) ? t('adminActive') : t('adminInactive')} - ${t('adminClickToToggle')}`}
+                                      />
+                                    ) : (
+                                      <div className={`w-4 h-4 rounded-full border-2 ${
+                                        getUserStatus(userItem.id)
+                                          ? 'bg-emerald-400 border-emerald-500'
+                                          : 'bg-rose-400 border-rose-500'
+                                      }`} />
+                                    )}
+                                  </td>
+                                  <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{userItem.phone}</td>
+                                  <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{userItem.first_name}</td>
+                                  <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{userItem.last_name}</td>
+                                  <td className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                    <span className={`px-2 py-1 rounded-full text-[12px] font-medium ${
+                                      userRole === ROLES.SUPER_ADMIN ? 'bg-red-100 text-red-800' :
+                                      userRole === ROLES.ADMIN ? 'bg-blue-100 text-blue-800' :
+                                      userRole === ROLES.AUTHOR ? 'bg-green-100 text-green-800' :
+                                      userRole === ROLES.SELLER ? 'bg-yellow-100 text-yellow-800' :
+                                      userRole === ROLES.USER ? 'bg-gray-100 text-gray-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {userRole === ROLES.SUPER_ADMIN ? t('roleSuperAdmin') :
+                                       userRole === ROLES.ADMIN ? t('roleAdmin') :
+                                       userRole === ROLES.AUTHOR ? t('roleAuthor') :
+                                       userRole === ROLES.SELLER ? t('roleSeller') :
+                                       userRole === ROLES.USER ? t('roleUser') :
+                                       t('roleUser')}
+                                    </span>
+                                  </td>
+                                  <td className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                    <div className="flex gap-2 justify-end">
+                                      {canEdit && (
+                                        <button 
+                                          onClick={() => handleEditUser(userItem.id)}
+                                          className="px-3 py-1 bg-primary text-quinary-tint-800 rounded hover:bg-primary-tint-100 transition-colors duration-300"
+                                        >
+                                          {t('adminEdit')}
+                                        </button>
+                                      )}
+                                      {canManageRoles(user) && (
+                                        <button className="px-3 py-1 bg-quaternary text-quinary-tint-800 rounded hover:bg-quaternary-tint-100 transition-colors duration-300">
+                                          {t('adminDelete')}
+                                        </button>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -299,12 +361,14 @@ const Admin = () => {
                       <h2 className={`text-[24px] font-bold text-primary ${isRTL ? 'text-right' : 'text-left'}`}>
                         {t('adminNewsManagement')}
                       </h2>
-                      <button 
-                        onClick={handleAddArticle}
-                        className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300"
-                      >
-                        {t('adminAddNews')}
-                      </button>
+                      {canAccessTab(user, 'news') && (
+                        <button 
+                          onClick={handleAddArticle}
+                          className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300"
+                        >
+                          {t('adminAddNews')}
+                        </button>
+                      )}
                     </div>
                     <div className="bg-quinary-tint-600 rounded-xl overflow-hidden">
                       <div className="overflow-x-auto">
@@ -327,15 +391,19 @@ const Admin = () => {
                                 <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{news.views}</td>
                                 <td className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
                                   <div className="flex gap-2 justify-end">
-                                    <button 
-                                      onClick={() => handleEditArticle(news.id)}
-                                      className="px-3 py-1 bg-primary text-quinary-tint-800 rounded hover:bg-primary-tint-100 transition-colors duration-300"
-                                    >
-                                      {t('adminEdit')}
-                                    </button>
-                                    <button className="px-3 py-1 bg-quaternary text-quinary-tint-800 rounded hover:bg-quaternary-tint-100 transition-colors duration-300">
-                                      {t('adminDelete')}
-                                    </button>
+                                    {canAccessTab(user, 'news') && (
+                                      <button 
+                                        onClick={() => handleEditArticle(news.id)}
+                                        className="px-3 py-1 bg-primary text-quinary-tint-800 rounded hover:bg-primary-tint-100 transition-colors duration-300"
+                                      >
+                                        {t('adminEdit')}
+                                      </button>
+                                    )}
+                                    {canManageRoles(user) && (
+                                      <button className="px-3 py-1 bg-quaternary text-quinary-tint-800 rounded hover:bg-quaternary-tint-100 transition-colors duration-300">
+                                        {t('adminDelete')}
+                                      </button>
+                                    )}
                                   </div>
                                 </td>
                               </tr>

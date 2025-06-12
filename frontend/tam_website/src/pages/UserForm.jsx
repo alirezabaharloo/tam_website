@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fakeUsers } from '../data/fakeUsers';
+import { canManageRoles, canEditUser, getUserRole, ROLES } from '../utils/roles';
 
 // Icons
 const Icons = {
@@ -63,9 +64,15 @@ const UserForm = () => {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const isEditMode = !!userId;
+  const canEditRoles = canManageRoles(user);
+  const currentUserRole = getUserRole(user);
+  const targetUserRole = getUserRole(formData);
 
   useEffect(() => {
-    if (!user?.isAdmin) {
+    if (!user || (getUserRole(user) !== ROLES.SUPER_ADMIN && 
+                  getUserRole(user) !== ROLES.ADMIN && 
+                  getUserRole(user) !== ROLES.AUTHOR && 
+                  getUserRole(user) !== ROLES.SELLER)) {
       navigate('/');
       return;
     }
@@ -174,7 +181,10 @@ const UserForm = () => {
     navigate('/admin');
   };
 
-  if (!user?.isAdmin) {
+  if (!user || (getUserRole(user) !== ROLES.SUPER_ADMIN && 
+                getUserRole(user) !== ROLES.ADMIN && 
+                getUserRole(user) !== ROLES.AUTHOR && 
+                getUserRole(user) !== ROLES.SELLER)) {
     return null;
   }
 
@@ -191,7 +201,7 @@ const UserForm = () => {
               >
                 <Icons.Back isRTL={isRTL} />
               </button>
-              <div className={`ml-4 ${isRTL ? 'text-right mr-4' : 'text-left'}`}>
+              <div className={`${isRTL ? 'mr-4 text-right' : 'ml-4 text-left'}`}>
                 <h1 className="text-[24px] sm:text-[32px] font-bold text-primary">
                   {isEditMode ? t('adminEditUser') : t('adminAddNewUser')}
                 </h1>
@@ -290,6 +300,26 @@ const UserForm = () => {
 
             {/* Boolean Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Current Role Display */}
+              <div className="flex items-center justify-between p-4 bg-quinary-tint-600 rounded-lg">
+                <span className="text-[16px] text-secondary">{t('adminRole')}</span>
+                <span className={`px-2 py-1 rounded-full text-[12px] font-medium ${
+                  targetUserRole === ROLES.SUPER_ADMIN ? 'bg-red-100 text-red-800' :
+                  targetUserRole === ROLES.ADMIN ? 'bg-blue-100 text-blue-800' :
+                  targetUserRole === ROLES.AUTHOR ? 'bg-green-100 text-green-800' :
+                  targetUserRole === ROLES.SELLER ? 'bg-yellow-100 text-yellow-800' :
+                  targetUserRole === ROLES.USER ? 'bg-gray-100 text-gray-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {targetUserRole === ROLES.SUPER_ADMIN ? t('roleSuperAdmin') :
+                   targetUserRole === ROLES.ADMIN ? t('roleAdmin') :
+                   targetUserRole === ROLES.AUTHOR ? t('roleAuthor') :
+                   targetUserRole === ROLES.SELLER ? t('roleSeller') :
+                   targetUserRole === ROLES.USER ? t('roleUser') :
+                   t('roleUser')}
+                </span>
+              </div>
+
               {/* Is Author */}
               <div className="flex items-center justify-between p-4 bg-quinary-tint-600 rounded-lg">
                 <span className="text-[16px] text-secondary">{t('adminIsAuthor')}</span>
@@ -298,9 +328,10 @@ const UserForm = () => {
                     type="checkbox"
                     checked={formData.is_author}
                     onChange={(e) => handleInputChange('is_author', e.target.checked)}
+                    disabled={!canEditRoles}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300"></div>
+                  <div className={`w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300 ${!canEditRoles ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
                 </label>
               </div>
 
@@ -312,9 +343,10 @@ const UserForm = () => {
                     type="checkbox"
                     checked={formData.is_superuser}
                     onChange={(e) => handleInputChange('is_superuser', e.target.checked)}
+                    disabled={!canEditRoles || currentUserRole !== ROLES.SUPER_ADMIN}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300"></div>
+                  <div className={`w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300 ${(!canEditRoles || currentUserRole !== ROLES.SUPER_ADMIN) ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
                 </label>
               </div>
 
@@ -326,9 +358,10 @@ const UserForm = () => {
                     type="checkbox"
                     checked={formData.is_seller}
                     onChange={(e) => handleInputChange('is_seller', e.target.checked)}
+                    disabled={!canEditRoles}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300"></div>
+                  <div className={`w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300 ${!canEditRoles ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
                 </label>
               </div>
 
@@ -340,9 +373,10 @@ const UserForm = () => {
                     type="checkbox"
                     checked={formData.is_active}
                     onChange={(e) => handleInputChange('is_active', e.target.checked)}
+                    disabled={!canEditRoles}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300"></div>
+                  <div className={`w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300 ${!canEditRoles ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
                 </label>
               </div>
             </div>

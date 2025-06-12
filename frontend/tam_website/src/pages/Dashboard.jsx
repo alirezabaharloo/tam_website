@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { getUserRole, ROLES } from '../utils/roles';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -125,12 +126,15 @@ const Dashboard = () => {
           
           {/* Admin Controls */}
           <div className="mt-4 flex flex-wrap gap-2 justify-center sm:justify-end">
-            {user?.isAdmin && (
+            {(getUserRole(user) === ROLES.SUPER_ADMIN || 
+              getUserRole(user) === ROLES.ADMIN || 
+              getUserRole(user) === ROLES.AUTHOR || 
+              getUserRole(user) === ROLES.SELLER) && (
               <button 
                 onClick={handleGoToAdmin}
                 className="px-4 py-2 bg-primary text-quinary-tint-800 text-[14px] font-semibold rounded-lg hover:bg-primary-tint-200 transition-colors duration-300"
               >
-                Admin Panel
+                {t('adminPanel')}
               </button>
             )}
           </div>

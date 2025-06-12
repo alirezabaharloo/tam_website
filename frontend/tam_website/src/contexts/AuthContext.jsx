@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fakeUsers } from '../data/fakeUsers';
+import { getUserRole, ROLES } from '../utils/roles';
 
 const AuthContext = createContext(null);
 
@@ -32,21 +34,36 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (phone, password) => {
     try {
+      // Clear any old user data first
+      localStorage.removeItem('user');
+      localStorage.removeItem('rememberedUser');
+      
       // Here you would typically make an API call to your backend
       // For now, we'll simulate a successful login
       
-      // List of admin phone numbers for testing
-      const adminPhones = ['09123456789', '09917982521', '09998887766', '09351234567'];
+      // Find user in fakeUsers data
+      const foundUser = fakeUsers.find(user => user.phone === phone);
       
-      const mockUser = {
-        phone,
-        isAdmin: adminPhones.includes(phone), // Check if phone is in admin list
-        // Add other user properties as needed
-      };
-
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      return true;
+      if (foundUser) {
+        // User exists in our system
+        setUser(foundUser);
+        localStorage.setItem('user', JSON.stringify(foundUser));
+        return true;
+      } else {
+        // Create a new user with default role
+        const newUser = {
+          id: Date.now().toString(),
+          phone,
+          first_name: '',
+          last_name: '',
+          role: ROLES.USER,
+          is_active: true
+        };
+        
+        setUser(newUser);
+        localStorage.setItem('user', JSON.stringify(newUser));
+        return true;
+      }
     } catch (error) {
       console.error('Login failed:', error);
       return false;
@@ -57,14 +74,17 @@ export const AuthProvider = ({ children }) => {
     try {
       // Here you would typically make an API call to your backend
       // For now, we'll simulate a successful registration
-      const mockUser = {
+      const newUser = {
+        id: Date.now().toString(),
         phone,
-        isAdmin: false,
-        // Add other user properties as needed
+        first_name: '',
+        last_name: '',
+        role: ROLES.USER,
+        is_active: true
       };
 
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
       return true;
     } catch (error) {
       console.error('Registration failed:', error);
@@ -83,12 +103,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const setAdminStatus = (isAdmin) => {
+  const setUserRole = (role) => {
     if (user) {
-      const updatedUser = { ...user, isAdmin };
+      const updatedUser = { ...user, role };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
     }
+  };
+
+  const clearAllData = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('rememberedUser');
+    setUser(null);
   };
 
   const value = {
@@ -97,7 +123,9 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    setAdminStatus,
+    setUserRole,
+    setUser,
+    clearAllData,
   };
 
   if (loading) {

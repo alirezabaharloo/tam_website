@@ -145,6 +145,7 @@ const resources = {
       // Admin Panel
       adminWelcome: "Welcome to Admin Panel",
       adminLogout: "Logout",
+      adminPanel: "Admin Panel",
       adminDashboard: "Dashboard",
       adminUsers: "Users",
       adminNews: "News",
@@ -197,6 +198,20 @@ const resources = {
       adminToggle: "Toggle Status",
       adminStatus: "Status",
       adminClickToToggle: "Click to toggle status",
+      adminRole: "Role",
+      // Roles
+      roleSuperAdmin: "Super Admin",
+      roleAdmin: "Admin",
+      roleAuthor: "Author",
+      roleSeller: "Seller",
+      roleUser: "User",
+      roleEditor: "Editor",
+      // Access Control
+      adminAccessDenied: "Access Denied",
+      adminInsufficientPermissions: "You don't have permission to access this section",
+      adminRoleManagement: "Role Management",
+      adminAssignRole: "Assign Role",
+      adminChangeRole: "Change Role",
       // Article Management
       articleAddNew: "Add New Article",
       articleEdit: "Edit Article",
@@ -376,6 +391,7 @@ const resources = {
       // Admin Panel
       adminWelcome: "به پنل مدیریت خوش آمدید",
       adminLogout: "خروج",
+      adminPanel: "پنل مدیریت",
       adminDashboard: "داشبورد",
       adminUsers: "کاربران",
       adminNews: "اخبار",
@@ -428,6 +444,20 @@ const resources = {
       adminToggle: "تغییر وضعیت",
       adminStatus: "وضعیت",
       adminClickToToggle: "برای تغییر وضعیت کلیک کنید",
+      adminRole: "نقش",
+      // Roles
+      roleSuperAdmin: "مدیر سرور",
+      roleAdmin: "مدیر",
+      roleAuthor: "نویسنده",
+      roleSeller: "فروشنده",
+      roleUser: "کاربر",
+      roleEditor: "ویرایشگر",
+      // Access Control
+      adminAccessDenied: "دسترسی ممنوع",
+      adminInsufficientPermissions: "شما دسترسی به این بخش را ندارید",
+      adminRoleManagement: "مدیریت نقش",
+      adminAssignRole: "نقش اختصاصی",
+      adminChangeRole: "تغییر نقش",
       // Article Management
       articleAddNew: "افزودن مقاله جدید",
       articleEdit: "ویرایش مقاله",
