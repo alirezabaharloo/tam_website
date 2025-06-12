@@ -38,6 +38,11 @@ const Icons = {
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
     </svg>
+  ),
+  Toggle: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h9Z" />
+    </svg>
   )
 };
 
@@ -47,6 +52,8 @@ const Admin = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [userStatuses, setUserStatuses] = useState({});
+  const [message, setMessage] = useState({ type: '', text: '' });
 
   const tabs = [
     { id: 'dashboard', label: t('adminDashboard'), icon: Icons.Dashboard },
@@ -70,6 +77,45 @@ const Admin = () => {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleAddUser = () => {
+    navigate('/admin/user/add');
+  };
+
+  const handleEditUser = (userId) => {
+    navigate(`/admin/user/edit/${userId}`);
+  };
+
+  const handleToggleUserStatus = (userId) => {
+    // Update local state for immediate UI feedback
+    const newStatus = !getUserStatus(userId);
+    setUserStatuses(prev => ({
+      ...prev,
+      [userId]: newStatus
+    }));
+    
+    // Get user name for better message
+    const userName = fakeUsers.find(u => u.id === userId)?.first_name || 'User';
+    
+    // Show success message
+    setMessage({
+      type: 'success',
+      text: `User status changed to ${newStatus ? t('adminActive') : t('adminInactive')}`
+    });
+    
+    // Clear message after 3 seconds
+    setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    
+    // Here you would typically make an API call to update the user status
+    console.log(`Toggling user ${userId} status to ${newStatus}`);
+  };
+
+  // Get current user status (local state or original data)
+  const getUserStatus = (userId) => {
+    return userStatuses.hasOwnProperty(userId) 
+      ? userStatuses[userId] 
+      : fakeUsers.find(u => u.id === userId)?.is_active || false;
   };
 
   if (!user?.isAdmin) {
@@ -110,6 +156,15 @@ const Admin = () => {
             </button>
           </div>
         </div>
+
+        {/* Message Display */}
+        {message.text && (
+          <div className={`mb-4 p-4 rounded-lg ${
+            message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
+            {message.text}
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -172,26 +227,48 @@ const Admin = () => {
                       <h2 className={`text-[24px] font-bold text-primary ${isRTL ? 'text-right' : 'text-left'}`}>
                         {t('adminUsersManagement')}
                       </h2>
-                      <button className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300">
+                      <button 
+                        onClick={handleAddUser}
+                        className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300"
+                      >
                         {t('adminAddUser')}
                       </button>
                     </div>
-                    <div className="bg-quinary-tint-700 rounded-xl overflow-hidden">
+                    <div className="bg-quinary-tint-600 rounded-xl overflow-hidden">
                       <div className="overflow-x-auto">
                         <table className="w-full">
                           <thead>
                             <tr className="bg-primary text-quinary-tint-800">
+                              <th className={`px-6 py-3 text-[16px] font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('adminStatus')}</th>
                               <th className={`px-6 py-3 text-[16px] font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('adminPhoneNumber')}</th>
-                              <th className="px-6 py-3"></th>
+                              <th className={`px-6 py-3 text-[16px] font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('adminFirstName')}</th>
+                              <th className={`px-6 py-3 text-[16px] font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('adminLastName')}</th>
+                              <th className={`px-6 py-3`}></th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-quinary-tint-600">
+                          <tbody className="divide-y divide-quinary-tint-500">
                             {fakeUsers.map((user, index) => (
-                              <tr key={index} className="hover:bg-quinary-tint-600 transition-colors duration-200">
+                              <tr key={index} className="hover:bg-quinary-tint-500 transition-colors duration-200">
+                                <td className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                  <button
+                                    onClick={() => handleToggleUserStatus(user.id)}
+                                    className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                                      getUserStatus(user.id)
+                                        ? 'bg-emerald-400 border-emerald-500 hover:bg-emerald-500 shadow-sm'
+                                        : 'bg-rose-400 border-rose-500 hover:bg-rose-500 shadow-sm'
+                                    }`}
+                                    title={`${getUserStatus(user.id) ? t('adminActive') : t('adminInactive')} - ${t('adminClickToToggle')}`}
+                                  />
+                                </td>
                                 <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{user.phone}</td>
+                                <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{user.first_name}</td>
+                                <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{user.last_name}</td>
                                 <td className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
                                   <div className="flex gap-2 justify-end">
-                                    <button className="px-3 py-1 bg-primary text-quinary-tint-800 rounded hover:bg-primary-tint-100 transition-colors duration-300">
+                                    <button 
+                                      onClick={() => handleEditUser(user.id)}
+                                      className="px-3 py-1 bg-primary text-quinary-tint-800 rounded hover:bg-primary-tint-100 transition-colors duration-300"
+                                    >
                                       {t('adminEdit')}
                                     </button>
                                     <button className="px-3 py-1 bg-quaternary text-quinary-tint-800 rounded hover:bg-quaternary-tint-100 transition-colors duration-300">
@@ -218,7 +295,7 @@ const Admin = () => {
                         {t('adminAddNews')}
                       </button>
                     </div>
-                    <div className="bg-quinary-tint-700 rounded-xl overflow-hidden">
+                    <div className="bg-quinary-tint-600 rounded-xl overflow-hidden">
                       <div className="overflow-x-auto">
                         <table className="w-full">
                           <thead>
@@ -230,9 +307,9 @@ const Admin = () => {
                               <th className="px-6 py-3"></th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-quinary-tint-600">
+                          <tbody className="divide-y divide-quinary-tint-500">
                             {newsData.map((news) => (
-                              <tr key={news.id} className="hover:bg-quinary-tint-600 transition-colors duration-200">
+                              <tr key={news.id} className="hover:bg-quinary-tint-500 transition-colors duration-200">
                                 <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{news.title[i18n.language]}</td>
                                 <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{news.category[i18n.language]}</td>
                                 <td className={`px-6 py-4 text-[16px] text-secondary ${isRTL ? 'text-right' : 'text-left'}`}>{news.type}</td>
@@ -266,7 +343,7 @@ const Admin = () => {
                         {t('adminAddProduct')}
                       </button>
                     </div>
-                    <div className="bg-quinary-tint-700 rounded-xl p-6">
+                    <div className="bg-quinary-tint-600 rounded-xl p-6">
                       <p className="text-secondary">{t('adminNoProducts')}</p>
                     </div>
                   </div>
@@ -278,21 +355,21 @@ const Admin = () => {
                       {t('adminSettings')}
                     </h2>
                     <div className="space-y-4">
-                      <div className="bg-quinary-tint-700 rounded-xl p-6">
+                      <div className="bg-quinary-tint-600 rounded-xl p-6">
                         <h3 className="text-[18px] font-medium text-secondary mb-4">{t('adminGeneralSettings')}</h3>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <span className="text-secondary">{t('adminMaintenanceMode')}</span>
                             <label className="relative inline-flex items-center cursor-pointer">
                               <input type="checkbox" className="sr-only peer" />
-                              <div className="w-11 h-6 bg-quinary-tint-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                              <div className="w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300"></div>
                             </label>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-secondary">{t('adminEnableComments')}</span>
                             <label className="relative inline-flex items-center cursor-pointer">
                               <input type="checkbox" className="sr-only peer" />
-                              <div className="w-11 h-6 bg-quinary-tint-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                              <div className="w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300"></div>
                             </label>
                           </div>
                         </div>

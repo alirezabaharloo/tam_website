@@ -34,9 +34,13 @@ export const AuthProvider = ({ children }) => {
     try {
       // Here you would typically make an API call to your backend
       // For now, we'll simulate a successful login
+      
+      // List of admin phone numbers for testing
+      const adminPhones = ['09123456789', '09917982521', '09998887766', '09351234567'];
+      
       const mockUser = {
         phone,
-        isAdmin: phone === '09123456789', // Mock admin user
+        isAdmin: adminPhones.includes(phone), // Check if phone is in admin list
         // Add other user properties as needed
       };
 
@@ -79,12 +83,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const setAdminStatus = (isAdmin) => {
+    if (user) {
+      const updatedUser = { ...user, isAdmin };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
   const value = {
     user,
     loading,
     login,
     register,
     logout,
+    setAdminStatus,
   };
 
   if (loading) {

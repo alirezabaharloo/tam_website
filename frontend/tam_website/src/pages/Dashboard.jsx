@@ -23,6 +23,10 @@ const Dashboard = () => {
     await logout();
   };
 
+  const handleGoToAdmin = () => {
+    navigate('/admin');
+  };
+
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -113,10 +117,22 @@ const Dashboard = () => {
             </div>
             <button 
               onClick={handleLogout}
-              className="mt-4 sm:mt-0 px-6 py-2 bg-quaternary text-quinary-tint-800 text-[16px] font-semibold rounded-lg hover:bg-quaternary-tint-200 transition-colors duration-300"
+              className="mt-4 sm:mt-0 px-6 py-2 bg-primary text-quinary-tint-800 text-[16px] font-semibold rounded-lg hover:bg-primary-tint-200 transition-colors duration-300"
             >
               {t('dashboardLogout')}
             </button>
+          </div>
+          
+          {/* Admin Controls */}
+          <div className="mt-4 flex flex-wrap gap-2 justify-center sm:justify-end">
+            {user?.isAdmin && (
+              <button 
+                onClick={handleGoToAdmin}
+                className="px-4 py-2 bg-primary text-quinary-tint-800 text-[14px] font-semibold rounded-lg hover:bg-primary-tint-200 transition-colors duration-300"
+              >
+                Admin Panel
+              </button>
+            )}
           </div>
         </div>
 
@@ -139,7 +155,7 @@ const Dashboard = () => {
                 className={`px-6 py-2 rounded-lg text-[16px] font-medium transition-all duration-300 ${
                   activeTab === tab.id
                     ? 'bg-primary text-quinary-tint-800'
-                    : 'bg-quinary-tint-700 text-secondary hover:bg-quinary-tint-600'
+                    : 'bg-quinary-tint-600 text-secondary hover:bg-quinary-tint-500'
                 }`}
               >
                 {tab.label}
@@ -148,7 +164,7 @@ const Dashboard = () => {
           </div>
 
           {/* Content */}
-          <div className="bg-quinary-tint-700 rounded-xl p-6">
+          <div className="bg-quinary-tint-600 rounded-xl p-6">
             {activeTab === 'profile' && (
               <div className="space-y-8">
                 <div>
@@ -172,7 +188,7 @@ const Dashboard = () => {
                         type="text"
                         value={user?.phone}
                         disabled
-                        className="w-full px-4 py-2 bg-quinary-tint-800 text-primary rounded-lg border-2 border-quinary-tint-600 focus:border-primary outline-none transition-colors duration-300"
+                        className="w-full px-4 py-2 bg-quinary-tint-600 text-primary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300"
                       />
                     </div>
                     {showEmailForm && (
@@ -186,7 +202,7 @@ const Dashboard = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder={t('dashboardEnterEmail')}
-                            className="w-full px-4 py-2 bg-quinary-tint-800 text-secondary rounded-lg border-2 border-quinary-tint-600 focus:border-primary outline-none transition-colors duration-300"
+                            className="w-full px-4 py-2 bg-quinary-tint-600 text-secondary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300"
                           />
                           <button 
                             type="submit"
@@ -222,7 +238,7 @@ const Dashboard = () => {
                           type="password"
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="w-full px-4 py-2 bg-quinary-tint-800 text-secondary rounded-lg border-2 border-quinary-tint-600 focus:border-primary outline-none transition-colors duration-300"
+                          className="w-full px-4 py-2 bg-quinary-tint-600 text-secondary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300"
                         />
                       </div>
                       <div>
@@ -233,7 +249,7 @@ const Dashboard = () => {
                           type="password"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          className="w-full px-4 py-2 bg-quinary-tint-800 text-secondary rounded-lg border-2 border-quinary-tint-600 focus:border-primary outline-none transition-colors duration-300"
+                          className="w-full px-4 py-2 bg-quinary-tint-600 text-secondary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300"
                         />
                       </div>
                       <div>
@@ -244,7 +260,7 @@ const Dashboard = () => {
                           type="password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full px-4 py-2 bg-quinary-tint-800 text-secondary rounded-lg border-2 border-quinary-tint-600 focus:border-primary outline-none transition-colors duration-300"
+                          className="w-full px-4 py-2 bg-quinary-tint-600 text-secondary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300"
                         />
                       </div>
                       <button 
@@ -287,24 +303,24 @@ const Dashboard = () => {
                   {t('dashboardAccountSettings')}
                 </h2>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-quinary-tint-800 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-quinary-tint-600 rounded-lg">
                     <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h3 className="text-[18px] font-medium text-secondary">{t('dashboardEmailNotifications')}</h3>
                       <p className="text-[14px] text-secondary-tint-500">{t('dashboardEmailNotificationsDesc')}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" />
-                      <div className="w-11 h-6 bg-quinary-tint-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                      <div className="w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300"></div>
                     </label>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-quinary-tint-800 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-quinary-tint-600 rounded-lg">
                     <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h3 className="text-[18px] font-medium text-secondary">{t('dashboardSmsNotifications')}</h3>
                       <p className="text-[14px] text-secondary-tint-500">{t('dashboardSmsNotificationsDesc')}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" />
-                      <div className="w-11 h-6 bg-quinary-tint-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                      <div className="w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300"></div>
                     </label>
                   </div>
                 </div>
