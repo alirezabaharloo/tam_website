@@ -1,12 +1,27 @@
 import React from 'react';
-import Slider from '../components/Slider';
+import { HomeProvider } from '../context/HomeContext';
 import LatestNews from '../components/LatestNews';
 import LatestVideos from '../components/LatestVideos';
 import TeamBoxes from '../components/TeamBoxes';
-import ShopSection from '../components/ShopSection';
 import PlayerSection from '../components/PlayerSection';
+import SpinLoader from '../components/UI/SpinLoader';
+import SomethingWentWrong from '../components/UI/SomethingWentWrong';
+import { useHome } from '../context/HomeContext';
+import Slider from '../components/Slider.jsx'
+import ShopSection from '../components/ShopSection.jsx'
 
-const Home = () => {
+
+const HomeContent = () => {
+  const { isLoading, isError } = useHome();
+
+  if (isError) {
+    return <SomethingWentWrong />;
+  }
+
+  if (isLoading) {
+    return <SpinLoader />;
+  }
+
   return (
     <div className="relative mt-4">
       <div id="slider">
@@ -31,4 +46,11 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default function Home() {
+  return (
+    <HomeProvider>
+      <HomeContent />
+    </HomeProvider>
+  );
+}
+

@@ -9,6 +9,8 @@ import { loadNamespaces } from '../i18n';
 import useAuth from '../hooks/useAuth.jsx';
 import SpinLoader from '../components/UI/SpinLoader.jsx';
 import SomethingWentWrong from '../components/UI/SomethingWentWrong.jsx';
+import domainUrl from '../utils/api.js';
+
 
 const Profile = () => {
   const { user, logout } = React.useContext(AuthContext);
@@ -27,7 +29,7 @@ const Profile = () => {
     isLoading,
     isError,
     data: profile
-  } = useAuthHttp("http://localhost:8000/api/admin/profile")
+  } = useAuthHttp(`http://${domainUrl}:8000/api/admin/profile`)
 
   
 

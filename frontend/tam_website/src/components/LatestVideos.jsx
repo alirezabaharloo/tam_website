@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { newsData } from '../data/newsData';
+import { useHome } from '../context/HomeContext';
+import LazyImage from './UI/LazyImage';
 
 const LatestVideos = () => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const LatestVideos = () => {
   const isRTL = i18n.language === 'fa';
   const currentLang = i18n.language;
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const { homeData } = useHome();
 
   useEffect(() => {
     const handleResize = () => {
@@ -19,30 +21,16 @@ const LatestVideos = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Get the latest 5 video news items
-  const latestVideos = [...newsData]
-    .filter(news => news.type === 'video')
-    .sort((a, b) => {
-      // Extract hours from date strings
-      const getHours = (date) => {
-        if (typeof date === 'object') {
-          const enDate = date.en;
-          return parseInt(enDate.replace('H', ''));
-        }
-        return parseInt(date.replace('H', ''));
-      };
-
-      const timeA = getHours(a.date);
-      const timeB = getHours(b.date);
-      return timeA - timeB;
-    })
-    .slice(0, 5);
+  // Get the latest 5 videos
+  const latestVideos = homeData.videos.slice(0, 5);
 
   // Split into two groups: first two and last three
   const [firstTwo, lastThree] = [
     latestVideos.slice(0, 2),
     latestVideos.slice(2)
   ];
+
+
 
   return (
     <>
@@ -77,18 +65,14 @@ const LatestVideos = () => {
           <div 
             key={video.id} 
             className="w-full lg:w-1/2 h-[180px] sm:h-[260px] md:h-[380px] rounded-lg overflow-hidden relative group cursor-pointer"
-            onClick={() => navigate(`/news/${video.id}`)}
+            onClick={() => navigate(`/news/${video.slug}`)}
           >
             {/* Background Image with Overlay */}
             <div className="absolute inset-0">
-              <img 
-                src={video.image} 
-                alt={typeof video.title === 'object' ? video.title[currentLang] : video.title} 
+              <LazyImage 
+                src={video.images[0]} 
+                alt={video.title} 
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                onError={(e) => {
-                  console.error('Error loading image:', video.image)
-                  e.target.src = "/images/banners/ArticlePicture2.png"
-                }}
               />
               <div className="absolute inset-0 bg-black/50"></div>
             </div>
@@ -99,11 +83,11 @@ const LatestVideos = () => {
             {/* Top Info */}
             <div className="absolute top-[8px] sm:top-[18px] right-2 sm:right-6 flex items-center">
               <span className="text-[10px] sm:text-[14px] font-medium text-quinary-tint-800">
-                {typeof video.date === 'object' ? video.date[currentLang] : video.date}
+                {video.created_date}
               </span>
               <div className="mx-1 sm:mx-2 h-4 w-[1px] bg-quinary-tint-800"></div>
               <span className="text-[10px] sm:text-[14px] font-medium text-tertiary-tint-200">
-                {typeof video.category === 'object' ? video.category[currentLang] : video.category}
+                {video.first_category.name}
               </span>
             </div>
             {/* Play Button */}
@@ -131,7 +115,7 @@ const LatestVideos = () => {
             {/* Bottom Title */}
             <div className={`absolute bottom-2 sm:bottom-8 ${isRTL ? 'right-2 sm:right-6' : 'left-2 sm:left-6'}`}>
               <h3 className={`text-[16px] sm:text-[24px] md:text-[32px] font-bold text-quinary-tint-800 ${isRTL ? 'text-right' : 'text-left'}`}>
-                {typeof video.title === 'object' ? video.title[currentLang] : video.title}
+                {video.title}
               </h3>
             </div>
           </div>
@@ -144,18 +128,14 @@ const LatestVideos = () => {
           <div 
             key={video.id} 
             className="w-full sm:w-1/2 lg:w-1/3 h-[120px] sm:h-[180px] md:h-[220px] rounded-lg overflow-hidden relative group cursor-pointer"
-            onClick={() => navigate(`/news/${video.id}`)}
+            onClick={() => navigate(`/news/${video.slug}`)}
           >
             {/* Background Image with Overlay */}
             <div className="absolute inset-0">
-              <img 
-                src={video.image} 
-                alt={typeof video.title === 'object' ? video.title[currentLang] : video.title} 
+              <LazyImage 
+                src={video.images[0]} 
+                alt={video.title} 
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                onError={(e) => {
-                  console.error('Error loading image:', video.image)
-                  e.target.src = "/images/banners/ArticlePicture2.png"
-                }}
               />
               <div className="absolute inset-0 bg-black/50"></div>
             </div>
@@ -166,11 +146,11 @@ const LatestVideos = () => {
             {/* Top Info */}
             <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex items-center">
               <span className="text-[10px] sm:text-[12px] font-regular text-quinary-tint-800">
-                {typeof video.date === 'object' ? video.date[currentLang] : video.date}
+                {video.created_date}
               </span>
               <div className="mx-1 sm:mx-2 h-4 w-[1px] bg-quinary-tint-800"></div>
               <span className="text-[10px] sm:text-[12px] font-regular text-tertiary-tint-200">
-                {typeof video.category === 'object' ? video.category[currentLang] : video.category}
+                {video.category}
               </span>
             </div>
             {/* Play Button */}
@@ -198,7 +178,7 @@ const LatestVideos = () => {
             {/* Bottom Title */}
             <div className={`absolute bottom-2 sm:bottom-4 ${isRTL ? 'right-2 sm:right-4' : 'left-2 sm:left-4'}`}>
               <h3 className={`text-[12px] sm:text-[16px] md:text-[20px] font-bold text-quinary-tint-800 ${isRTL ? 'text-right' : 'text-left'}`}>
-                {typeof video.title === 'object' ? video.title[currentLang] : video.title}
+                {video.title}
               </h3>
             </div>
           </div>

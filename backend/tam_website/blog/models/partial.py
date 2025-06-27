@@ -1,9 +1,11 @@
 from django.db import models
 from accounts.models import User
 from django_jalali.db import models as jmodels
-from parler.models import TranslatableModel
+from parler.models import TranslatableModel, TranslatedFields
 from django.utils.translation import gettext_lazy as _
-
+from django.utils.text import slugify
+from uuid import uuid4
+from ..utils.blog_utils import get_localization_position
 
 
 # class Comment(models.Model):
@@ -32,9 +34,11 @@ from django.utils.translation import gettext_lazy as _
 #         return self.replies.filter(is_active=True)
 
 
-class Player(models.Model):
+class Player(TranslatableModel):
     # player information
-    name = models.CharField(max_length=250, help_text="The name of the player")
+    translations = TranslatedFields(
+        name = models.CharField(max_length=250, help_text="The name of the player"),
+    )
     image = models.ImageField(upload_to='players/', null=True, blank=True, help_text="Profile image of the player")
     number = models.IntegerField(null=True, blank=True, help_text="The jersey number of the player")
 
@@ -53,3 +57,13 @@ class Player(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.position}"
+    
+    def get_name(self, language_code='fa'):
+        if self.has_translation(language_code):
+            return self.safe_translation_getter('name', language_code=language_code, default="")
+        return ""
+
+    def get_position(self, language_code="fa"):
+        print(self.position, language_code)
+        return get_localization_position(self.position, language_code)
+

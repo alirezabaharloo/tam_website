@@ -45,17 +45,15 @@ export default function Login() {
   // Check if form data has changed from initial state
   const isDataEmpty = () => !formData.phone || !formData.password;
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault(); // Prevent default form submission
     setError(''); // Reset error before login attempt
     setLoading(true);
     
     try {
       // Call the login function from AuthContext
       const result = await login(formData.phone, formData.password);
-      console.log(
-        result
-      );
-
+      console.log(result);
 
       if (!result.success) {
         // Show error notification
@@ -76,34 +74,22 @@ export default function Login() {
 
   return (
     <>
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          navigate('/')
-        }}
-        data={{
-          title: t('loginSuccessTitle', { ns: 'validation' }),
-          content: t('loginSuccessContent', { ns: 'validation' }),
-          onlyAcceptable: true
-        }}
-      />
       <div className="w-[95%] max-w-[1200px] h-[600px] mx-auto mt-8 flex flex-col lg:flex-row shadow-[4px_4px_16px_0_rgba(0,0,0,0.25)] rounded-2xl">
         {/* Welcome Section - Hidden on mobile */}
         <div className={`hidden lg:block w-[780px] h-full bg-gradient-to-br from-primary to-quaternary relative rounded-l-2xl ${isRTL ? 'order-2' : 'order-1'}`}>
-          <div className={`absolute top-[96px] ${isRTL ? 'right-[64px]' : 'left-[64px]'}`}>
+          <div className={`relative top-[96px] max-w-[88%] ${isRTL ? 'right-[64px]' : 'left-[64px]'}`}>
             <h1 className="text-[48px] font-bold text-quinary-tint-800">
               {t('loginWelcomeTitle', { ns: 'validation' })}
             </h1>
-            <p className="text-[24px] font-normal text-quinary-tint-800 mt-4 max-w-[600px]">
+            <p className="text-[24px] font-normal  text-quinary-tint-800 mt-4 max-w-[90%]">
               {t('loginWelcomeDescription', { ns: 'validation' })}
             </p>
           </div>
         </div>
 
-        <div className={`w-full lg:w-[520px] h-full bg-quinary-tint-800 rounded-2xl lg:rounded-r-2xl lg:rounded-l-none flex flex-col items-center p-4 sm:p-8 ${isRTL ? 'order-1 lg:rounded-l-2xl lg:rounded-r-none' : 'order-2'}`}>
+        <div className={`w-full lg:w-[550px] h-full bg-quinary-tint-800 rounded-2xl lg:rounded-r-2xl lg:rounded-l-none flex flex-col items-center p-4 sm:p-8 ${isRTL ? 'order-1 lg:rounded-l-2xl lg:rounded-r-none' : 'order-2'}`}>
           <h2 className="text-[28px] sm:text-[36px] font-bold text-primary mt-[32px]">{t('userLogin', { ns: 'validation' })}</h2>
-          <div className="w-full max-w-[400px] flex flex-col items-center">
+          <form onSubmit={handleLogin} className="w-full max-w-[400px] flex flex-col items-center">
             <Input
               icon={Icons.User}
               type="text"
@@ -117,6 +103,7 @@ export default function Login() {
                   setFormData(prev => ({ ...prev, phone: numbersOnly }));
                 } 
               }}
+              required
             />
 
             <Input
@@ -132,23 +119,28 @@ export default function Login() {
 
             {error && <ErrorMessage errorMessage={error} />}
 
-            <div className="w-full flex flex-col sm:flex-row justify-between items-center mt-4">
+            <div className="w-[90%] flex flex-wrap flex-row justify-between items-center mt-4">
               <div className="flex items-center">
-                <button onClick={() => setFormData(prev => ({ ...prev, rememberMe: !prev.rememberMe }))} className="text-primary">
+                <button 
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, rememberMe: !prev.rememberMe }))} 
+                  className="text-primary"
+                >
                   {formData.rememberMe ? <Icons.Checked /> : <Icons.Unchecked />}
                 </button>
                 <span className="ml-2 text-[14px] sm:text-[16px] text-primary">{t('rememberMe', { ns: 'validation' })}</span>
               </div>
               <button 
+                type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="text-[14px] sm:text-[16px] text-primary hover:text-quaternary transition-colors duration-300 mt-2 sm:mt-0"
+                className="text-[14px] sm:text-[16px] text-primary hover:text-quaternary transition-colors duration-300 sm:mt-0"
               >
                 {t('forgotPassword', { ns: 'validation' })}
               </button>
             </div>
 
             <Button 
-              onClick={handleLogin} 
+              type="submit"
               className="mt-4 cursor-pointer" 
               disabled={isDataEmpty() || loading}
               loading={loading}
@@ -166,9 +158,15 @@ export default function Login() {
 
             <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
               <span className="text-[16px] sm:text-[20px] font-semibold text-primary">{t('dontHaveAccount', { ns: 'validation' })}</span>
-              <Button onClick={() => navigate('/register')} variant="secondary">{t('register', { ns: 'validation' })}</Button>
+              <Button 
+                type="button"
+                onClick={() => navigate('/register')} 
+                variant="secondary"
+              >
+                {t('register', { ns: 'validation' })}
+              </Button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </>

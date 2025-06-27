@@ -9,6 +9,8 @@ import SpinLoader from '../components/UI/SpinLoader'
 import SomethingWentWrong from '../components/UI/SomethingWentWrong'
 import NoArticlesFound from '../components/UI/NoArticlesFound'
 import useHttp from '../hooks/useHttp'
+import domainUrl from '../utils/api'
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -46,14 +48,18 @@ export default function News() {
     const params = new URLSearchParams(window.location.search);
     const searchParam = params.get('search');
     const typeParam = params.get('type');
+    const categoryParam = params.get('category');
     const pageParam = params.get('page');
     
-    const searchUrl = new URL('http://localhost:8000/api/blog/articles');
+    const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
     if (searchParam) {
       searchUrl.searchParams.set('search', searchParam);
     }
     if (typeParam) {
       searchUrl.searchParams.set('type', typeParam);
+    }
+    if (categoryParam) {
+      searchUrl.searchParams.set('category', categoryParam);
     }
     if (pageParam) {
       searchUrl.searchParams.set('page', pageParam);
@@ -66,6 +72,7 @@ export default function News() {
 
   const activeFilter = new URLSearchParams(window.location.search).get("type");
   const searchParam = new URLSearchParams(window.location.search).get("search");
+  const categoryParam = new URLSearchParams(window.location.search).get("category");
   const currentPage = new URLSearchParams(window.location.search).get("page") || "1";
 
   const {
@@ -80,6 +87,7 @@ export default function News() {
       setAllArticles(prev => [...prev, ...response.articles]);
     }
   }, [response]);
+
 
   const hasNext = response?.next || false;
 
@@ -96,6 +104,7 @@ export default function News() {
   const handleClearSearch = () => {
     const params = new URLSearchParams(window.location.search);
     params.delete('search');
+    params.delete('category');
     params.delete('page');
     if (params.get('type')) {
       navigate(`/news?type=${params.get('type')}`);
@@ -107,11 +116,15 @@ export default function News() {
   };
 
   const handleFilterChange = (filterId) => {
-    const searchUrl = new URL('http://localhost:8000/api/blog/articles');
+    const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
     const searchParam = new URLSearchParams(window.location.search).get('search');
+    const categoryParam = new URLSearchParams(window.location.search).get('category');
     
     if (searchParam) {
       searchUrl.searchParams.set('search', searchParam);
+    }
+    if (categoryParam) {
+      searchUrl.searchParams.set('category', categoryParam);
     }
     if (filterId !== 'all') {
       searchUrl.searchParams.set('type', filterId);
@@ -141,12 +154,12 @@ export default function News() {
     <div className="w-full max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
       <div className="flex flex-col gap-6 sm:gap-8 md:gap-10">
         {searchParam && (
-          <div className="flex items-center justify-between bg-quinary-tint-600/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-quinary-tint-800/20">
+          <div className="flex items-center justify-between bg-quaternary mt-[-3rem] backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-quinary-tint-800/20">
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="text-secondary text-sm sm:text-base md:text-lg">
                 {t('searchResultsFor')}:
               </span>
-              <span className="text-quaternary font-medium text-sm sm:text-base md:text-lg">
+              <span className="text-quaternary font-medium text-sm sm:text-base md:text-lg text-white">
                 {searchParam}
               </span>
             </div>
@@ -158,6 +171,35 @@ export default function News() {
                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
               <span className="text-sm sm:text-base">{t('clearSearch')}</span>
+            </button>
+          </div>
+        )}
+        
+        {categoryParam && (
+          <div className="flex items-center justify-between bg-quaternary  backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-quinary-tint-800/20">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="text-secondary text-sm sm:text-base md:text-lg text-">
+                {t('categoryFilter') || 'Category'}:
+              </span>
+              <span className="text-quaternary font-medium text-sm sm:text-base md:text-lg text-white">
+                {categoryParam}
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                const params = new URLSearchParams(window.location.search);
+                params.delete('category');
+                params.delete('page');
+                navigate(`/news?${params.toString()}`);
+                window.location.reload();
+                setAllArticles([]);
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-quinary-tint-800 hover:bg-quinary-tint-700 rounded-lg text-secondary hover:text-quaternary transition-colors duration-300"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm sm:text-base">{t('clearFilter') || 'Clear Filter'}</span>
             </button>
           </div>
         )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LazyImage from './UI/LazyImage';
 
@@ -20,17 +20,25 @@ const NewsBox = ({
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const currentLang = i18n.language;
+  const { isRTL } = i18n.language === 'fa';
 
 
-  const handleClick = () => {
+  const handleTitleClick = () => {
     navigate(`/news/${slug}`);
+  };
+
+  const handleCategoryClick = () => {
+  const params = new URLSearchParams(window.location.search);
+    if (first_category?.slug && (!params.get("category") || params.get("category") !== first_category.slug)) {
+      navigate(`/news?category=${first_category.slug}`);
+      window.location.reload(); 
+    }
   };
 
 
   return (
     <div 
-      className="w-full h-[280px] sm:h-[300px] md:h-[340px] rounded-lg bg-quinary-tint-800 shadow-[4px_4px_16px_rgba(0,0,0,0.25)] overflow-hidden group cursor-pointer"
-      onClick={handleClick}
+      className="w-full h-[280px] sm:h-[300px] md:h-[340px] rounded-lg bg-quinary-tint-800 shadow-[4px_4px_16px_rgba(0,0,0,0.25)] overflow-hidden group"
     >
       {/* Top Half - Image Section */}
       <div className="h-1/2 relative overflow-hidden">
@@ -41,7 +49,7 @@ const NewsBox = ({
         />
         {type === 'VD' && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-quinary-tint-800">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-quinary-tint-800`}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
             </svg>
@@ -61,19 +69,31 @@ const NewsBox = ({
       
       {/* Bottom Half - Content Section */}
       <div className="h-1/2 p-2 sm:p-3 md:p-4 flex flex-col">
-        <div className="flex items-center">
+        <div className={`flex items-start ${!isRTL ? 'gap-[0.3rem]' : ''}`}>
           {type === 'SS' && (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5 text-secondary mr-2">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none" 
+              viewBox="0 0 24 24" 
+              strokeWidth={1.5}
+              stroke="currentColor" 
+              className="text-secondary mr-2 w-[6.5%] h-max mt-[0.1rem]"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
             </svg>
           )}
           {type === 'VD' && (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5 text-secondary mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"  className="text-secondary mr-2 w-[7%] h-max mt-[0.1rem]">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
             </svg>
           )}
-          <h3 className="text-[16px] sm:text-[18px] md:text-[20px] font-bold text-secondary line-clamp-2">{title}</h3>
+          <h3 
+            className="w-[90%] text-[16px] sm:text-[18px] md:text-[20px] font-bold text-secondary line-clamp-2 cursor-pointer hover:text-quaternary transition-colors duration-200"
+            onClick={handleTitleClick}
+          >
+            {title}
+          </h3>
         </div>
         <p className="text-[12px] sm:text-[13px] md:text-[14px] font-medium text-secondary-tint-100 mt-2 line-clamp-2">
           {body}
@@ -82,7 +102,16 @@ const NewsBox = ({
           <div className="flex items-center">
             <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-secondary-tint-200">{time_ago}</span>
             <div className="h-3 w-[1px] bg-secondary mx-2"></div>
-            <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary">{first_category?.name || ''}</span>
+            {first_category?.slug ? (
+              <button
+                onClick={handleCategoryClick}
+                className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary hover:text-secondary transition-colors duration-200"
+              >
+                {first_category.name || ''}
+              </button>
+            ) : (
+              <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary">{first_category?.name || ''}</span>
+            )}
           </div>
           <div>
             <svg 

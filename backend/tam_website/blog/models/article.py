@@ -36,6 +36,8 @@ class Article(TranslatableModel):
         help_text="The category of this article"
     )
 
+    team = models.OneToOneField("Team", on_delete=models.PROTECT, related_name='article')
+
     # Translated fields
     translations = TranslatedFields(
         title=models.CharField(_("title"), max_length=250),
@@ -145,6 +147,25 @@ class Category(TranslatableModel):
     image=models.ImageField(upload_to='categories/', null=True, blank=True)
     slug = models.SlugField(max_length=250, unique=True, blank=True)
     
+    def save(self, *args, **kwargs):
+        title_en = self.safe_translation_getter("name", language_code='en', default="")
+        slugified_title = slugify(title_en)
+        if not self.slug or slugified_title != self.slug:
+            self.slug = slugified_title or self.slug or uuid4()
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+    
+
+class Team(TranslatableModel):
+    translations = TranslatedFields(
+        name=models.CharField(_("name"), max_length=250),
+    )
+    image = models.ImageField(upload_to='team_pictures/', null=True, blank=True)
+    slug = models.SlugField(max_length=250, unique=True, blank=True)
+
     def save(self, *args, **kwargs):
         title_en = self.safe_translation_getter("name", language_code='en', default="")
         slugified_title = slugify(title_en)

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import HomeDataView
 
 app_name = 'blog'
 
@@ -11,5 +12,6 @@ urlpatterns = [
     path('delete-article/<str:slug>/', views.DeleteArticleView.as_view(), name='delete-article'),
     path('author-articles/', views.ArticleListForAuthorsView.as_view(), name='author-articles'),
     path('preview-article/<str:slug>/', views.ArticleDetailForAuthorsView.as_view(), name='author-article-detail'),
-    path('article-like/<str:slug>/', views.ArticleLikeView.as_view(), name='article-like')
+    path('article-like/<str:slug>/', views.ArticleLikeView.as_view(), name='article-like'),
+    path('home-datas/', HomeDataView.as_view(), name='home-datas'),
 ]

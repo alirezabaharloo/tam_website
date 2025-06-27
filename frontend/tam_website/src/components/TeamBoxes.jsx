@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHome } from '../context/HomeContext';
+import LazyImage from './UI/LazyImage';
 
 const TeamBoxes = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
-  const totalSlides = 7; // کاهش تعداد اسلایدها
+  const { homeData } = useHome();
+  const totalSlides = Math.ceil(homeData.tam_teams.length / 5);
   const slidesPerView = 5;
 
-  // ریست کردن اسلاید وقتی زبان تغییر می‌کند
+  // Reset slide when language changes
   useEffect(() => {
     setCurrentSlide(0);
   }, [i18n.language]);
@@ -21,7 +24,7 @@ const TeamBoxes = () => {
     setCurrentSlide(prev => (prev + 1) % totalSlides);
   };
 
-  // محاسبه ترنسفورم برای اسلاید
+  // Calculate transform for slide
   const getTransform = () => {
     const slideWidth = 220;
     const offset = currentSlide * slideWidth;
@@ -32,7 +35,8 @@ const TeamBoxes = () => {
     <>
       <div className="w-full max-w-[1300px] mx-auto mt-8 flex flex-row justify-between items-center px-2 sm:px-4">
         <h2 className="text-[28px] sm:text-[36px] md:text-[48px] font-regular text-secondary order-1">{t('tamsTeam')}</h2>
-        <div className="flex items-center gap-2 sm:gap-4 mt-2 lg:mt-0 order-2">
+        { homeData.tam_teams.length > 5 ? (
+          <div className="flex items-center gap-2 sm:gap-4 mt-2 lg:mt-0 order-2">
           <button 
             onClick={handlePrevSlide}
             className="w-8 h-8 sm:w-12 sm:h-12 rounded-full hover:bg-secondary-tint-800 transition-colors duration-300 flex items-center justify-center group"
@@ -71,7 +75,8 @@ const TeamBoxes = () => {
               />
             </svg>
           </button>
-        </div>
+        </div> ) : <span className='mb-[0.8rem]'></span>
+         }
       </div>
 
       <div className="w-full max-w-[1300px] mx-auto mt-4 overflow-hidden px-2 sm:px-4">
@@ -83,9 +88,9 @@ const TeamBoxes = () => {
               direction: isRTL ? 'rtl' : 'ltr'
             }}
           >
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((index) => (
+            {homeData.tam_teams.map((team) => (
               <div 
-                key={index} 
+                key={team.id} 
                 className={`relative w-[140px] sm:w-[200px] h-[220px] sm:h-[340px] rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 ${
                   isRTL 
                     ? 'ml-1.5 sm:ml-2.5' 
@@ -93,14 +98,14 @@ const TeamBoxes = () => {
                 }`}
               >
                 <div className="absolute inset-0">
-                  <img 
-                    src="/images/banners/ArticlePicture.png" 
-                    alt="Team Image" 
+                  <LazyImage 
+                    src={team.image} 
+                    alt={team.name} 
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="absolute bottom-2 sm:bottom-3 left-1.5 right-1.5 flex items-center justify-center gap-1.5">
-                  <span className="text-[14px] sm:text-[24px] font-bold text-quinary-tint-800">{t('football')}</span>
+                  <span className="text-[14px] sm:text-[24px] font-bold text-quinary-tint-800">{team.name}</span>
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     fill="none" 

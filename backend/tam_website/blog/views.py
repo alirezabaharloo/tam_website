@@ -13,6 +13,8 @@ from django_filters import rest_framework as filters
 from django.db.models import Count, Q, Case, When, Value, F
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from rest_framework.pagination import PageNumberPagination
+from .models import Team, Player
+from .serializers import TeamSerializer, PlayerSerializer
 
 
 class ArticlePagination(PageNumberPagination):
@@ -36,13 +38,24 @@ class ArticlePagination(PageNumberPagination):
 class ArticleFilter(filters.FilterSet):
     type = filters.ChoiceFilter(choices=Article.Type.choices)
     status = filters.ChoiceFilter(choices=Article.Status.choices)
+    category = filters.CharFilter(method='filter_category')
     most_viewed = filters.BooleanFilter(method='filter_most_viewed')
     most_popular = filters.BooleanFilter(method='filter_most_popular')
     search = filters.CharFilter(method='filter_search')
 
     class Meta:
         model = Article
-        fields = ['type', 'status', 'most_viewed', 'most_popular', 'search']
+        fields = ['type', 'status', 'category', 'most_viewed', 'most_popular', 'search']
+
+    def filter_category(self, queryset, name, value):
+        if value:
+            return queryset.filter(category__slug=value)
+        return queryset
+
+    def filter_player(self, queryset, name, value):
+        if value:
+            return queryset.filter(team__slug=value)
+        return queryset
 
     def filter_most_viewed(self, queryset, name, value):
         if value:
@@ -288,3 +301,35 @@ class ArticleLikeView(IpAddressMixin, APIView):
             article.likes.remove(ip_obj)
             article.save()
         return Response(status=status.HTTP_200_OK)
+
+
+class HomeDataView(LocalizationMixin, APIView):
+    def get(self, request):
+        try:
+            # Get latest 5 articles
+            articles = Article.objects.filter(Q(status='AC') & Q(type="TX")).order_by('-created_date')[:5]
+            articles_data = ArticleSerializer(articles, many=True, context={'request': request, "list": True}).data
+
+            # Get latest videos
+            videos = Article.objects.filter(status='AC', type='VD').order_by('-created_date')[:5]
+            videos_data = ArticleSerializer(videos, many=True, context={'request': request, "list": True}).data
+
+            # Get all teams
+            teams = Team.objects.all()
+            teams_data = TeamSerializer(teams, many=True, context={'request': request}).data
+
+            # Get all players
+            players = Player.objects.all()
+            players_data = PlayerSerializer(players, many=True, context={'request': request}).data
+
+            return Response({
+                'articles': articles_data,
+                'videos': videos_data,
+                'tam_teams': teams_data,
+                'players': players_data
+            })
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

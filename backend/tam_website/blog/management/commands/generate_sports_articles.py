@@ -1,10 +1,11 @@
 from django.core.management.base import BaseCommand
-from blog.models import Article, Category
+from blog.models import Article, Category, Image
 from django.utils.text import slugify
 from faker import Faker
 import random
 from django.utils.translation import activate
 from accounts.models import User
+from django.core.files.base import ContentFile
 
 # Create Faker instances for both languages
 fake_en = Faker('en')
@@ -76,6 +77,21 @@ class Command(BaseCommand):
             
             categories.append(category)
 
+        # Create a placeholder image
+        image_name = 'VideoPicture.jpg'
+        image_path = f'~/Desktop/tam web/frontend/tam_website/public/images/banners/{image_name}'
+        try:
+            image = Image.objects.get(image=image_path)
+            self.stdout.write(self.style.SUCCESS(f'Using existing image: {image_path}'))
+        except Image.DoesNotExist:
+            dummy_content = b'this is a dummy image file'
+            image_file = ContentFile(dummy_content, name=image_name)
+            
+            image = Image()
+            image.image.save(image_name, image_file, save=True)
+            self.stdout.write(self.style.SUCCESS(f'Created new placeholder image: {image_path}'))
+
+
         # List of sports-related topics in both languages
         sports_topics = {
             'en': [
@@ -125,13 +141,23 @@ class Command(BaseCommand):
             article.set_current_language('fa')
             article.title = title_fa
             article.body = body_fa
-            
+
+            user = None
+            if not User.objects.filter(phone_number='09133333333').exists():
+                user = User.objects.create_superuser(phone_number='09133333333', password='1234')
+            else:
+                user = User.objects.get(phone_number='09133333333')
+                
+            article.author = user
             # Save the article first
             article.save()
             
             # Now add the category after the article is saved
             random_category = random.choice(categories)
             article.category.add(random_category)
+
+            # Add the image to the article
+            article.article_images.add(image)
             
             self.stdout.write(
                 self.style.SUCCESS(
@@ -140,4 +166,4 @@ class Command(BaseCommand):
                     f'FA: "{title_fa}"\n'
                     f'Category: "{random_category.name}"'
                 )
-            ) 
+            )

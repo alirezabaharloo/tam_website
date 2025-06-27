@@ -96,3 +96,35 @@ def time_ago_persian_format(time_string: str) -> str:
 
         
     raise ValueError(f"Unknown naturaltime format! {time_string}")
+
+
+def get_localization_position(position, language_code):
+    position_keys = [
+        'DEFENDER',
+        'MIDFIELDER',
+        'FORWARD',
+        'GOALKEEPER',
+    ]
+    position_english_values = [
+        'Defender',
+        'Midfielder',
+        'Forward',
+        'Goalkeeper',
+    ]
+    position_persian_vlaues = [
+        'مدافع',
+        'هافبک',
+        'مهاجم',
+        'دروازه‌بان',
+    ]
+    
+    if language_code == 'en':
+        for index, pos in enumerate(position_keys):
+            if position == pos:
+                return position_english_values[index]
+            
+    elif language_code == 'fa':
+        for index, pos in enumerate(position_keys):
+            if position == pos:
+                return position_persian_vlaues[index]
+    

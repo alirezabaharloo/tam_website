@@ -10,7 +10,7 @@ const Input = React.memo(({
   onChange, 
   required
 }) => (
-  <div className="w-[400px] h-[54px] bg-quaternary-tint-800 rounded-[100px] mt-2 flex items-center px-6 shadow-[2px_2px_8px_0_rgba(0,0,0,0.25)]">
+  <div className="w-[90%] h-[54px] not-first:mt-[0.8rem] bg-quaternary-tint-800 rounded-[100px] mt-2 flex items-center px-6 shadow-[2px_2px_8px_0_rgba(0,0,0,0.25)]">
     <Icon />
     <input
       type={type}

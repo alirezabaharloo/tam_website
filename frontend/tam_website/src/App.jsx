@@ -18,6 +18,7 @@ import { SearchProvider } from './context/SearchContext';
 import SpinLoader from './components/UI/SpinLoader.jsx';
 
 
+
 // Scroll to top component
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -40,7 +41,7 @@ function App() {
   useEffect(() => {
     // Set document direction based on language
     document.documentElement.dir = i18n.language === 'fa' ? 'rtl' : 'ltr';
-    
+
     // Load core namespace
     loadNamespaces('blog');
   }, [i18n.language]);

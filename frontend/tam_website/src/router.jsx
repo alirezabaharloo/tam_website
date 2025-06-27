@@ -10,7 +10,7 @@ import Profile from './pages/Profile';
 import Error from './pages/Error';
 import OtpVerification from './pages/OtpVerification';
 import Register from './pages/Register';
-import SpinLoader from './components/UI/SpinLoader';
+
 
 const PageTransition = ({ children }) => {
   return (
@@ -89,7 +89,11 @@ const BlogRoutes = () => {
 // const AdminRoutes = () => {
 //   return (
 //     <>
-    
+//       <Route path="/admin" element={<Admin />} />
+//       <Route path="/admin/user/add" element={<UserForm />} />
+//       <Route path="/admin/user/edit/:userId" element={<UserForm />} />
+//       <Route path="/admin/article/add" element={<ArticleForm />} />
+//       <Route path="/admin/article/edit/:id" element={<ArticleForm />} />
 //     </>
 //   )
 // }

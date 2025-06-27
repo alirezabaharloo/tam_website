@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import domainUrl from '../utils/api';
 
 
 export const AuthContext = createContext(
@@ -152,7 +153,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No tokens found');
       }
       const refreshToken = JSON.parse(storedTokens).refresh;
-      const res = await fetch('http://localhost:8000/api/auth/get-refresh-token/', {
+      const res = await fetch(`http://${domainUrl}:8000/api/auth/get-refresh-token/`, {
         method: 'POST',
         headers: {
           ...authHeader(),

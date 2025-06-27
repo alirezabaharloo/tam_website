@@ -42,12 +42,10 @@ class CategoryAdmin(TranslatableAdmin):
     #     }),
     # )
 
-
 @admin.register(Player)
 class PlayerAdmin(TranslatableAdmin):
     list_display = ('name', 'number', 'position', 'goals', 'games')
     search_fields = ('name', 'position')
-    ordering = ('name',)
 
 
     def get_category_slug(self, obj: Article):
@@ -57,6 +55,13 @@ class PlayerAdmin(TranslatableAdmin):
 
     get_category_slug.short_description = 'category slug'
 
+@admin.register(Team)
+class PlayerAdmin(TranslatableAdmin):
+    list_display = ('name', )
+    search_fields = ('name', 'slug')
+
+
 admin.site.register(IpAddress)
 admin.site.register(MiddleArticleIpAddress)
 admin.site.register(Image)
+

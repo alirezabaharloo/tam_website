@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import NewsBox from './NewsBox'
 import useHttp from '../hooks/useHttp'
@@ -7,11 +7,13 @@ import SpinLoader from './UI/SpinLoader'
 import SomethingWentWrong from './UI/SomethingWentWrong'
 import LazyImage from './UI/LazyImage'
 import ArticleNotFound from '../components/UI/ArticleNotFound.jsx'
+import domainUrl from '../utils/api.js'
 
 
 export default function NewsDetail() {
   const { slug } = useParams()
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const isRTL = i18n.language === 'fa'
   const [isLiked, setIsLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
@@ -21,7 +23,7 @@ export default function NewsDetail() {
     isError,
     errorMessage,
     data: article,
-  } = useHttp(`http://localhost:8000/api/blog/articles/${slug}`)
+  } = useHttp(`http://${domainUrl}:8000/api/blog/articles/${slug}`)
 
 
   // Initialize likeCount and isLiked when article data is received
@@ -45,6 +47,10 @@ export default function NewsDetail() {
     return <SpinLoader />
   }
 
+  const handleCategoryClick = (categorySlug) => {
+    window.location.reload();
+    navigate(`/news?category=${categorySlug}`);
+  };
 
   const handleLike = async () => {
     try {
@@ -54,7 +60,7 @@ export default function NewsDetail() {
       setIsLiked(!isLiked)
 
       // Make API call to toggle like
-      const response = await fetch(`http://localhost:8000/api/blog/article-like/${slug}`, {
+      const response = await fetch(`http://${domainUrl}:8000/api/blog/article-like/${slug}`, {
         method: 'GET',
       })
 
@@ -148,12 +154,23 @@ export default function NewsDetail() {
                   {/* Categories */}
                   <div className="flex items-center gap-2 flex-wrap">
                     {article.categories?.map((category, index) => (
-                      <span key={index} className="text-[14px] sm:text-[16px] font-regular text-quaternary">
-                        {category.name}
+                      <React.Fragment key={index}>
+                        {category.slug ? (
+                          <button
+                            onClick={() => handleCategoryClick(category.slug)}
+                            className="text-[14px] sm:text-[16px] font-regular text-quaternary hover:text-secondary transition-colors duration-200 cursor-pointer"
+                          >
+                            {category.name}
+                          </button>
+                        ) : (
+                          <span className="text-[14px] sm:text-[16px] font-regular text-quaternary">
+                            {category.name}
+                          </span>
+                        )}
                         {index < article.categories.length - 1 && (
                           <span className="mx-2 text-secondary">•</span>
                         )}
-                      </span>
+                      </React.Fragment>
                     ))}
                   </div>
                   {/* Interactive elements */}

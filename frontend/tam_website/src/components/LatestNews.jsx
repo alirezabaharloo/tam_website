@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { newsData } from '../data/newsData';
+import { useHome } from '../context/HomeContext';
+import LazyImage from './UI/LazyImage';
 
 const LatestNews = () => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const LatestNews = () => {
   const isRTL = i18n.language === 'fa';
   const currentLang = i18n.language;
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const { homeData } = useHome();
 
   useEffect(() => {
     const handleResize = () => {
@@ -19,30 +21,17 @@ const LatestNews = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Get the latest 5 basic news items
-  const latestNews = [...newsData]
-    .filter(news => news.type === 'basic')
-    .sort((a, b) => {
-      // Extract hours from date strings
-      const getHours = (date) => {
-        if (typeof date === 'object') {
-          const enDate = date.en;
-          return parseInt(enDate.replace('H', ''));
-        }
-        return parseInt(date.replace('H', ''));
-      };
-
-      const timeA = getHours(a.date);
-      const timeB = getHours(b.date);
-      return timeA - timeB;
-    })
-    .slice(0, 5);
+  // Get the latest 5 articles
+  const latestNews = homeData.articles;
 
   // Split into two groups: first two and last three
   const [firstTwo, lastThree] = [
     latestNews.slice(0, 2),
     latestNews.slice(2)
   ];
+  
+  console.log(latestNews);
+  
 
   return (
     <>
@@ -74,17 +63,18 @@ const LatestNews = () => {
 
       {/* First Two Large Articles */}
       <div className="w-full max-w-[1300px] mx-auto mt-4 flex flex-col lg:flex-row justify-between gap-4 px-2 sm:px-4">
-        {firstTwo.slice(0, windowWidth < 1024 ? 1 : 2).map((news) => (
+        {firstTwo.slice(0, windowWidth < 1024 ? 1 : 2).map((article) => (
           <div 
-            key={news.id} 
+            key={article.id} 
             className="w-full lg:w-1/2 h-[220px] sm:h-[300px] md:h-[380px] rounded-lg bg-quinary-tint-800 shadow-[4px_4px_16px_rgba(0,0,0,0.25)] overflow-hidden group cursor-pointer flex"
-            onClick={() => navigate(`/news/${news.id}`)}
+            onClick={() => {navigate(`/news/${article.slug}`);console.log(article.slug);
+            }}
           >
             {/* Left side - Image */}
-            <div className="w-1/2 h-full overflow-hidden">
-              <img 
-                src={news.image} 
-                alt={typeof news.title === 'object' ? news.title[currentLang] : news.title} 
+            <div className="w-1/2 h-full overflow-hidden order-1">
+              <LazyImage 
+                src={article.images[0]} 
+                alt={article.title} 
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
               />
             </div>
@@ -92,19 +82,19 @@ const LatestNews = () => {
             <div className="w-1/2 p-2 sm:p-4 flex flex-col">
               <div className="h-[1px] w-3 bg-quaternary transition-all duration-300 group-hover:w-[100px]"></div>
               <h3 className="text-[14px] sm:text-[18px] md:text-[20px] font-bold text-secondary mt-[8px]">
-                {typeof news.title === 'object' ? news.title[currentLang] : news.title}
+                {article.title}
               </h3>
               <p className="text-[10px] sm:text-[12px] md:text-[14px] font-medium text-secondary-tint-100 mt-2 sm:mt-4">
-                {typeof news.description === 'object' ? news.description[currentLang] : news.description}
+                {article.body}
               </p>
               <div className="mt-auto flex items-center justify-between">
                 <div className="flex items-center">
                   <span className="text-[10px] sm:text-[12px] font-regular text-secondary-tint-200">
-                    {typeof news.date === 'object' ? news.date[currentLang] : news.date}
+                    {article.time_ago}
                   </span>
                   <div className="h-4 w-[1px] bg-secondary mx-2 sm:mx-4"></div>
                   <span className="text-[10px] sm:text-[12px] font-regular text-quaternary">
-                    {typeof news.category === 'object' ? news.category[currentLang] : news.category}
+                    {article.first_category.name}
                   </span>
                 </div>
                 <div>
@@ -129,17 +119,17 @@ const LatestNews = () => {
 
       {/* Three Bottom Boxes Section */}
       <div className="w-full max-w-[1300px] mx-auto mt-4 flex flex-col sm:flex-row justify-between gap-4 px-2 sm:px-4">
-        {lastThree.slice(0, windowWidth < 640 ? 0 : windowWidth < 1024 ? 2 : 3).map((news) => (
+        {lastThree.slice(0, windowWidth < 640 ? 0 : windowWidth < 1024 ? 2 : 3).map((article) => (
           <div 
-            key={news.id} 
+            key={article.id} 
             className="w-full sm:w-1/2 lg:w-1/3 h-[180px] sm:h-[220px] md:h-[340px] rounded-lg bg-quinary-tint-800 shadow-[4px_4px_16px_rgba(0,0,0,0.25)] overflow-hidden group cursor-pointer flex flex-col"
-            onClick={() => navigate(`/news/${news.id}`)}
+            onClick={() => navigate(`/news/${article.slug}`)}
           >
             {/* Top Half - Image Section */}
             <div className="h-1/2 relative overflow-hidden">
-              <img 
-                src={news.image} 
-                alt={typeof news.title === 'object' ? news.title[currentLang] : news.title} 
+              <LazyImage 
+                src={article.images[0]} 
+                alt={article.title} 
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
               />
               <div className="absolute bottom-2 left-2">
@@ -149,19 +139,19 @@ const LatestNews = () => {
             {/* Bottom Half - Content Section */}
             <div className="h-1/2 p-1 sm:p-2 flex flex-col">
               <h3 className="text-[12px] sm:text-[16px] md:text-[20px] font-bold text-secondary mt-[8px]">
-                {typeof news.title === 'object' ? news.title[currentLang] : news.title}
+                {article.title}
               </h3>
               <p className="text-[8px] sm:text-[12px] md:text-[14px] font-medium text-secondary-tint-100 mt-1 sm:mt-2 line-clamp-2">
-                {typeof news.description === 'object' ? news.description[currentLang] : news.description}
+                {article.body}
               </p>
               <div className="mt-auto flex items-center justify-between">
                 <div className="flex items-center">
                   <span className="text-[10px] sm:text-[12px] font-regular text-secondary-tint-200">
-                    {typeof news.date === 'object' ? news.date[currentLang] : news.date}
+                    {article.time_ago}
                   </span>
                   <div className="h-4 w-[1px] bg-secondary mx-2 sm:mx-4"></div>
                   <span className="text-[10px] sm:text-[12px] font-regular text-quaternary">
-                    {typeof news.category === 'object' ? news.category[currentLang] : news.category}
+                    {article.first_category.name}
                   </span>
                 </div>
                 <div>

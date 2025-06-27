@@ -114,6 +114,8 @@ const commonResources = {
       imageNotProvided: "Image not available",
       // about search
       searchResultsFor: 'search results for',
+      // about category
+      categoryFilter:'category resulsts for',
     },
     // Form and validation related translations - loaded when needed
     validation: {
@@ -283,6 +285,8 @@ const commonResources = {
       imageNotProvided: "تصویر در دسترس نیست",
       // about search
       searchResultsFor: 'نتیجه جست و جو برای',
+      // about category
+      categoryFilter: 'نتیجه جست و جو برای'
     },
     validation: {
       // Login Page

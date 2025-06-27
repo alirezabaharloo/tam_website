@@ -4,6 +4,8 @@ from .utils import filter_vocabulary
 from django.utils.translation import get_language
 from .models import Article
 from .utils import get_time_ago
+from .models import Team, Player
+from .utils.blog_utils import persian_digits
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -155,3 +157,40 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
 
         instance.save()  
         return instance
+
+
+class TeamSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Team
+        fields = ['id', 'name', 'image', 'slug']
+
+    def get_name(self, obj):
+        return obj.safe_translation_getter('name', language_code=self.context['request'].LANGUAGE_CODE)
+
+
+class PlayerSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    position = serializers.SerializerMethodField()
+    goals = serializers.SerializerMethodField()
+    games = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Player
+        fields = ['id', 'name', 'image', 'number', 'position', 'goals', 'games']
+
+    def get_name(self, obj: Player):
+        return obj.get_name(language_code=get_language())
+
+    def get_position(self, obj):
+        return obj.get_position_display()
+
+    def get_goals(self, obj):
+        return persian_digits(obj.goals) if obj.goals is not None else None
+
+    def get_games(self, obj):
+        return persian_digits(obj.games) if obj.games is not None else None
+    
+    def get_position(self, obj):
+        return obj.get_position(language_code=get_language())
