@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useContext } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { AuthContext } from '../context/AuthContext.jsx'
+import { AuthContext } from '../../context/AuthContext.jsx'
 import { useTranslation } from 'react-i18next';
-import { loadNamespaces } from '../i18n';
-import { useSearch } from '../context/SearchContext';
+import { loadNamespaces } from '../../i18n.js';
+import { useSearch } from '../../context/SearchContext.jsx';
 
 export default function Header() {
   const location = useLocation();

@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import NewsBox from './NewsBox'
-import useHttp from '../hooks/useHttp'
-import SpinLoader from './UI/SpinLoader'
-import SomethingWentWrong from './UI/SomethingWentWrong'
-import LazyImage from './UI/LazyImage'
-import ArticleNotFound from '../components/UI/ArticleNotFound.jsx'
-import domainUrl from '../utils/api.js'
+import useHttp from '../../hooks/useHttp.jsx'
+import SpinLoader from '../UI/SpinLoader.jsx'
+import SomethingWentWrong from '../UI/SomethingWentWrong.jsx'
+import LazyImage from '../UI/LazyImage.jsx'
+import ArticleNotFound from '../UI/ArticleNotFound.jsx'
+import domainUrl from '../../utils/api.js'
 
 
 export default function NewsDetail() {

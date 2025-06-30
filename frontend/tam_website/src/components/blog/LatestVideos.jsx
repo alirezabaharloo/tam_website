@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useHome } from '../context/HomeContext';
-import LazyImage from './UI/LazyImage';
+import { useHome } from '../../context/HomeContext';
+import LazyImage from '../UI/LazyImage';
 
 const LatestVideos = () => {
   const navigate = useNavigate();
@@ -30,7 +30,11 @@ const LatestVideos = () => {
     latestVideos.slice(2)
   ];
 
-
+  const handleTeamClick = (e, teamSlug) => {
+    e.stopPropagation();
+    navigate(`/news?team=${teamSlug}&type=VD`);
+    window.location.reload(); 
+  };
 
   return (
     <>
@@ -86,8 +90,11 @@ const LatestVideos = () => {
                 {video.created_date}
               </span>
               <div className="mx-1 sm:mx-2 h-4 w-[1px] bg-quinary-tint-800"></div>
-              <span className="text-[10px] sm:text-[14px] font-medium text-tertiary-tint-200">
-                {video.first_category.name}
+              <span 
+                className="cursor-default hover:text-[white] text-[10px] sm:text-[14px] font-medium text-tertiary-tint-200"
+                onClick={(e)=>handleTeamClick(e, video.team.slug)}
+              >
+                {video.team.name}
               </span>
             </div>
             {/* Play Button */}

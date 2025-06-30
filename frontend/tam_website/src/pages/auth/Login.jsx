@@ -1,14 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthContext } from '../context/AuthContext.jsx'
-import Modal from '../components/Modal'
+import { AuthContext } from '../../context/AuthContext.jsx'
 import { useTranslation } from 'react-i18next'
-import { loadNamespaces } from '../i18n'
-import Icons from '../data/Icons'
-import Input from '../components/authentication/common/Input'
-import Button from '../components/authentication/common/Button'
-import ErrorMessage from '../components/authentication/common/ErrorMessage'
-import { successNotif, errorNotif } from '../utils/customNotifs'
+import { loadNamespaces } from '../../i18n.js'
+import { authIcons } from '../../data/Icons.jsx'
+import Input from '../../components/authentication/common/Input.jsx'
+import Button from '../../components/authentication/common/Button.jsx'
+import ErrorMessage from '../../components/authentication/common/ErrorMessage.jsx'
+import { successNotif, errorNotif } from '../../utils/customNotifs.jsx'
 
 export default function Login() {
   const { t, i18n } = useTranslation(['blog', 'validation']);
@@ -91,7 +90,7 @@ export default function Login() {
           <h2 className="text-[28px] sm:text-[36px] font-bold text-primary mt-[32px]">{t('userLogin', { ns: 'validation' })}</h2>
           <form onSubmit={handleLogin} className="w-full max-w-[400px] flex flex-col items-center">
             <Input
-              icon={Icons.User}
+              icon={authIcons.User}
               type="text"
               placeholder={t('phoneNumber', { ns: 'validation' })}
               value={formData.phone}
@@ -107,7 +106,7 @@ export default function Login() {
             />
 
             <Input
-              icon={Icons.Lock}
+              icon={authIcons.Lock}
               type={formData.showPassword ? "text" : "password"}
               placeholder={t('password', { ns: 'validation' })}
               value={formData.password}
@@ -126,7 +125,7 @@ export default function Login() {
                   onClick={() => setFormData(prev => ({ ...prev, rememberMe: !prev.rememberMe }))} 
                   className="text-primary"
                 >
-                  {formData.rememberMe ? <Icons.Checked /> : <Icons.Unchecked />}
+                  {formData.rememberMe ? <authIcons.Checked /> : <authIcons.Unchecked />}
                 </button>
                 <span className="ml-2 text-[14px] sm:text-[16px] text-primary">{t('rememberMe', { ns: 'validation' })}</span>
               </div>

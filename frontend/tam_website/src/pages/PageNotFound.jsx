@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
-export default function Error() {
+export default function PageNotFound() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
 
@@ -28,10 +28,10 @@ export default function Error() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-2 sm:mt-4"
           >
-            <h2 className={`text-[24px] sm:text-[32px] md:text-[40px] lg:text-[48px] font-semibold text-secondary mb-2 sm:mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <h2 className={`text-[24px] sm:text-[32px] md:text-[40px] lg:text-[48px] font-semibold text-secondary mb-2 sm:mb-4 text-center`}>
               {t('errorPageNotFound')}
             </h2>
-            <p className={`text-[16px] sm:text-[18px] md:text-[20px] text-secondary-tint-500 mb-6 sm:mb-8 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <p className={`text-[16px] sm:text-[18px] md:text-[20px] text-secondary-tint-500 mb-6 sm:mb-8 text-center`}>
               {t('errorPageDescription')}
             </p>
           </motion.div>

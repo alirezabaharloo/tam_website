@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import LazyImage from './UI/LazyImage';
+import LazyImage from '../UI/LazyImage';
 
 const NewsBox = ({ 
   id,
@@ -15,7 +15,8 @@ const NewsBox = ({
   images,
   type,
   video_url,
-  first_category
+  first_category,
+  team,
  }) => {
   const navigate = useNavigate();
   const { i18n } = useTranslation();
@@ -23,14 +24,15 @@ const NewsBox = ({
   const { isRTL } = i18n.language === 'fa';
 
 
-  const handleTitleClick = () => {
+  const handleBoxClick = () => {
     navigate(`/news/${slug}`);
   };
 
-  const handleCategoryClick = () => {
-  const params = new URLSearchParams(window.location.search);
-    if (first_category?.slug && (!params.get("category") || params.get("category") !== first_category.slug)) {
-      navigate(`/news?category=${first_category.slug}`);
+  const handleTeamClick = (e) => {
+    e.stopPropagation();
+    const params = new URLSearchParams(window.location.search);
+    if (team?.slug && (!params.get("team") || params.get("team") !== team.slug)) {
+      navigate(`/news?team=${team.slug}`);
       window.location.reload(); 
     }
   };
@@ -38,7 +40,8 @@ const NewsBox = ({
 
   return (
     <div 
-      className="w-full h-[280px] sm:h-[300px] md:h-[340px] rounded-lg bg-quinary-tint-800 shadow-[4px_4px_16px_rgba(0,0,0,0.25)] overflow-hidden group"
+      className="w-full h-[280px] sm:h-[300px] md:h-[340px] rounded-lg bg-quinary-tint-800 shadow-[4px_4px_16px_rgba(0,0,0,0.25)] overflow-hidden group cursor-pointer"
+      onClick={handleBoxClick}
     >
       {/* Top Half - Image Section */}
       <div className="h-1/2 relative overflow-hidden">
@@ -89,8 +92,7 @@ const NewsBox = ({
             </svg>
           )}
           <h3 
-            className="w-[90%] text-[16px] sm:text-[18px] md:text-[20px] font-bold text-secondary line-clamp-2 cursor-pointer hover:text-quaternary transition-colors duration-200"
-            onClick={handleTitleClick}
+            className="w-[90%] text-[16px] sm:text-[18px] md:text-[20px] font-bold text-secondary line-clamp-2 transition-colors duration-200"
           >
             {title}
           </h3>
@@ -102,15 +104,15 @@ const NewsBox = ({
           <div className="flex items-center">
             <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-secondary-tint-200">{time_ago}</span>
             <div className="h-3 w-[1px] bg-secondary mx-2"></div>
-            {first_category?.slug ? (
+            {team?.slug ? (
               <button
-                onClick={handleCategoryClick}
+                onClick={(e) => {handleTeamClick(e)}}
                 className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary hover:text-secondary transition-colors duration-200"
               >
-                {first_category.name || ''}
+                {team.name || ''}
               </button>
             ) : (
-              <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary">{first_category?.name || ''}</span>
+              <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary">{team?.name || ''}</span>
             )}
           </div>
           <div>

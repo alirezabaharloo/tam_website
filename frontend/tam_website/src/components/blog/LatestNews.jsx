@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useHome } from '../context/HomeContext';
-import LazyImage from './UI/LazyImage';
+import { useHome } from '../../context/HomeContext';
+import LazyImage from '../UI/LazyImage';
 
 const LatestNews = () => {
   const navigate = useNavigate();
@@ -30,7 +30,11 @@ const LatestNews = () => {
     latestNews.slice(2)
   ];
   
-  console.log(latestNews);
+  const handleTeamClick = (e, teamSlug) => {
+    e.stopPropagation();
+    navigate(`/news?team=${teamSlug}`);
+    window.location.reload(); 
+  };
   
 
   return (
@@ -67,8 +71,7 @@ const LatestNews = () => {
           <div 
             key={article.id} 
             className="w-full lg:w-1/2 h-[220px] sm:h-[300px] md:h-[380px] rounded-lg bg-quinary-tint-800 shadow-[4px_4px_16px_rgba(0,0,0,0.25)] overflow-hidden group cursor-pointer flex"
-            onClick={() => {navigate(`/news/${article.slug}`);console.log(article.slug);
-            }}
+            onClick={() => {navigate(`/news/${article.slug}`)}}
           >
             {/* Left side - Image */}
             <div className="w-1/2 h-full overflow-hidden order-1">
@@ -93,8 +96,11 @@ const LatestNews = () => {
                     {article.time_ago}
                   </span>
                   <div className="h-4 w-[1px] bg-secondary mx-2 sm:mx-4"></div>
-                  <span className="text-[10px] sm:text-[12px] font-regular text-quaternary">
-                    {article.first_category.name}
+                  <span 
+                      onClick={(e)=>{handleTeamClick(e, article.team.slug)}}
+                      className="pointer-auto cursor-default text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary hover:text-secondary transition-colors duration-200"
+                  >
+                    {article.team.name}
                   </span>
                 </div>
                 <div>
@@ -150,8 +156,11 @@ const LatestNews = () => {
                     {article.time_ago}
                   </span>
                   <div className="h-4 w-[1px] bg-secondary mx-2 sm:mx-4"></div>
-                  <span className="text-[10px] sm:text-[12px] font-regular text-quaternary">
-                    {article.first_category.name}
+                  <span 
+                      onClick={(e)=>{handleTeamClick(e, article.team.slug)}}
+                      className="pointer-auto cursor-default text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary hover:text-secondary transition-colors duration-200"
+                  >
+                    {article.team.name}
                   </span>
                 </div>
                 <div>

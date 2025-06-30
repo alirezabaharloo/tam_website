@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext.jsx';
+import { AuthContext } from '../../context/AuthContext.jsx';
 import { useTranslation } from 'react-i18next';
-import { successNotif, errorNotif } from '../utils/customNotifs.jsx';
-import useAuthHttp from '../hooks/useAuthHttp.jsx';
-import ChangePassword from '../components/authentication/ChangePassword.jsx';
-import { loadNamespaces } from '../i18n';
-import useAuth from '../hooks/useAuth.jsx';
-import SpinLoader from '../components/UI/SpinLoader.jsx';
-import SomethingWentWrong from '../components/UI/SomethingWentWrong.jsx';
-import domainUrl from '../utils/api.js';
+import { successNotif, errorNotif } from '../../utils/customNotifs.jsx';
+import useAuthHttp from '../../hooks/useAuthHttp.jsx';
+import ChangePassword from '../../components/authentication/ChangePassword.jsx';
+import { loadNamespaces } from '../../i18n.js';
+import useAuth from '../../hooks/useAuth.jsx';
+import SpinLoader from '../../components/UI/SpinLoader.jsx';
+import SomethingWentWrong from '../../components/UI/SomethingWentWrong.jsx';
+import domainUrl from '../../utils/api.js';
 
 
 const Profile = () => {
@@ -30,6 +30,12 @@ const Profile = () => {
     isError,
     data: profile
   } = useAuthHttp(`http://${domainUrl}:8000/api/admin/profile`)
+
+  const {
+    isLoading: isAdminPannelAccessLoading,
+    isError: isAdminPannelAccessError,
+    data: adminPannelAccessData
+  } = useAuthHttp(`http://${domainUrl}:8000/api/admin/admin-pannel-access`)
 
   
 
@@ -81,11 +87,9 @@ const Profile = () => {
     { id: 'settings', label: t('profileSettings', { ns: 'blog' }) }
   ];
 
-  if (isLoading) {
+  if (isLoading || isAdminPannelAccessLoading) {
     <SpinLoader />
   }
-  
-  console.log(isError);
   
 
   if (isError) {
@@ -138,12 +142,24 @@ const Profile = () => {
                 <p className="text-[16px] sm:text-[18px] text-secondary">{user?.phone}</p>
               </div>
             </div>
-            <button 
-              onClick={handleLogout}
-              className="mt-4 sm:mt-0 px-6 py-2 bg-quaternary text-quinary-tint-800 text-[16px] font-semibold rounded-lg hover:bg-quaternary-tint-200 transition-colors duration-300"
-            >
-              {t('profileLogout', { ns: 'blog' })}
-            </button>
+            <div className='flex justify-center items-center gap-[1rem]'>
+              {!isAdminPannelAccessError && adminPannelAccessData == 'Access granted.' && (
+                <button 
+                  className="mt-4 sm:mt-0 px-6 py-2 bg-quaternary text-quinary-tint-800 text-[16px] font-semibold rounded-lg hover:bg-quaternary-tint-200 transition-colors duration-300"
+                  onClick={()=>{
+                    navigate("/admin")
+                  }}
+                >
+                  admin pannel
+                </button>
+              )}
+              <button 
+                onClick={handleLogout}
+                className="mt-4 sm:mt-0 px-6 py-2 bg-quaternary text-quinary-tint-800 text-[16px] font-semibold rounded-lg hover:bg-quaternary-tint-200 transition-colors duration-300"
+              >
+                {t('profileLogout', { ns: 'blog' })}
+              </button>
+            </div>
           </div>
         </div>
 

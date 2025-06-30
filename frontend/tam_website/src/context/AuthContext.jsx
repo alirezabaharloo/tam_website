@@ -10,6 +10,7 @@ export const AuthContext = createContext(
     register: () => {},
     refreshToken: () => {},
     isAuthenticated: () => {},
+    isAdminPannelAccess: () => {},
     isAdmin: () => {},
     user: () => {},
   }
@@ -18,6 +19,7 @@ export const AuthContext = createContext(
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [ isAdminPannelAccess, setIsAdminPannelAccess ] = useState(false);
   const navigate = useNavigate();
 
 
@@ -39,11 +41,10 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  
   useEffect(() => {
     let isMounted = true;
 
-    const checkAdminAccess = async () => {
+    const checkAdminPannelAccess = async () => {
       try {
         const storedTokens = localStorage.getItem('tokens');
         if (!storedTokens || !isAuthenticated) {
@@ -52,7 +53,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         const accessToken = JSON.parse(storedTokens).access;
-        const response = await fetch('http://localhost:8000/api/auth/admin-access/', {
+        const response = await fetch(`http://${domainUrl}:8000/api/admin/admin-pannel-access`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -63,11 +64,11 @@ export const AuthProvider = ({ children }) => {
         if (!isMounted) return;
 
         if (response.status === 403) {
-          setIsAdmin(false);
+          setIsAdminPannelAccess(false);
         } else if (response.ok) {
-          setIsAdmin(true);
+          setIsAdminPannelAccess(true);
         } else {
-          setIsAdmin(false);
+          setIsAdminPannelAccess(false);
         }
       } catch (error) {
         console.error('Error checking admin access:', error);
@@ -75,7 +76,7 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    checkAdminAccess();
+    checkAdminPannelAccess();
 
     return () => {
       isMounted = false;
@@ -146,6 +147,8 @@ export const AuthProvider = ({ children }) => {
     navigate('/login');
   };
 
+  
+
   const refreshToken = async () => {
     try {
       const storedTokens = localStorage.getItem('tokens');
@@ -188,6 +191,7 @@ export const AuthProvider = ({ children }) => {
       register,
       refreshToken,
       isAuthenticated,
+      isAdminPannelAccess,
       isAdmin,
     }}>
       {children}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHome } from '../context/HomeContext';
-import LazyImage from './UI/LazyImage';
+import { useHome } from '../../context/HomeContext';
+import LazyImage from '../UI/LazyImage';
 
 const PlayerBoxes = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

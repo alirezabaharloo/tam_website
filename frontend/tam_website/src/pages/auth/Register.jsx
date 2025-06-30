@@ -1,12 +1,12 @@
 import React, { useReducer, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { fakeUsers } from '../data/fakeUsers'
-import Icons from '../data/Icons'
-import Input from '../components/authentication/common/Input'
-import Button from '../components/authentication/common/Button'
-import ErrorMessage from '../components/authentication/common/ErrorMessage'
-import { validatePhone, validatePassword, validateConfirmPassword } from '../utils/validators'
+import { fakeUsers } from '../../data/fakeUsers'
+import { authIcons } from '../../data/Icons'
+import Input from '../../components/authentication/common/Input'
+import Button from '../../components/authentication/common/Button'
+import ErrorMessage from '../../components/authentication/common/ErrorMessage'
+import { validatePhone, validatePassword, validateConfirmPassword } from '../../utils/validators'
 
 // Reducer for register state
 const registerReducer = (state, action) => {
@@ -124,7 +124,7 @@ export default function Register() {
         <div className="w-full max-w-[400px] flex flex-col items-center">
           {/* Phone Input */}
           <Input
-            icon={Icons.User}
+            icon={authIcons.User}
             type="text"
             placeholder={t('phoneNumber')}
             value={registerState.phone}
@@ -134,7 +134,7 @@ export default function Register() {
 
           {/* Password Input */}
           <Input
-            icon={Icons.Lock}
+            icon={authIcons.Lock}
             type={registerState.showPassword ? 'text' : 'password'}
             placeholder={t('password')}
             value={registerState.password}
@@ -145,7 +145,7 @@ export default function Register() {
 
           {/* Confirm Password Input */}
           <Input
-            icon={Icons.Lock}
+            icon={authIcons.Lock}
             type={registerState.showConfirmPassword ? 'text' : 'password'}
             placeholder={t('confirmPassword')}
             value={registerState.confirm}

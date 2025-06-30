@@ -93,7 +93,7 @@ const SomethingWentWrong = () => {
           {/* Description */}
           <motion.p
             variants={itemVariants}
-            className={`text-[16px] sm:text-[18px] md:text-[20px] text-secondary-tint-500 mb-8 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`text-[16px] sm:text-[18px] md:text-[20px] text-secondary-tint-500 mb-8 text-center`}
           >
             {t('somethingWentWrongDescription')}
           </motion.p>

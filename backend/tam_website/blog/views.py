@@ -42,17 +42,18 @@ class ArticleFilter(filters.FilterSet):
     most_viewed = filters.BooleanFilter(method='filter_most_viewed')
     most_popular = filters.BooleanFilter(method='filter_most_popular')
     search = filters.CharFilter(method='filter_search')
+    team = filters.CharFilter(method='filter_team')
 
     class Meta:
         model = Article
-        fields = ['type', 'status', 'category', 'most_viewed', 'most_popular', 'search']
+        fields = ['type', 'status', 'category', 'most_viewed', 'most_popular', 'search', 'team']
 
     def filter_category(self, queryset, name, value):
         if value:
             return queryset.filter(category__slug=value)
         return queryset
 
-    def filter_player(self, queryset, name, value):
+    def filter_team(self, queryset, name, value):
         if value:
             return queryset.filter(team__slug=value)
         return queryset
@@ -128,8 +129,8 @@ class ArticleListView(ListAPIView):
         queryset = super().get_queryset()
         # Optimize category prefetching for list view
         return queryset.prefetch_related(
-            'category',
-            'category__translations',
+            'team',
+            'team__translations',
             'article_images',
             'hits',
             'likes'

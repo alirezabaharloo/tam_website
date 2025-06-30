@@ -1,9 +1,9 @@
 import React, { useReducer, useEffect, useContext, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import Modal from '../components/Modal'
-import { AuthContext } from '../context/AuthContext'
-import Icons from '../data/Icons'
+import Modal from '../../components/blog/Modal'
+import { AuthContext } from '../../context/AuthContext'
+import { authIcons } from '../../data/Icons'
 
 // OTP state reducer
 const otpReducer = (state, action) => {
@@ -169,7 +169,7 @@ export default function OtpVerification() {
               </div>
               {otpState.error && (
                 <div className={`flex items-center ${isRTL ? 'mr-2 sm:mr-4' : 'ml-2 sm:ml-4'}`}>
-                  <Icons.Error />
+                  <authIcons.Error />
                   <span className={`${isRTL ? 'mr-1' : 'ml-1'} text-[14px] sm:text-[16px] font-normal text-quaternary`}>{t('invalidOtpCode')}</span>
                 </div>
               )}

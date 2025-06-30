@@ -6,6 +6,8 @@ import random
 from django.utils.translation import activate
 from accounts.models import User
 from django.core.files.base import ContentFile
+from ..models import Team
+
 
 # Create Faker instances for both languages
 fake_en = Faker('en')
@@ -103,7 +105,7 @@ class Command(BaseCommand):
                 'فوتبال', 'بسکتبال', 'تنیس', 'شنا', 'دو و میدانی',
                 'والیبال', 'هندبال', 'راگبی', 'کریکت', 'بیسبال',
                 'گلف', 'بوکس', 'ام‌ام‌ای', 'فرمول یک', 'دوچرخه‌سواری'
-            ]
+            ]   
         }
 
         # Generate 100 articles
@@ -118,8 +120,8 @@ class Command(BaseCommand):
             title_en = f"{sport_en} News: {fake_en.sentence()}"
             title_fa = f"اخبار {sport_fa}: {fake_fa.sentence()}"
             
-            body_en = fake_en.paragraph(nb_sentences=5)
-            body_fa = fake_fa.paragraph(nb_sentences=5)
+            body_en = fake_en.paragraph(nb_sentences=25)
+            body_fa = fake_fa.paragraph(nb_sentences=25)
             
             slug = slugify(title_en)
             
@@ -155,6 +157,10 @@ class Command(BaseCommand):
             # Now add the category after the article is saved
             random_category = random.choice(categories)
             article.category.add(random_category)
+
+            # Now add the Team after article is saved
+            random_team = random.choice(Team.objects.all())
+            article.team = random_category
 
             # Add the image to the article
             article.article_images.add(image)

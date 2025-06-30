@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import Header from "./components/Header"
-import Footer from "./components/Footer"
-import Divider from "./components/Divider"
-import ContactBoxes from "./components/ContactBoxes"
-import LogoSection from "./components/LogoSection"
+import Header from "./components/blog/Header.jsx"
+import Footer from "./components/blog/Footer.jsx"
+import Divider from "./components/blog/Divider.jsx"
+import ContactBoxes from "./components/blog/ContactBoxes.jsx"
+import LogoSection from "./components/blog/LogoSection.jsx"
 import './i18n';
 import { loadNamespaces } from './i18n';
 import { AuthProvider } from './context/AuthContext';
-import { BlogRoutes } from './router.jsx';
+import { WebsiteRoutes } from './router.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from 'react-i18next';
@@ -58,7 +58,7 @@ function App() {
           <div className="min-h-screen bg-quinary-tint-600">
             <Header />
             <Suspense fallback={SpinLoader}>
-              <BlogRoutes />
+              <WebsiteRoutes />
             </Suspense>
             <Divider />
             <ContactBoxes />

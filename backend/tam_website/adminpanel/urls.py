@@ -1,15 +1,12 @@
 from django.urls import path
-from .views import (
-    UserListView,
-    AdminUserManagementView,
-    UserProfileView
-)
+from . import views
 
 urlpatterns = [
     # Admin routes
-    path('users/', UserListView.as_view(), name='user-list'),  # List all users
-    path('user/<int:pk>/', AdminUserManagementView.as_view(), name='admin-user-management'),  # Admin management of specific user
-    
+    path('users/', views.UserListView.as_view(), name='user-list'),  # List all users
+    path('user/<int:pk>/', views.AdminUserManagementView.as_view(), name='admin-user-management'),  # Admin management of specific user
+    path('admin-pannel-access/', views.check_admin_access, name='user-list'),
+
     # User routes
-    path('profile/', UserProfileView.as_view(), name='user-profile'),  # User's own profile management
+    path('profile/', views.UserProfileView.as_view(), name='user-profile'),  # User's own profile management
 ]

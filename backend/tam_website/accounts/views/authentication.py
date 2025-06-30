@@ -78,14 +78,3 @@ class ResetPasswordView(LocalizationMixin, GenericAPIView):
         
         return Response(srz_data.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def check_admin_access(request):
-    """
-    Check if the authenticated user has admin access
-    """
-    is_admin = request.user.is_superuser
-    if not is_admin:
-        return Response('Access denied.', status=status.HTTP_403_FORBIDDEN)
-    return Response("Access granted.", status=status.HTTP_200_OK)

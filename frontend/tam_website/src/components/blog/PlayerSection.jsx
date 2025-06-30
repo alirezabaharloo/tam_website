@@ -1,7 +1,7 @@
 import React from 'react';
 import PlayerBoxes from './PlayerBoxes';
 import { useTranslation } from 'react-i18next';
-import { useHome } from '../context/HomeContext.jsx';
+import { useHome } from '../../context/HomeContext.jsx';
 
 const PlayerSection = () => {
   const { t, i18n } = useTranslation();

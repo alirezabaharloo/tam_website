@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { loadNamespaces } from '../i18n';
-import { scrollToSection, navigateToNewsWithFilter, scrollToAboutSection } from '../utils/navigation';
+import { loadNamespaces } from '../../i18n';
+import { scrollToSection, navigateToNewsWithFilter, scrollToAboutSection } from '../../utils/navigation';
 
 const Footer = () => {
   const navigate = useNavigate();

@@ -1,14 +1,14 @@
 import React from 'react';
-import { HomeProvider } from '../context/HomeContext';
-import LatestNews from '../components/LatestNews';
-import LatestVideos from '../components/LatestVideos';
-import TeamBoxes from '../components/TeamBoxes';
-import PlayerSection from '../components/PlayerSection';
-import SpinLoader from '../components/UI/SpinLoader';
-import SomethingWentWrong from '../components/UI/SomethingWentWrong';
-import { useHome } from '../context/HomeContext';
-import Slider from '../components/Slider.jsx'
-import ShopSection from '../components/ShopSection.jsx'
+import { HomeProvider } from '../../context/HomeContext.jsx';
+import LatestNews from '../../components/blog/LatestNews.jsx';
+import LatestVideos from '../../components/blog/LatestVideos.jsx';
+import TeamBoxes from '../../components/blog/TeamBoxes.jsx';
+import PlayerSection from '../../components/blog/PlayerSection.jsx';
+import SpinLoader from '../../components/UI/SpinLoader.jsx';
+import SomethingWentWrong from '../../components/UI/SomethingWentWrong.jsx';
+import { useHome } from '../../context/HomeContext.jsx';
+import Slider from '../../components/blog/Slider.jsx'
+import ShopSection from '../../components/blog/ShopSection.jsx'
 
 
 const HomeContent = () => {

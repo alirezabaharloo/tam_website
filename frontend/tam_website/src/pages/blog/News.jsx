@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearch } from '../context/SearchContext'
+import { useSearch } from '../../context/SearchContext'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import NewsFilter from '../components/NewsFilter'
-import NewsBox from '../components/NewsBox'
-import SpinLoader from '../components/UI/SpinLoader'
-import SomethingWentWrong from '../components/UI/SomethingWentWrong'
-import NoArticlesFound from '../components/UI/NoArticlesFound'
-import useHttp from '../hooks/useHttp'
-import domainUrl from '../utils/api'
+import NewsFilter from '../../components/blog/NewsFilter'
+import NewsBox from '../../components/blog/NewsBox'
+import SpinLoader from '../../components/UI/SpinLoader'
+import SomethingWentWrong from '../../components/UI/SomethingWentWrong'
+import NoArticlesFound from '../../components/UI/NoArticlesFound'
+import useHttp from '../../hooks/useHttp'
+import domainUrl from '../../utils/api'
 
 
 const containerVariants = {
@@ -50,7 +50,8 @@ export default function News() {
     const typeParam = params.get('type');
     const categoryParam = params.get('category');
     const pageParam = params.get('page');
-    
+    const teamParam = params.get('team');
+
     const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
     if (searchParam) {
       searchUrl.searchParams.set('search', searchParam);
@@ -61,10 +62,14 @@ export default function News() {
     if (categoryParam) {
       searchUrl.searchParams.set('category', categoryParam);
     }
+    if (teamParam) {
+      searchUrl.searchParams.set('team', teamParam);
+    }
     if (pageParam) {
       searchUrl.searchParams.set('page', pageParam);
       searchUrl.searchParams.set('fetch-all', 'true');
     }
+
     return searchUrl.toString();
   });
   const [allArticles, setAllArticles] = useState([]);
@@ -74,6 +79,7 @@ export default function News() {
   const searchParam = new URLSearchParams(window.location.search).get("search");
   const categoryParam = new URLSearchParams(window.location.search).get("category");
   const currentPage = new URLSearchParams(window.location.search).get("page") || "1";
+  const teamParam = new URLSearchParams(window.location.search).get("team");
 
   const {
     isLoading,
@@ -118,13 +124,13 @@ export default function News() {
   const handleFilterChange = (filterId) => {
     const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
     const searchParam = new URLSearchParams(window.location.search).get('search');
-    const categoryParam = new URLSearchParams(window.location.search).get('category');
+    const teamParam = new URLSearchParams(window.location.search).get('team');
     
     if (searchParam) {
       searchUrl.searchParams.set('search', searchParam);
     }
-    if (categoryParam) {
-      searchUrl.searchParams.set('category', categoryParam);
+    if (teamParam) {
+      searchUrl.searchParams.set('team', teamParam);
     }
     if (filterId !== 'all') {
       searchUrl.searchParams.set('type', filterId);
@@ -175,20 +181,20 @@ export default function News() {
           </div>
         )}
         
-        {categoryParam && (
+        {teamParam && (
           <div className="flex items-center justify-between bg-quaternary  backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-quinary-tint-800/20">
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="text-secondary text-sm sm:text-base md:text-lg text-">
                 {t('categoryFilter') || 'Category'}:
               </span>
               <span className="text-quaternary font-medium text-sm sm:text-base md:text-lg text-white">
-                {categoryParam}
+                {teamParam}
               </span>
             </div>
             <button
               onClick={() => {
                 const params = new URLSearchParams(window.location.search);
-                params.delete('category');
+                params.delete('team');
                 params.delete('page');
                 navigate(`/news?${params.toString()}`);
                 window.location.reload();

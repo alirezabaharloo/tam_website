@@ -1,8 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 export default function NoArticlesFound() {
   const { t } = useTranslation();
+  const navigate  = useNavigate();
+
 
   return (
     <div className="w-full flex flex-col items-center justify-center py-8 px-4">
@@ -33,12 +36,13 @@ export default function NoArticlesFound() {
 
       <div className="flex gap-3">
         <button
-          className="px-4 py-2 bg-quaternary-800 text-white rounded-lg text-sm hover:bg-quaternary-700"
+          className="px-4 py-2 bg-quaternary-200 text-white rounded-lg text-sm hover:bg-quaternary-300"
         >
           {t('tryDifferentFilter')}
         </button>
         <button
           className="px-4 py-2 bg-white text-quaternary-800 border border-quaternary-800 rounded-lg text-sm hover:bg-quaternary-50"
+          onClick={()=>{navigate("/")}}        
         >
           {t('refreshPage')}
         </button>

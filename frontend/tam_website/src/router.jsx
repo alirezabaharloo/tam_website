@@ -1,15 +1,22 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import Home from './pages/Home';
-import About from './pages/About';
+// blog routes
+import Home from './pages/blog/Home';
+import About from './pages/blog/About';
 import Shop from './pages/Shop';
-import News from './pages/News';
-import NewsDetail from './components/NewsDetail';
-import Login from './pages/Login';
-import Profile from './pages/Profile';
-import Error from './pages/Error';
-import OtpVerification from './pages/OtpVerification';
-import Register from './pages/Register';
+import News from './pages/blog/News';
+import NewsDetail from './components/blog/NewsDetail';
+// auth routes
+import Login from './pages/auth/Login';
+import Profile from './pages/auth/Profile';
+import PageNotFound from './pages/PageNotFound';
+import OtpVerification from './pages/auth/OtpVerification';
+import Register from './pages/auth/Register';
+// admin routes
+import AdminLayout from './layout/AdminLayout';
+import Admin from './pages/admin/Admin';
+// import ArticleForm from './pages/admin/ArticleForm';
+// import UserForm from './pages/admin/UserForm';
 
 
 const PageTransition = ({ children }) => {
@@ -25,12 +32,14 @@ const PageTransition = ({ children }) => {
   );
 };
 
-const BlogRoutes = () => {
+const WebsiteRoutes = () => {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+
+        {/* BLOG routes */}
         <Route path="/" element={
           <PageTransition>
             <Home />
@@ -56,6 +65,8 @@ const BlogRoutes = () => {
             <NewsDetail />
           </PageTransition>
         } />
+
+        {/* AUTH routes */}
         <Route path="/login" element={
           <PageTransition>
             <Login />
@@ -81,21 +92,15 @@ const BlogRoutes = () => {
             <Error />
           </PageTransition>
         } />
+
+        {/* ADMIN routes */}
+        <Route path="/admin/*" element={<AdminLayout />} >
+          <Route index element={<Admin />} />
+        </Route>
+      
       </Routes>
     </AnimatePresence>
   );
 };
 
-// const AdminRoutes = () => {
-//   return (
-//     <>
-//       <Route path="/admin" element={<Admin />} />
-//       <Route path="/admin/user/add" element={<UserForm />} />
-//       <Route path="/admin/user/edit/:userId" element={<UserForm />} />
-//       <Route path="/admin/article/add" element={<ArticleForm />} />
-//       <Route path="/admin/article/edit/:id" element={<ArticleForm />} />
-//     </>
-//   )
-// }
-
-export { BlogRoutes };
+export { WebsiteRoutes };

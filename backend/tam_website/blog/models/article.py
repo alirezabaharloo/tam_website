@@ -33,7 +33,9 @@ class Article(TranslatableModel):
 
     category = models.ManyToManyField(
         "Category",
-        help_text="The category of this article"
+        help_text="The category of this article",
+        null=True,
+        blank=True,
     )
 
     team = models.OneToOneField("Team", on_delete=models.PROTECT, related_name='article')

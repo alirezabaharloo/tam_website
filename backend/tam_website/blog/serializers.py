@@ -38,10 +38,11 @@ class ArticleSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     first_category = serializers.SerializerMethodField()
     categories = serializers.SerializerMethodField()
+    team = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
-        fields = ['id', 'title', 'body', 'author_name', 'slug', 'view_count', 'time_ago', 'likes', 'images', 'type', 'video_url', 'categories', 'first_category']
+        fields = ['id', 'title', 'body', 'author_name', 'slug', 'view_count', 'time_ago', 'likes', 'images', 'type', 'video_url', 'categories', 'first_category', 'team']
         read_only_fields = ['author']
 
     def get_author_name(self, obj):
@@ -91,6 +92,12 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def get_images(self, obj):
         return [image.image.url for image in obj.article_images.all()]
+
+    def get_team(self, obj):
+        return {
+            'name': obj.team.name,
+            'slug': obj.team.slug
+        }
 
     def to_representation(self, instance: Article):
         """Customize output based on context"""
