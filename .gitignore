@@ -63,3 +63,4 @@ postgres_data/
 
 # Others
 env
+.cursor

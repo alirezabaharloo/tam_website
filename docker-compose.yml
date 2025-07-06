@@ -1,0 +1,85 @@
+services:
+  database:
+    container_name: database
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=tam_website
+      - POSTGRES_USER=tam
+      - POSTGRES_PASSWORD=8923u4odsha89huofnd
+    ports:
+      - "5432:5432"     
+    volumes:
+      - tam_db_data:/var/lib/postgresql/data
+    networks:
+      - tam-network
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    ports:
+      - 8000:8000
+    command: >
+          sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"  
+    volumes:
+      - ./backend/tam_website:/app
+    depends_on:
+      - database
+      - redis
+    networks:
+      - tam-network
+    restart: always
+    env_file:
+      - ./backend/tam_website/core/.env
+
+  # frontend:
+  #   container_name: frontend
+  #   build:
+  #     context: .
+  #     dockerfile: ./docker/react/Dockerfile
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./frontend/tam_website:/app
+  #     - /app/node_modules
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - tam-network
+  #   restart: always
+
+  redis:
+    container_name: redis
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - tam-network
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  # celery:
+  #   container_name: celery
+  #   build:
+  #     context: .
+  #     dockerfile: ./docker/django/Dockerfile
+  #   command: celery -A core worker -l INFO
+  #   volumes:
+  #     - ./backend/tam_website:/app
+  #   depends_on:
+  #     - redis
+  #     - backend
+  #   networks:
+  #     - tam-network
+  #   restart: always
+  #   env_file:
+  #     - ./backend/tam_website/core/.env
+
+volumes:
+  tam_db_data:
+  redis_data:
+
+networks:
+  tam-network:
