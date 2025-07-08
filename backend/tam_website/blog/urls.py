@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import HomeDataView, AdminDashboardDataView
+from .views import HomeDataView
 
 app_name = 'blog'
 
@@ -14,5 +14,5 @@ urlpatterns = [
     path('preview-article/<str:slug>/', views.ArticleDetailForAuthorsView.as_view(), name='author-article-detail'),
     path('article-like/<str:slug>/', views.ArticleLikeView.as_view(), name='article-like'),
     path('home-datas/', HomeDataView.as_view(), name='home-datas'),
-    path('admin-dashboard-data/', AdminDashboardDataView.as_view(), name='admin-dashboard-data'),
+
 ]

@@ -3,6 +3,7 @@ import useAuthHttp from '../../hooks/useAuthHttp';
 import AdminPagination from './AdminPagination';
 import SpinLoader from '../UI/SpinLoader';
 import SomethingWentWrong from '../UI/SomethingWentWrong';
+import { AdminIcons } from '../../data/Icons';
 
 const AdminUsersTab = ({ navigate }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,19 +78,27 @@ const AdminUsersTab = ({ navigate }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-2">
-        <h2 className="text-[24px] font-bold text-primary mb-2 sm:mb-0">
-          مدیریت کاربران
-        </h2>
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full sm:w-auto">
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <input
-              type="text"
-              placeholder="جست و جو کاربر..."
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-quinary-tint-400 focus:outline-none focus:ring-2 focus:ring-primary text-right w-full sm:w-64 bg-quinary-tint-800 text-primary"
-              dir="rtl"
-            />
+            <div className="relative w-full sm:w-64">
+              <input
+                type="text"
+                placeholder="جست و جو کاربر..."
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                className="px-3 py-2 pr-4 rounded-lg border border-quinary-tint-400 focus:outline-none focus:ring-2 focus:ring-primary text-right w-full bg-quinary-tint-800 text-primary pl-8"
+                dir="rtl"
+              />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-quaternary transition-colors duration-200"
+                >
+                  <AdminIcons.ClearSearch />
+                </button>
+              )}
+            </div>
             <button
               type="submit"
               className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 font-bold"
@@ -108,15 +117,6 @@ const AdminUsersTab = ({ navigate }) => {
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
-          {search && (
-            <button
-              type="button"
-              onClick={handleClearSearch}
-              className="px-3 py-2 bg-quaternary text-quinary-tint-800 rounded-lg hover:bg-quaternary-tint-100 transition-colors duration-300 font-bold"
-            >
-              پاک کردن جستجو
-            </button>
-          )}
         </form>
         <button 
           onClick={() => navigate('/admin/user/add')}

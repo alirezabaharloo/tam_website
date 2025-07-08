@@ -40,6 +40,7 @@ const useAuthHttp = (url, options = null) => {
         ...options?.headers,
         "Authorization": `Bearer ${JSON.parse(localStorage.getItem('tokens'))?.access}`,
         'Content-Type': 'application/json',
+        'Accept-Language': localStorage.getItem("language", "fa")
       }
     };
     let res = await fetch(url, requestOptions);
@@ -53,7 +54,6 @@ const useAuthHttp = (url, options = null) => {
       // Try to refresh the token
       
       const refreshSuccess = await handleUnauthorized();
-      console.log(refreshSuccess);
       
       if (refreshSuccess) {
         // Retry the original request with new token

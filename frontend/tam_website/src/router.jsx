@@ -19,7 +19,7 @@ import Dashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
 import AdminNews from './pages/admin/News';
 import AdminShop from './pages/admin/Shop';
-import Settings from './pages/admin/Settings';
+import Players from './pages/admin/Players';
 // import ArticleForm from './pages/admin/ArticleForm';
 // import UserForm from './pages/admin/UserForm';
 
@@ -30,7 +30,7 @@ const PageTransition = ({ children }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.4 }}
     >
       {children}
     </motion.div>
@@ -98,13 +98,13 @@ const WebsiteRoutes = () => {
           </PageTransition>
         } />
 
-        {/* ADMIN routes */}
+        {/* ADMIN routes - بدون PageTransition */}
         <Route path="/admin/*" element={<AdminLayout />} >
           <Route index element={<Dashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="news" element={<AdminNews />} />
           <Route path="shop" element={<AdminShop />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="players" element={<Players />} />
         </Route>
       
       </Routes>

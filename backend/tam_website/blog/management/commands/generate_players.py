@@ -10,6 +10,7 @@ class Command(BaseCommand):
     help = 'Generates dummy players'
 
     def handle(self, *args, **kwargs):
+        Player.objects.all().delete()
         fake_en = Faker('en_US')
         fake_fa = Faker('fa_IR')
 

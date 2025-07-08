@@ -47,7 +47,7 @@ function AppContent() {
       {!isAdminPath && (
         <>
           <Header />
-          <Suspense fallback={SpinLoader}>
+          <Suspense fallback={<SpinLoader />}>
             <WebsiteRoutes />
           </Suspense>
           <Divider />
@@ -60,7 +60,7 @@ function AppContent() {
       
       {/* Show only routes for admin paths */}
       {isAdminPath && (
-        <Suspense fallback={SpinLoader}>
+        <Suspense fallback={<SpinLoader />}>
           <WebsiteRoutes />
         </Suspense>
       )}
@@ -74,8 +74,9 @@ function App() {
 
   // Ensure the blog namespace is loaded
   useEffect(() => {
-    // Set document direction based on language
+    // Set document direction and language based on language
     document.documentElement.dir = i18n.language === 'fa' ? 'rtl' : 'ltr';
+    document.documentElement.lang = i18n.language;
 
     // Load core namespace
     loadNamespaces('blog');

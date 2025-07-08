@@ -37,7 +37,7 @@ class Article(TranslatableModel):
         blank=True,
     )
 
-    team = models.OneToOneField("Team", on_delete=models.PROTECT, related_name='article', null=True)
+    team = models.ForeignKey("Team", on_delete=models.SET_NULL, related_name='articles', null=True)
 
     # Translated fields
     translations = TranslatedFields(
@@ -133,7 +133,7 @@ class MiddleArticleIpAddress(models.Model):
 
 
 class Image(models.Model):
-    image = models.ImageField(upload_to='slide-show-images')
+    image = models.ImageField(upload_to='article-images/')
     article = models.ManyToManyField(Article, related_name='article_images')
 
     def __str__(self) -> str:
@@ -145,7 +145,7 @@ class Category(TranslatableModel):
         name=models.CharField(max_length=250),
         description=models.TextField(),
     )
-    image=models.ImageField(upload_to='categories/', null=True, blank=True)
+    image=models.ImageField(upload_to='categories/', null=True, blank=True, max_length=850)
     slug = models.SlugField(max_length=250, unique=True, blank=True)
     
     def save(self, *args, **kwargs):

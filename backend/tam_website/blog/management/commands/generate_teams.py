@@ -9,6 +9,7 @@ class Command(BaseCommand):
     help = 'Generates dummy teams'
 
     def handle(self, *args, **kwargs):
+        Team.objects.all().delete()
         fake_en = Faker('en_US')
         fake_fa = Faker('fa_IR')
 
@@ -32,13 +33,7 @@ class Command(BaseCommand):
             team.set_current_language('fa')
             team.name = team_data['fa']
             
-            # Handle image
-            dummy_content = b'dummy image data'
-            image_file = ContentFile(dummy_content, name=f'{slugify(team_data["en"])}.jpg')
-            team.image.save(image_file.name, image_file, save=False)
 
             team.save()
-            
-            self.stdout.write(self.style.SUCCESS(f'Successfully created team: {team_data["en"]} / {team_data["fa"]}'))
         
         self.stdout.write(self.style.SUCCESS('Finished generating teams.')) 

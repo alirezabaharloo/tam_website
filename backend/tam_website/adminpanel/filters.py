@@ -2,6 +2,7 @@ from django_filters import rest_framework as filters
 from accounts.models import User
 from django.db.models import Q
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from blog.models.partial import Player
 
 class UserFilter(filters.FilterSet):
     type = filters.CharFilter(method='filter_type')
@@ -21,7 +22,6 @@ class UserFilter(filters.FilterSet):
         return queryset
 
     def filter_search(self, queryset, name, value):
-        print(value)
         if value:
             try:
                 # Use 'simple' config for Persian/English fallback
@@ -48,4 +48,38 @@ class UserFilter(filters.FilterSet):
                     Q(seller_profile__first_name__icontains=value) |
                     Q(seller_profile__last_name__icontains=value)
                 ).distinct()
+        return queryset
+
+
+class PlayerFilter(filters.FilterSet):
+    position = filters.CharFilter(field_name='position')
+    search = filters.CharFilter(method='filter_search')
+    search_language = filters.CharFilter(method='filter_search_language')
+
+    class Meta:
+        model = Player
+        fields = ['position', 'search', 'search_language']
+    
+    def filter_search(self, queryset, name, value):
+        if not value:
+            return queryset
+        
+        # Get search language from request, default to 'fa'
+        search_language = self.request.query_params.get('search_language', 'fa')
+        
+        # Create a filter that targets the appropriate language translation
+        if search_language == 'en':
+            # Search in English translations
+            return queryset.filter(
+                Q(translations__name__icontains=value) & Q(translations__language_code='en')
+            ).distinct()
+        else:
+            # Default to search in Persian translations
+            return queryset.filter(
+                Q(translations__name__icontains=value) & Q(translations__language_code='fa')
+            ).distinct()
+    
+    def filter_search_language(self, queryset, name, value):
+        # This is just a parameter holder for the serializer
+        # The actual filtering is done in filter_search
         return queryset 

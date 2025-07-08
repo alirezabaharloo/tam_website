@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
 import useAuthHttp from '../hooks/useAuthHttp';
@@ -31,11 +31,12 @@ const AdminLayout = () => {
         { id: 'users', label: 'کاربران', icon: AdminIcons.Users, path: '/admin/users' },
         { id: 'news', label: 'اخبار', icon: AdminIcons.News, path: '/admin/news' },
         { id: 'shop', label: 'فروشگاه', icon: AdminIcons.Shop, path: '/admin/shop' },
-        { id: 'settings', label: 'تنظیمات', icon: AdminIcons.Settings, path: '/admin/settings' },
+        { id: 'players', label: 'بازیکن‌ها', icon: AdminIcons.Teams, path: '/admin/players' },
       ];
     } else if (userData.is_author) {
       return [
         { id: 'news', label: 'اخبار', icon: AdminIcons.News, path: '/admin/news' },
+        { id: 'players', label: 'بازیکن‌ها', icon: AdminIcons.Teams, path: '/admin/players' },
       ];
     } else if (userData.is_seller) {
       return [
@@ -63,11 +64,19 @@ const AdminLayout = () => {
     }
   };
 
+  useEffect(() => {
+    const websiteLanguage = localStorage.getItem("language", "fa");
+    if (websiteLanguage === "en") {
+      localStorage.setItem("language", "fa");
+      window.location.reload();
+    }
+  }, []);
+
   // لودینگ یا خطا
   if (userLoading) {
     return <SpinLoader />;
   }
-
+  
   if (isAdminPannelAccess === null) {
     return <SpinLoader />;
   }
@@ -79,11 +88,7 @@ const AdminLayout = () => {
   return (
     <div className="flex h-screen bg-quinary-tint-600">
       {/* Sidebar */}
-      <motion.div 
-        initial={{ x: -300 }}
-        animate={{ x: 0 }}
-        className="w-80 bg-quinary-tint-800 shadow-[0_0_16px_rgba(0,0,0,0.25)] flex flex-col"
-      >
+      <div className="w-80 bg-quinary-tint-800 shadow-[0_0_16px_rgba(0,0,0,0.25)] flex flex-col">
         {/* Header */}
         <div className="p-6 border-b border-quinary-tint-700">
           <h2 className="text-2xl font-bold text-primary">پنل مدیریت</h2>
@@ -94,30 +99,24 @@ const AdminLayout = () => {
         <nav className="mt-6 flex-grow px-4">
           <div className="space-y-2">
             {tabs.map((tab) => (
-              <motion.button
+              <button
                 key={tab.id}
                 onClick={() => navigate(tab.path)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-[16px] font-medium transition-all duration-300 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-[16px] font-medium transition-colors duration-200 ${
                   getActiveTab() === tab.id
                     ? 'bg-primary text-quinary-tint-800'
                     : 'text-secondary hover:bg-quinary-tint-700'
                 }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
               >
                 {tab.icon ? <tab.icon /> : <AdminIcons.Dashboard />}
                 {tab.label}
-              </motion.button>
+              </button>
             ))}
           </div>
         </nav>
 
         {/* User Profile Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 border-t border-quinary-tint-700"
-        >
+        <div className="p-4 border-t border-quinary-tint-700">
           <div className="flex items-center space-x-4 space-x-reverse">
             <div className="p-2 bg-primary bg-opacity-20 rounded-full">
               <AdminIcons.User />
@@ -149,59 +148,66 @@ const AdminLayout = () => {
             </div>
             <button
               onClick={() => setIsLogoutModalOpen(true)}
-              className="p-2 text-secondary hover:text-quaternary transition-colors"
+              className="p-2 text-secondary hover:text-quaternary transition-colors duration-200"
             >
               <AdminIcons.Logout />
             </button>
           </div>
           
           {/* Return to Website Button */}
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+          <button
             onClick={() => navigate('/')}
-            className="mt-4 w-full py-2 px-4 bg-gradient-to-l from-primary to-primary-tint-200 text-quinary-tint-800 rounded-lg shadow-md hover:from-primary-tint-200 hover:to-primary transition-all duration-300 flex items-center justify-center gap-2 font-medium"
+            className="mt-4 w-full py-2 px-4 bg-gradient-to-l from-primary to-primary-tint-200 text-quinary-tint-800 rounded-lg shadow-md hover:from-primary-tint-200 hover:to-primary transition-colors duration-200 flex items-center justify-center gap-2 font-medium"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7m-7-7v14" />
             </svg>
             بازگشت به سایت
-          </motion.button>
-        </motion.div>
-      </motion.div>
+          </button>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <main className="p-8">
-          <Outlet />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ 
+                duration: 0.3, 
+                ease: "easeInOut" 
+              }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
       {/* Logout Confirmation Modal */}
       {isLogoutModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-quinary-tint-800 p-6 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] max-w-md w-full mx-4"
-          >
+          <div className="bg-quinary-tint-800 p-6 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] max-w-md w-full mx-4">
             <h3 className="text-xl font-bold text-primary mb-4">تأیید خروج</h3>
             <p className="text-secondary mb-6">آیا مطمئن هستید که می‌خواهید از حساب کاربری خود خارج شوید؟</p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setIsLogoutModalOpen(false)}
-                className="px-4 py-2 bg-quinary-tint-700 text-secondary rounded-lg hover:bg-quinary-tint-600 transition-colors duration-300"
+                className="px-4 py-2 bg-quinary-tint-700 text-secondary rounded-lg hover:bg-quinary-tint-600 transition-colors duration-200"
               >
                 انصراف
               </button>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-quaternary text-quinary-tint-800 rounded-lg hover:bg-quaternary-tint-200 transition-colors duration-300 font-medium"
+                className="px-4 py-2 bg-quaternary text-quinary-tint-800 rounded-lg hover:bg-quaternary-tint-200 transition-colors duration-200 font-medium"
               >
                 خروج
               </button>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
     </div>

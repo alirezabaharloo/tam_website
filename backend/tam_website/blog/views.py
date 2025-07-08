@@ -338,20 +338,3 @@ class HomeDataView(LocalizationMixin, APIView):
             )
 
 
-class AdminDashboardDataView(APIView):
-    """
-    Returns total users, articles, and products (products=0 for now) for admin dashboard.
-    """
-    def get(self, request):
-        try:
-            from blog.models import Article
-            users_count = User.objects.count()
-            articles_count = Article.objects.count()
-            products_count = 0  # فعلاً محصول نداریم
-            return Response({
-                'users': users_count,
-                'articles': articles_count,
-                'products': products_count
-            })
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
