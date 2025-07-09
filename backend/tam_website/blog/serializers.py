@@ -47,7 +47,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def get_author_name(self, obj):
         """Get formatted author name from profile"""
-        return str(obj.author.get_profile)
+        return str(obj.author) if obj.author else "Unknown"
     
     def get_first_category(self, obj):
         """Get the first category of the article"""

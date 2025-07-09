@@ -4,7 +4,7 @@ from django.utils.text import slugify
 from faker import Faker
 import random
 from django.utils.translation import activate
-from accounts.models import User
+from accounts.models import User, Profile
 from django.core.files.base import ContentFile
 from ...models import Team
 
@@ -123,8 +123,7 @@ class Command(BaseCommand):
                 type=article_type,
                 status=Article.Status.ACCEPT,
                 video_url=fake_en.url() if article_type == Article.Type.VIDEO else None,
-                slug=slug,
-                author=User.objects.first()
+                slug=slug
             )
             
             # Set English translation
@@ -142,8 +141,11 @@ class Command(BaseCommand):
                 user = User.objects.create_superuser(phone_number='09133333333', password='1234')
             else:
                 user = User.objects.get(phone_number='09133333333')
-                
-            article.author = user
+            
+            # Get or create profile for the user
+            profile = Profile.objects.get_or_create(user=user)[0]
+            article.author = profile
+            
             random_team = random.choice(Team.objects.all())
             article.team = random_team
             # Save the article first

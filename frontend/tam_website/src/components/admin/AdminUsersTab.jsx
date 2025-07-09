@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import useAuthHttp from '../../hooks/useAuthHttp';
 import AdminPagination from './AdminPagination';
 import SpinLoader from '../UI/SpinLoader';
 import SomethingWentWrong from '../UI/SomethingWentWrong';
 import { AdminIcons } from '../../data/Icons';
+import useAdminHttp from '../../hooks/useAdminHttp';
 
 const AdminUsersTab = ({ navigate }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,13 +21,13 @@ const AdminUsersTab = ({ navigate }) => {
     data,
     isError,
     errorContent
-  } = useAuthHttp(url);
+  } = useAdminHttp(url);
 
   const {
     data: userPermissionsData,
     isLoading: userPermissionsLoading,
     isError: userPermissionsError
-  } = useAuthHttp('http://localhost:8000/api/admin/user-permissions-list/');
+  } = useAdminHttp('http://localhost:8000/api/admin/user-permissions-list/');
 
   useEffect(() => {
     if (data && data.results) {

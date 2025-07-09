@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 from rest_framework import viewsets, mixins, permissions
-from accounts.models.profiles import UserProfile, SellerProfile
+from accounts.models.profiles import Profile
 from blog.models.partial import Player
 from blog.serializers import PlayerSerializer
 
@@ -28,9 +28,10 @@ def check_admin_access(request):
     is_admin = request.user.is_superuser
     is_author = request.user.is_author
     is_seller = request.user.is_seller
-    if not is_admin or not is_author or not is_seller:
-        return Response('Access denied.', status=status.HTTP_403_FORBIDDEN)
-    return Response("Access granted.", status=status.HTTP_200_OK)
+    if is_admin or is_author or is_seller:
+        return Response("Access granted.", status=status.HTTP_200_OK)
+    return Response('Access denied.', status=status.HTTP_403_FORBIDDEN)
+    
 
 class UserPagination(PageNumberPagination):
     page_size = 8

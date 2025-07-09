@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import User
+from accounts.models import Profile
 from django.utils.text import slugify
 from django_jalali.db import models as jmodels
 from parler.models import TranslatableModel, TranslatedFields
@@ -24,7 +24,7 @@ class Article(TranslatableModel):
 
     # Relationships
     author = models.ForeignKey(
-        User,
+        Profile,
         on_delete=models.SET_NULL,
         related_name='articles',
         null=True,

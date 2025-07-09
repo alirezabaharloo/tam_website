@@ -28,11 +28,9 @@ class UserFilter(filters.FilterSet):
                 config = 'simple'
                 # Create search vectors for all relevant fields
                 phone_vector = SearchVector('phone_number', weight='A', config=config)
-                up_first_vector = SearchVector('user_profile__first_name', weight='B', config=config)
-                up_last_vector = SearchVector('user_profile__last_name', weight='B', config=config)
-                sp_first_vector = SearchVector('seller_profile__first_name', weight='B', config=config)
-                sp_last_vector = SearchVector('seller_profile__last_name', weight='B', config=config)
-                search_vector = phone_vector + up_first_vector + up_last_vector + sp_first_vector + sp_last_vector
+                first_name_vector = SearchVector('user_profile__first_name', weight='B', config=config)
+                last_name_vector = SearchVector('user_profile__last_name', weight='B', config=config)
+                search_vector = phone_vector + first_name_vector + last_name_vector
                 search_query = SearchQuery(value, config=config)
                 return queryset.annotate(
                     rank=SearchRank(search_vector, search_query)
@@ -44,9 +42,7 @@ class UserFilter(filters.FilterSet):
                 return queryset.filter(
                     Q(phone_number__icontains=value) |
                     Q(user_profile__first_name__icontains=value) |
-                    Q(user_profile__last_name__icontains=value) |
-                    Q(seller_profile__first_name__icontains=value) |
-                    Q(seller_profile__last_name__icontains=value)
+                    Q(user_profile__last_name__icontains=value)
                 ).distinct()
         return queryset
 

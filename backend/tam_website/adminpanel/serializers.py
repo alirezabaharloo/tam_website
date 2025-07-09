@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from accounts.models import User
-from accounts.models.profiles import UserProfile, SellerProfile
+from accounts.models.profiles import Profile
 from blog.models.partial import Player
 
 class UserListSerializer(serializers.ModelSerializer):

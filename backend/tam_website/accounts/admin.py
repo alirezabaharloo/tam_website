@@ -7,21 +7,13 @@ from django_jalali.admin.filters import JDateFieldListFilter
 from django.contrib.sessions.models import Session
 
 # --- اضافه کردن اینلاین پروفایل ---
-class UserProfileInline(admin.StackedInline):
-    model = UserProfile
+class ProfileInline(admin.StackedInline):
+    model = Profile
     can_delete = False
     fk_name = 'user'
     extra = 0
     verbose_name = 'پروفایل کاربر'
     verbose_name_plural = 'پروفایل کاربر'
-
-class SellerProfileInline(admin.StackedInline):
-    model = SellerProfile
-    can_delete = False
-    fk_name = 'user'
-    extra = 0
-    verbose_name = 'پروفایل فروشنده'
-    verbose_name_plural = 'پروفایل فروشنده'
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
@@ -75,19 +67,11 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('phone_number',)
     ordering = ('phone_number',)
 
-    inlines = [UserProfileInline, SellerProfileInline]
+    inlines = [ProfileInline]
 
 
-
-@admin.register(SellerProfile)
-class SellerProfileAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'user')
-    search_fields = ('full_name', 'user__phone_number')
-
-    
-
-@admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'user')
     search_fields = ('full_name', 'user__phone_number')
 

@@ -7,6 +7,7 @@ import SpinLoader from '../components/UI/SpinLoader';
 import PageNotFound from '../pages/PageNotFound';
 import { AdminIcons } from '../data/Icons';
 import domainUrl from '../utils/api';
+import SomethingWentWrong from '../components/UI/SomethingWentWrong';
 
 const AdminLayout = () => {
   const { isAdminPannelAccess, logout } = useAuth();
@@ -64,25 +65,17 @@ const AdminLayout = () => {
     }
   };
 
-  useEffect(() => {
-    const websiteLanguage = localStorage.getItem("language", "fa");
-    if (websiteLanguage === "en") {
-      localStorage.setItem("language", "fa");
-      window.location.reload();
-    }
-  }, []);
-
-  // لودینگ یا خطا
-  if (userLoading) {
-    return <SpinLoader />;
-  }
   
-  if (isAdminPannelAccess === null) {
+  if (isAdminPannelAccess === null || userLoading) {
     return <SpinLoader />;
   }
 
-  if (!isAdminPannelAccess || userError) {
+  if (!isAdminPannelAccess) {
     return <PageNotFound />;
+  }
+
+  if (userError) {
+    return <SomethingWentWrong />
   }
 
   return (

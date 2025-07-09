@@ -15,7 +15,7 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from rest_framework.pagination import PageNumberPagination
 from .models import Team, Player
 from .serializers import TeamSerializer, PlayerSerializer
-from accounts.models import User
+from accounts.models import Profile
 
 
 class ArticlePagination(PageNumberPagination):
@@ -219,7 +219,9 @@ class CreateArticleView(LocalizationMixin, CreateAPIView):
     permission_classes = [IsAuthor]
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user) 
+        # Get or create profile for the user
+        profile = Profile.objects.get_or_create(user=self.request.user)
+        serializer.save(author=profile)
 
 
 class UpdateArticleView(LocalizationMixin, GenericAPIView):
@@ -261,7 +263,9 @@ class ArticleListForAuthorsView(ArticleListView):
     permission_classes = [IsAuthor]
     
     def get_queryset(self):
-        return Article.objects.filter(author=self.request.user)
+        # Get the user's profile
+        profile = Profile.objects.get_or_create(user=self.request.user)
+        return Article.objects.filter(author=profile)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -277,7 +281,9 @@ class ArticleDetailForAuthorsView(ArticleDetailView):
     permission_classes = [IsAuthor]
 
     def get_queryset(self):
-        return Article.objects.filter(author=self.request.user)
+        # Get the user's profile
+        profile = Profile.objects.get_or_create(user=self.request.user)
+        return Article.objects.filter(author=profile)
     
 
     def retrieve(self, request, *args, **kwargs):

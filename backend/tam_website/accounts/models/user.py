@@ -47,12 +47,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def get_profile(self):
         """
-        Returns the appropriate profile for the user.
-        For admin users, returns both user_profile and seller_profile.
-        For other users, returns their user_profile.
+        Returns the user profile.
         """
-        if self.is_seller:
-            return getattr(self, 'seller_profile', None)
         return getattr(self, 'user_profile', None)
 
     @classmethod

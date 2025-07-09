@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import useAuthHttp from '../../hooks/useAuthHttp';
+import useAdminHttp from '../../hooks/useAdminHttp';
 import SpinLoader from '../../components/UI/SpinLoader';
 import SomethingWentWrong from '../../components/UI/SomethingWentWrong';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +24,7 @@ const Dashboard = () => {
     data: dashboardData,
     isLoading: dashboardLoading,
     isError: dashboardError
-  } = useAuthHttp(`http://${domainUrl}:8000/api/admin/admin-dashboard-data/`);
+  } = useAdminHttp(`http://${domainUrl}:8000/api/admin/admin-dashboard-data/`);
 
   if (dashboardLoading) {
     return <SpinLoader />;

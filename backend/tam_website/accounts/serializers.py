@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import OtpCode, User, UserProfile, SellerProfile
+from .models import OtpCode, User, Profile
 from .mixins import PasswordSerializerMixin
 from rest_framework_simplejwt.serializers import *
 from django.utils.translation import gettext_lazy as _
@@ -199,15 +199,11 @@ class UserInfoSerializer(serializers.ModelSerializer):
         return perms
 
     def get_first_name(self, obj):
-        if obj.is_seller:
-            return getattr(obj, 'seller_profile', None).first_name
-        else:
-            return getattr(obj, 'user_profile', None).last_name
+        profile = getattr(obj, 'user_profile', None)
+        return profile.first_name if profile else None
 
     def get_last_name(self, obj):
-        if obj.is_seller:
-            return getattr(obj, 'seller_profile').last_name
-        else:
-            return getattr(obj, 'user_profile').last_name
+        profile = getattr(obj, 'user_profile', None)
+        return profile.last_name if profile else None
 
 

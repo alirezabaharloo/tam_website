@@ -14,14 +14,13 @@ export default function Login() {
   const isRTL = i18n.language === 'fa';
   const navigate = useNavigate();
   const { login, isAuthenticated } = useContext(AuthContext);
-
+  const [showPassword, setShowPassword] = useState(false);
 
 
   // Form data state
   const [formData, setFormData] = useState({
     phone: '',
     password: '',
-    showPassword: false,
     rememberMe: false,
   });
 
@@ -107,13 +106,13 @@ export default function Login() {
 
             <Input
               icon={authIcons.Lock}
-              type={formData.showPassword ? "text" : "password"}
+              type={showPassword ? "text" : "password"}
               placeholder={t('password', { ns: 'validation' })}
               value={formData.password}
               onChange={e => setFormData(prev => ({ ...prev, password: e.target.value }))}
-              showPassword={formData.showPassword}
+              showPassword={showPassword}
               required={true}
-              onTogglePassword={() => setFormData(prev => ({ ...prev, showPassword: !prev.showPassword }))}
+              onTogglePassword={() => setShowPassword(!showPassword)}
             />
 
             {error && <ErrorMessage errorMessage={error} />}
