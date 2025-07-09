@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 const ArticleNotFound = () => {
   const { t } = useTranslation();
-  
+  const { i18n } = useTranslation();
+  const lang = i18n.language;
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="text-center">
@@ -15,7 +16,7 @@ const ArticleNotFound = () => {
           className="mb-8"
         >
           <svg
-            className="w-32 h-32 mx-auto text-gray-400"
+            className="w-32 h-32 mx-auto text-quaternary"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -34,18 +35,18 @@ const ArticleNotFound = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-4xl font-bold text-gray-800 mb-4"
+          className="text-4xl font-bold text-secondary mb-4"
         >
-          Article Not Found
+          {t('articleNotFound')}
         </motion.h1>
 
         <motion.p
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="text-gray-600 mb-8 max-w-md mx-auto"
+          className="text-secondary-tint-200 mb-8 max-w-md mx-auto"
         >
-          We couldn't find the article you're looking for. It might have been moved or deleted.
+          {t('articleNotFoundDescription')}
         </motion.p>
 
         <motion.div
@@ -55,10 +56,10 @@ const ArticleNotFound = () => {
         >
           <Link
             to="/"
-            className="inline-flex items-center px-6 py-3 bg-quaternary text-white font-semibold rounded-lg hover:bg-quaternary-300 transition-colors duration-200"
+            className="inline-flex items-center px-6 py-3 bg-quaternary text-quinary-tint-800 font-semibold rounded-lg hover:bg-quaternary-100 transition-colors duration-200"
           >
             <svg
-              className="w-5 h-5 mr-2"
+              className={`w-5 h-5 ${lang === 'fa' ? 'rotate-180 ml-2' : 'mr-2'}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -71,7 +72,7 @@ const ArticleNotFound = () => {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            {t('backToHome')}
+            {t('articleNotFoundBackToHome')}
           </Link>
         </motion.div>
       </div>

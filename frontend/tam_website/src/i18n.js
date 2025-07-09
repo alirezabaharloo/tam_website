@@ -119,6 +119,10 @@ const commonResources = {
       // hamburger menu
       hamburgerLoginRegister: "Login/Register",
       hamburgerProfile: "Profile",
+      // Article Not Found
+      articleNotFound: "Article Not Found",
+      articleNotFoundDescription: "We couldn't find the article you're looking for. It might have been moved or deleted.",
+      articleNotFoundBackToHome: "Back to Home",
     },
     // Form and validation related translations - loaded when needed
     validation: {
@@ -293,6 +297,10 @@ const commonResources = {
       // hamburger menu
       hamburgerLoginRegister: "ورود/ثبت نام",
       hamburgerProfile: "پروفایل",
+      // Article Not Found
+      articleNotFound: "مقاله یافت نشد",
+      articleNotFoundDescription: "متأسفانه مقاله‌ای که به دنبال آن هستید وجود ندارد یا منتقل شده است.",
+      articleNotFoundBackToHome: "بازگشت به خانه",
     },
     validation: {
       // Login Page
