@@ -30,12 +30,12 @@ const SomethingWentWrong = () => {
   };
 
   return (
-    <div className="min-h-screen bg-quinary-tint-600 flex items-center justify-center px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
+    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8 py-2 sm:py-4 md:py-6">
       <motion.div
         initial="hidden"
         animate="visible"
         variants={containerVariants}
-        className="w-full max-w-[1300px] bg-quinary-tint-900 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6 sm:p-8 md:p-12"
+        className="w-full max-w-[1300px] rounded-2xl px-6 sm:px-8 md:px-12"
       >
         <div className="text-center">
           {/* Error Icon */}
@@ -77,7 +77,7 @@ const SomethingWentWrong = () => {
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
-                className="absolute inset-8 border-4 border-tertiary rounded-full"
+                className="absolute inset-8 border-4 border-primary rounded-full"
               />
             </div>
           </motion.div>
@@ -93,7 +93,7 @@ const SomethingWentWrong = () => {
           {/* Description */}
           <motion.p
             variants={itemVariants}
-            className={`text-[16px] sm:text-[18px] md:text-[20px] text-secondary-tint-500 mb-8 text-center`}
+            className={`text-[16px] sm:text-[18px] md:text-[20px] text-secondary-tint-200 mb-8 text-center`}
           >
             {t('somethingWentWrongDescription')}
           </motion.p>
@@ -103,10 +103,10 @@ const SomethingWentWrong = () => {
             variants={itemVariants}
             className="mb-8"
           >
-            <span className="text-[14px] sm:text-[16px] text-secondary-tint-400">
+            <span className="text-[14px] sm:text-[16px] text-secondary-tint-200">
               {t('somethingWentWrongErrorCode')}:{' '}
             </span>
-            <span className="font-mono text-[14px] sm:text-[16px] text-tertiary">
+            <span className="font-mono text-[14px] sm:text-[16px] text-quaternary">
               {Math.random().toString(36).substring(2, 8).toUpperCase()}
             </span>
           </motion.div>
@@ -171,7 +171,7 @@ const SomethingWentWrong = () => {
                 ease: "easeInOut",
                 delay: 0.4,
               }}
-              className="w-2 sm:w-3 h-2 sm:h-3 bg-tertiary rounded-full"
+              className="w-2 sm:w-3 h-2 sm:h-3 bg-tertiary-200 rounded-full"
             />
           </motion.div>
         </div>

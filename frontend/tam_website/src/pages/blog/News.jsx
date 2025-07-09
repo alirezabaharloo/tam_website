@@ -122,7 +122,7 @@ export default function News() {
   };
 
   const handleFilterChange = (filterId) => {
-    const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
+    const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articless`);
     const searchParam = new URLSearchParams(window.location.search).get('search');
     const teamParam = new URLSearchParams(window.location.search).get('team');
     
