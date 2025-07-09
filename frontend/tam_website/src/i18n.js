@@ -116,6 +116,9 @@ const commonResources = {
       searchResultsFor: 'search results for',
       // about category
       categoryFilter:'category resulsts for',
+      // hamburger menu
+      hamburgerLoginRegister: "Login/Register",
+      hamburgerProfile: "Profile",
     },
     // Form and validation related translations - loaded when needed
     validation: {
@@ -287,6 +290,9 @@ const commonResources = {
       searchResultsFor: 'نتیجه جست و جو برای',
       // about category
       categoryFilter: 'نتیجه جست و جو برای',
+      // hamburger menu
+      hamburgerLoginRegister: "ورود/ثبت نام",
+      hamburgerProfile: "پروفایل",
     },
     validation: {
       // Login Page

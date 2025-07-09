@@ -164,63 +164,61 @@ export default function Header() {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-6">
-            {/* Search Box */}
-            <div className="relative w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8">
-              <button 
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className={`focus:outline-none transition-all duration-300 ${isSearchOpen ? 'opacity-0' : 'opacity-100'}`}
-              >
-                <img 
-                  src="/images/icons/SearchLogo.svg" 
-                  alt="Search" 
-                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-secondary transition-colors duration-300"
-                />
-              </button>
-              <div 
-                ref={searchBarRef}
-                className={`absolute ${isRTL ? 'left-[-16px]' : 'right-[-16px]'} top-1/2 -translate-y-1/2 h-8 sm:h-9 md:h-10 w-[140px] sm:w-[180px] md:w-[220px] bg-quinary-tint-600 rounded-lg flex items-center transition-all duration-300 ease-out ${
-                  isSearchOpen 
-                    ? 'translate-x-0 opacity-100' 
-                    : isRTL ? 'translate-x-[-8px] opacity-0 pointer-events-none' : 'translate-x-8 opacity-0 pointer-events-none'
-                }`}
-              >
-                <form  className="flex items-center h-full w-full">
-                  <div className="flex items-center h-full">
-                    <img 
-                      src="/images/icons/SearchLogoBlack.svg" 
-                      alt="Search" 
-                      className={`${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'} h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5`}
-                      onClick={handleSearch}
-                    />
-                    <div className={`h-4 sm:h-5 md:h-6 border-l-[1px] border-secondary ${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'}`}></div>
-                  </div>
-                  <input 
-                    ref={searchInputRef}
-                    type="text" 
-                    placeholder={t('search', { ns: 'blog' })}
-                    className="w-[80px] sm:w-[100px] md:w-[120px] h-full pl-3 sm:pl-4 pr-2 sm:pr-3 bg-transparent outline-none text-secondary placeholder-secondary/50 text-xs sm:text-sm md:text-base"
-                    value={searchContent}
-                    onChange={(e) => setSearchContent(e.target.value)}
-                    onKeyPress={handleKeyPress}
+            {/* Only show on desktop */}
+            <div className="hidden lg:flex items-center space-x-3 sm:space-x-4 md:space-x-6">
+              {/* Search Box */}
+              <div className="relative w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8">
+                <button 
+                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  className={`focus:outline-none transition-all duration-300 ${isSearchOpen ? 'opacity-0' : 'opacity-100'}`}
+                >
+                  <img 
+                    src="/images/icons/SearchLogo.svg" 
+                    alt="Search" 
+                    className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-secondary transition-colors duration-300"
                   />
-                </form>
+                </button>
+                <div 
+                  ref={searchBarRef}
+                  className={`absolute ${isRTL ? 'left-[-16px]' : 'right-[-16px]'} top-1/2 -translate-y-1/2 h-8 sm:h-9 md:h-10 w-[140px] sm:w-[180px] md:w-[220px] bg-quinary-tint-600 rounded-lg flex items-center transition-all duration-300 ease-out ${
+                    isSearchOpen 
+                      ? 'translate-x-0 opacity-100' 
+                      : isRTL ? 'translate-x-[-8px] opacity-0 pointer-events-none' : 'translate-x-8 opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <form  className="flex items-center h-full w-full">
+                    <div className="flex items-center h-full">
+                      <img 
+                        src="/images/icons/SearchLogoBlack.svg" 
+                        alt="Search" 
+                        className={`${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'} h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5`}
+                        onClick={handleSearch}
+                      />
+                      <div className={`h-4 sm:h-5 md:h-6 border-l-[1px] border-secondary ${isRTL ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'}`}></div>
+                    </div>
+                    <input 
+                      ref={searchInputRef}
+                      type="text" 
+                      placeholder={t('search', { ns: 'blog' })}
+                      className="w-[80px] sm:w-[100px] md:w-[120px] h-full pl-3 sm:pl-4 pr-2 sm:pr-3 bg-transparent outline-none text-secondary placeholder-secondary/50 text-xs sm:text-sm md:text-base"
+                      value={searchContent}
+                      onChange={(e) => setSearchContent(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                    />
+                  </form>
+                </div>
               </div>
+              <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
+              {/* Account Button */}
+              <button onClick={handleAccountClick} className="flex items-center group h-8 sm:h-10 md:h-12 focus:outline-none">
+                {isAuthenticated ? (
+                  <img src="/images/icons/UserLogo2.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
+                ) : (
+                  <img src="/images/icons/UserLogo.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
+                )}
+              </button>
             </div>
-
-            <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
-
-            {/* Account Button */}
-            <button onClick={handleAccountClick} className="flex items-center group h-8 sm:h-10 md:h-12 focus:outline-none">
-              {isAuthenticated ? (
-                <img src="/images/icons/UserLogo2.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
-              ) : (
-                <img src="/images/icons/UserLogo.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
-              )}
-            </button>
-
-            <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
-
-            {/* Language Selector */}
+            {/* Language Selector (always visible) */}
             <div className="relative w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8">
               <button 
                 onClick={() => setIsLangOpen(!isLangOpen)}
@@ -284,65 +282,93 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        <div 
+        {/* Mobile Menu (Side Drawer) */}
+        <div
           ref={mobileMenuRef}
-          className={`lg:hidden absolute top-full left-0 right-0 mt-2 rounded-lg transition-all duration-500 ease-in-out transform origin-top backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(var(--color-primary-rgb),0.4),0_0_20px_rgba(var(--color-tertiary-rgb),0.2)] bg-[rgba(var(--color-primary-rgb),0.8)] ${
-            isMobileMenuOpen 
-              ? 'opacity-100 translate-y-0 scale-y-100' 
-              : 'opacity-0 -translate-y-4 scale-y-0 pointer-events-none'
-          }`}
+          className={`lg:hidden fixed top-0 ${isRTL ? 'right-0' : 'left-0'} h-screen w-1/3 min-w-[220px] max-w-xs z-50 transition-transform duration-500 ease-in-out bg-[rgba(var(--color-primary-rgb),0.98)] shadow-2xl border-t-0 border-b-0 border-${isRTL ? 'r' : 'l'} border-white/20 rounded-${isRTL ? 'l' : 'r'}-2xl
+            ${isMobileMenuOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'}
+          `}
+          style={{direction: isRTL ? 'rtl' : 'ltr'}}
         >
-          <div className="relative overflow-hidden">
-            {/* Decorative top border with glass effect */}
-            <div 
-              className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[rgba(var(--color-tertiary-rgb),0.5)] to-transparent"
-            ></div>
-            
-            <nav className="flex flex-col p-4 space-y-3">
-              {navLinks.map((link, index) => (
-                <div
-                  key={link.label}
-                  className={`transform transition-all duration-500 ease-out ${
-                    isMobileMenuOpen 
-                      ? 'translate-y-0 opacity-100' 
-                      : 'translate-y-4 opacity-0'
-                  }`}
-                  style={{
-                    transitionDelay: `${index * 100}ms`
-                  }}
+          <div className="flex flex-col h-full justify-between">
+            <div>
+              <div className="flex justify-end items-center p-4 border-b border-white/10">
+                <button onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu" className="text-quinary-tint-800 hover:text-tertiary transition-colors duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <nav className="flex flex-col p-4 space-y-3">
+                {navLinks.map((link, index) => (
+                  <div
+                    key={link.label}
+                    className={`transform transition-all duration-500 ease-out ${
+                      isMobileMenuOpen 
+                        ? 'translate-y-0 opacity-100' 
+                        : 'translate-y-4 opacity-0'
+                    }`}
+                    style={{
+                      transitionDelay: `${index * 100}ms`
+                    }}
+                  >
+                    {link.to === '#contact' ? (
+                      <button 
+                        onClick={() => {
+                          link.onClick();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-all duration-300 ${
+                          isRTL ? 'text-right' : 'text-left'
+                        } px-2 py-1.5`}
+                      >
+                        {link.label}
+                      </button>
+                    ) : (
+                      <Link 
+                        to={link.to}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`block w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary transition-all duration-300 ${
+                          location.pathname === link.to ? 'text-tertiary' : ''
+                        } ${isRTL ? 'text-right' : 'text-left'} px-2 py-1.5`}
+                      >
+                        {link.label}
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </nav>
+              {/* Search box inside drawer (redesigned) */}
+              <form onSubmit={handleSearch} className={`flex items-center bg-quinary-tint-600 rounded-lg mx-4 mt-4 px-2 py-1.5 border border-quinary-tint-400 focus-within:border-tertiary transition-all duration-200`}>
+                <button type="submit" className={`flex items-center justify-center p-0 m-0 focus:outline-none`}
+                  style={{lineHeight: 0}}>
+                  <img 
+                    src="/images/icons/SearchLogoBlack.svg" 
+                    alt="Search" 
+                    className="h-5 w-5"
+                  />
+                </button>
+                <input 
+                  type="text" 
+                  placeholder={t('search', { ns: 'blog' })}
+                  className={`flex-1 bg-transparent outline-none text-secondary placeholder-secondary/50 text-base ${isRTL ? 'text-right pr-2' : 'text-left pl-2'}`}
+                  value={searchContent}
+                  onChange={(e) => setSearchContent(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  style={{minWidth: 0}}
+                />
+              </form>
+              {/* Login/Register button right below search box */}
+              <div className="mx-4 mt-3 mb-4">
+                <button
+                  onClick={handleAccountClick}
+                  className="w-full py-2 rounded-lg bg-secondary text-white font-semibold text-base shadow hover:bg-secondary-tint-100 transition-colors duration-200 focus:outline-none"
+                  style={{minHeight: '40px'}}
                 >
-                  {link.to === '#contact' ? (
-                    <button 
-                      onClick={() => {
-                        link.onClick();
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className={`w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary hover:text-shadow-[0_0_8px_rgba(var(--color-tertiary-rgb),0.3)] transition-all duration-300 ${
-                        isRTL ? 'text-right' : 'text-left'
-                      } px-2 py-1.5`}
-                    >
-                      {link.label}
-                    </button>
-                  ) : (
-                    <Link 
-                      to={link.to}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`block w-full font-inter text-[16px] text-quinary-tint-800 hover:text-tertiary hover:text-shadow-[0_0_8px_rgba(var(--color-tertiary-rgb),0.3)] transition-all duration-300 ${
-                        location.pathname === link.to ? 'text-tertiary' : ''
-                      } ${isRTL ? 'text-right' : 'text-left'} px-2 py-1.5`}
-                    >
-                      {link.label}
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </nav>
-
-            {/* Decorative bottom border with glass effect */}
-            <div 
-              className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[rgba(var(--color-tertiary-rgb),0.5)] to-transparent"
-            ></div>
+                  {isAuthenticated ? t('hamburgerProfile', { ns: 'blog' }) : t('hamburgerLoginRegister', { ns: 'blog' })}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
