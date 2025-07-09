@@ -217,6 +217,7 @@ export default function Header() {
                   <img src="/images/icons/UserLogo.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
                 )}
               </button>
+              <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
             </div>
             {/* Language Selector (always visible) */}
             <div className="relative w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8">
