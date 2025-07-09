@@ -216,25 +216,35 @@ export default function News() {
         />
         {
           (((isLoading || allArticles.length == 0) && response?.detail !== 'no articles found!' && (!requestUrl.includes("page") || (requestUrl.includes("page") && requestUrl.includes("fetch-all"))))) ?  <SpinLoader /> :(
-            <motion.div 
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <AnimatePresence mode="wait">
-                {allArticles.length > 0 && allArticles.map((article) => (
-                  <motion.div
-                    key={article.id}
-                    variants={itemVariants}
-                    layout
-                  >
-                    <NewsBox {...article} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              {(response?.detail === 'no articles found!') && <NoArticlesFound />}
-            </motion.div>
+            (response?.detail === 'no articles found!') ? (
+              <motion.div
+                initial={{ opacity: 0, y: 32 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="flex flex-col items-center justify-center min-h-[60vh] w-full"
+              >
+                <NoArticlesFound />
+              </motion.div>
+            ) : (
+              <motion.div 
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <AnimatePresence mode="wait">
+                  {allArticles.length > 0 && allArticles.map((article) => (
+                    <motion.div
+                      key={article.id}
+                      variants={itemVariants}
+                      layout
+                    >
+                      <NewsBox {...article} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )
           )
         }
         
