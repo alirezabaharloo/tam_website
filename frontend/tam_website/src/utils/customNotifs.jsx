@@ -5,7 +5,7 @@ import i18n from '../i18n';
 
 // Custom toast configurations based on notification type
 const toastConfig = {
-  position: i18n.language === 'en' ? "top-left" : "top-right",
+  position: i18n.language === 'en' ? "top-right" : "top-left",
   autoClose: 5000,
   hideProgressBar: false,
   closeOnClick: true,
@@ -15,70 +15,137 @@ const toastConfig = {
 
 // Success notification function
 export const successNotif = (message, options = {}) => {
-  const config = {
-    ...toastConfig,                         
-    ...options,
-    style: {
-      background: '#dd2c2c',
-      color: '#fff',
-      borderRadius: '8px',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-      padding: '1.25rem',
-      minWidth: '300px',
-      fontSize: '1.1rem',
-    },  
-    progressStyle: {
-      background: '#fff',
-    },
-    icon: ({ theme, type }) => (
-      <div
-        className='w-[2rem] rounded-full bg-white'
-      >
-        <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-          className='fill-black'
-        />
-      </svg>
+  const isRTL = i18n.language === 'fa';
+  return toast.success(
+    <div
+      className={`flex items-stretch w-full max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg border border-quaternary-200 bg-quaternary text-quinary-tint-800 p-0 overflow-hidden flex-row-reverse`}
+      style={{ direction: isRTL ? 'rtl' : 'ltr' }}
+    >
+      {/* Icon */}
+      <div className="flex items-center px-4 py-4">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" className="fill-quinary-tint-800"/></svg>
       </div>
-    ),
-    closeButton: ({ closeToast, theme }) => (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        xmlns="http://www.w3.org/2000/svg"
-        onClick={closeToast}
-        className={`cursor-pointe absolute ${i18n.language == 'fa' ? 'left-[1rem]' : 'right-[1rem]'}`}
+      {/* Text content */}
+      <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
+        <div className="font-bold text-lg mb-1">{i18n.t('preRegisterSuccess', { ns: 'preRegister' })}</div>
+      </div>
+      {/* Vertical Divider */}
+      <div className="w-px bg-quinary-tint-800 mx-0.5 my-2" />
+      {/* Close button */}
+      <button
+        onClick={options.closeToast}
+        className={`flex items-center px-3 focus:outline-none text-quinary-tint-800 hover:text-quinary-tint-600 transition-colors duration-150 ${isRTL ? 'ml-0 mr-2' : 'mr-0 ml-2'}`}
+        aria-label="Close notification"
       >
-        <path
-          d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
-          fill="none"
-          className='fill-gray-800 hover:fill-gray-950 transition-all'
-        />
-      </svg>
-    ),
-  };
-  return toast.success(message, config);
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" className="fill-quinary-tint-800 hover:fill-quinary-tint-600 transition-all"/></svg>
+      </button>
+    </div>,
+    {
+      position: isRTL ? 'top-right' : 'top-left',
+      autoClose: 4000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      rtl: isRTL,
+      style: { boxShadow: '0 4px 16px rgba(0,0,0,0.12)', padding: 0, background: 'transparent', minWidth: 0 },
+      progressStyle: { background: '#fff' },
+      closeButton: false,
+      icon: false,
+    }
+  );
 };
 
 // Error notification function
 export const errorNotif = (message, options = {}) => {
-  const config = { ...toastConfig, ...options };
-  return toast.error(message, config);
+  const isRTL = i18n.language === 'fa';
+  return toast.error(
+    <div
+      className={`flex items-stretch w-full max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg border border-quaternary-200 bg-quaternary text-quinary-tint-800 p-0 overflow-hidden ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+      style={{ direction: isRTL ? 'rtl' : 'ltr' }}
+    >
+      {/* Icon */}
+      <div className="flex items-center px-4 py-4 bg-white/80">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z" className="fill-red-600"/></svg>
+      </div>
+      {/* Vertical Divider */}
+      <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
+      {/* Text content */}
+      <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
+        <div className="font-bold text-lg mb-1 truncate">{i18n.t('error', { ns: 'common' })}</div>
+        <div className="text-base leading-snug break-words truncate" title={message}>{message}</div>
+      </div>
+      {/* Vertical Divider */}
+      <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
+      {/* Close button */}
+      <button
+        onClick={options.closeToast}
+        className={`flex items-center px-3 focus:outline-none text-quaternary-800 hover:text-quaternary-600 transition-colors duration-150 ${isRTL ? 'ml-0 mr-2' : 'mr-0 ml-2'}`}
+        aria-label="Close notification"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" className="fill-quaternary-800 hover:fill-quaternary-600 transition-all"/></svg>
+      </button>
+    </div>,
+    {
+      position: isRTL ? 'top-right' : 'top-left',
+      autoClose: 4000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      rtl: isRTL,
+      style: { boxShadow: '0 4px 16px rgba(0,0,0,0.12)', padding: 0, background: 'transparent', minWidth: 0 },
+      progressStyle: { background: '#fff' },
+      closeButton: false,
+      icon: false,
+    }
+  );
 };
 
 // Info notification function
 export const infoNotif = (message, options = {}) => {
-  const config = { ...toastConfig, ...options };
-  return toast.info(message, config);
+  const isRTL = i18n.language === 'fa';
+  return toast.info(
+    <div
+      className={`flex items-stretch w-full max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg border border-quaternary-200 bg-quaternary text-quinary-tint-800 p-0 overflow-hidden ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+      style={{ direction: isRTL ? 'rtl' : 'ltr' }}
+    >
+      {/* Icon */}
+      <div className="flex items-center px-4 py-4 bg-white/80">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-6h2v6zm0-8h-2V7h2v2z" className="fill-secondary"/></svg>
+      </div>
+      {/* Vertical Divider */}
+      <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
+      {/* Text content */}
+      <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
+        <div className="font-bold text-lg mb-1 truncate">{i18n.t('info', { ns: 'common' })}</div>
+        <div className="text-base leading-snug break-words truncate" title={message}>{message}</div>
+      </div>
+      {/* Vertical Divider */}
+      <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
+      {/* Close button */}
+      <button
+        onClick={options.closeToast}
+        className={`flex items-center px-3 focus:outline-none text-quaternary-800 hover:text-quaternary-600 transition-colors duration-150 ${isRTL ? 'ml-0 mr-2' : 'mr-0 ml-2'}`}
+        aria-label="Close notification"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" className="fill-quaternary-800 hover:fill-quaternary-600 transition-all"/></svg>
+      </button>
+    </div>,
+    {
+      position: isRTL ? 'top-right' : 'top-left',
+      autoClose: 4000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      rtl: isRTL,
+      style: { boxShadow: '0 4px 16px rgba(0,0,0,0.12)', padding: 0, background: 'transparent', minWidth: 0 },
+      progressStyle: { background: '#fff' },
+      closeButton: false,
+      icon: false,
+    }
+  );
 };
 
 // This function will update RTL status and position when language changes
