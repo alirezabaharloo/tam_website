@@ -185,7 +185,23 @@ const commonResources = {
       profilePasswordRequired: "Password is required",
       profilePasswordChangeError: "An error occurred while changing your password",
     },
-
+    preRegister: {
+      preRegisterTitle: "Pre-Registration",
+      fullName: "Full Name",
+      phone: "Phone",
+      age: "Age",
+      sportsField: "Sports Field",
+      selectSport: "Select a sport",
+      submit: "Submit",
+      required: "This field is required",
+      invalidAge: "Please enter a valid age",
+      preRegisterSuccess: "Pre-registration successful! Thank you.",
+      football: "Football",
+      basketball: "Basketball",
+      volleyball: "Volleyball",
+      tennis: "Tennis",
+      swimming: "Swimming",
+    },
   },
   fa: {
     blog: {
@@ -360,6 +376,23 @@ const commonResources = {
       profileHidePasswordForm: "مخفی کردن فرم رمز عبور",
       profilePasswordRequired: "رمز عبور الزامی است",
       profilePasswordChangeError: "خطا در تغییر رمز عبور",
+    },
+    preRegister: {
+      preRegisterTitle: "پیش ثبت نام",
+      fullName: "نام کامل",
+      phone: "تلفن",
+      age: "سن",
+      sportsField: "رشته ورزشی",
+      selectSport: "انتخاب رشته ورزشی",
+      submit: "ثبت نام",
+      required: "این فیلد الزامی است",
+      invalidAge: "لطفاً سن معتبر وارد کنید",
+      preRegisterSuccess: "پیش ثبت نام موفق! متشکریم.",
+      football: "فوتبال",
+      basketball: "بسکتبال",
+      volleyball: "والیبال",
+      tennis: "تنیس",
+      swimming: "سویینگ",
     },
   }
 };

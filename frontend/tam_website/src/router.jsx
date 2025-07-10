@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 // blog routes
 import Home from './pages/blog/Home';
@@ -22,6 +22,7 @@ import AdminShop from './pages/admin/Shop';
 import Players from './pages/admin/Players';
 // import ArticleForm from './pages/admin/ArticleForm';
 // import UserForm from './pages/admin/UserForm';
+import PreRegister from './pages/blog/PreRegister';
 
 
 const PageTransition = ({ children }) => {
@@ -68,6 +69,11 @@ const WebsiteRoutes = () => {
         <Route path="/news/:slug" element={
           <PageTransition>
             <NewsDetail />
+          </PageTransition>
+        } />
+        <Route path="/pre-register" element={
+          <PageTransition>
+            <PreRegister />
           </PageTransition>
         } />
 

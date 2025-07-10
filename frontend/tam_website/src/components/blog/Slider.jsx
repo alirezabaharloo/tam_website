@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const Slider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -19,7 +20,8 @@ const Slider = () => {
   return (
     <div className="relative w-full max-w-[1300px] h-[240px] sm:h-[320px] md:h-[420px] lg:h-[540px] xl:h-[640px] mx-auto rounded-2xl overflow-hidden">
       {slides.map((slide, index) => (
-        <div
+        <Link to={`/pre-register`} key={slide.id}>
+          <div
           key={slide.id}
           className={`absolute w-full h-full transition-opacity duration-500 ${
             index === currentSlide ? 'opacity-100' : 'opacity-0'
@@ -31,6 +33,7 @@ const Slider = () => {
             className="w-full h-full object-cover"
           />
         </div>
+        </Link>
       ))}
       <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {slides.map((_, index) => (
