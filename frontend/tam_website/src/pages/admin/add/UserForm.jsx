@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fakeUsers } from '../data/fakeUsers';
-import { UserFormIcons } from '../../data/Icons';
+import { UserFormIcons } from '../../../data/Icons';
 
 // Icons
 const Icons = UserFormIcons;

@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from './useAuth';
-import { renderToReadableStream } from 'react-dom/server';
 
-const useAuthHttp = (url, options = null) => {
+const useAdminHttp = (url, options = null) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({
     isError: false,
@@ -94,13 +93,36 @@ const useAuthHttp = (url, options = null) => {
     return resData;
   };
   
-  const sendRequest = useCallback(async (requestData = null) => {
+  const sendRequest = useCallback(async (requestUrl = null, requestMethod = null, requestData = null) => {
     setIsLoading(true);
     
     try {
       let responseData;
       if (requestData) {
-        responseData = await customFetchFunction(url, {...options, body: JSON.stringify(requestData)});
+        responseData = await customFetchFunction(requestUrl, 
+          {
+            method: requestMethod,
+            headers: {
+              "Authorization": `Bearer ${JSON.parse(localStorage.getItem('tokens'))?.access}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Accept-Language': 'en',
+            },
+            body: JSON.stringify(requestData),
+          }
+        );
+      } else if (!requestData && (requestMethod && requestUrl)) {
+        responseData = await customFetchFunction(requestUrl, 
+          {
+            method: requestMethod,
+            headers: {
+              "Authorization": `Bearer ${JSON.parse(localStorage.getItem('tokens'))?.access}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Accept-Language': 'en'
+            },
+          }
+        );
       } else {
         responseData = await customFetchFunction(url, options);
       }
@@ -121,7 +143,7 @@ const useAuthHttp = (url, options = null) => {
   }, [url, options]);
 
   useEffect(() => {
-    if ((options && options.method === 'GET') || (!options)) {
+    if (url) {
       sendRequest();
     }
   }, [url, options]);
@@ -135,4 +157,4 @@ const useAuthHttp = (url, options = null) => {
   };
 };
 
-export default useAuthHttp;
+export default useAdminHttp;

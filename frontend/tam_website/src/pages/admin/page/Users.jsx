@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import AdminNewsTab from '../../components/admin/AdminNewsTab';
+import AdminUsersTab from '../../../components/admin/AdminUsersTab';
 import { useNavigate } from 'react-router-dom';
 
-const News = () => {
+const Users = () => {
   const navigate = useNavigate();
 
   return (
@@ -11,12 +11,12 @@ const News = () => {
       className="space-y-6"
     >
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-primary">مدیریت اخبار</h1>
+        <h1 className="text-3xl font-bold text-primary">مدیریت کاربران</h1>
       </div>
       
-      <AdminNewsTab navigate={navigate} />
+      <AdminUsersTab navigate={navigate} />
     </div>
   );
 };
 
-export default News; 
+export default Users; 

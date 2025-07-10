@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import useAuthHttp from '../../hooks/useAuthHttp';
+import useAdminHttp from '../../hooks/useAdminHttp';
 import AdminPagination from './AdminPagination';
 import SpinLoader from '../UI/SpinLoader';
 import SomethingWentWrong from '../UI/SomethingWentWrong';
+import Modal from '../UI/Modal';
 import { AdminIcons } from '../../data/Icons';
 
 const AdminPlayersTab = ({ navigate }) => {
@@ -11,6 +12,11 @@ const AdminPlayersTab = ({ navigate }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [positionOptions, setPositionOptions] = useState({});
+  
+  // Delete player state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [playerToDelete, setPlayerToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Extract all filter values from URL params
   const currentPage = parseInt(searchParams.get('page') || '1');
@@ -28,15 +34,19 @@ const AdminPlayersTab = ({ navigate }) => {
     isLoading,
     data,
     isError,
-    errorContent
-  } = useAuthHttp(url);
+    errorContent,
+    sendRequest: getPlayers
+  } = useAdminHttp(url);
+
+  // Admin HTTP hook for delete operation
+  const { sendRequest, isLoading: isDeleteLoading } = useAdminHttp();
 
   // Fetch position filter options
   const {
     data: positionsData,
     isLoading: positionsLoading,
     isError: positionsError
-  } = useAuthHttp('http://localhost:8000/api/admin/player-positions/');
+  } = useAdminHttp('http://localhost:8000/api/admin/player-positions/');
 
   // State for pagination info
   const [paginationInfo, setPaginationInfo] = useState({ count: 0, totalPages: 1 });
@@ -119,6 +129,41 @@ const AdminPlayersTab = ({ navigate }) => {
   const handleClearAllFilters = () => {
     setSearchInput('');
     setSearchParams(new URLSearchParams({ page: '1', pageSize: itemsPerPage.toString() }));
+  };
+
+  // Handle opening delete modal
+  const handleOpenDeleteModal = (player) => {
+    setPlayerToDelete(player);
+    setDeleteModalOpen(true);
+  };
+
+  // Handle closing delete modal
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setPlayerToDelete(null);
+  };
+
+  // Handle player deletion
+  const handleDeletePlayer = async () => {
+    if (!playerToDelete) return;
+    setIsDeleting(true);
+  
+    try {
+      await sendRequest(`http://localhost:8000/api/admin/player-delete/${playerToDelete.id}/`, 'DELETE');
+  
+      setDeleteModalOpen(false);
+      setPlayerToDelete(null);
+  
+      if (players.length === 1 && currentPage > 1) {
+        updateSearchParams({ page: (currentPage - 1).toString() });
+      } 
+      getPlayers();
+      
+    } catch (error) {
+      console.error('Failed to delete player:', error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (isLoading || positionsLoading) return <SpinLoader />;
@@ -236,7 +281,10 @@ const AdminPlayersTab = ({ navigate }) => {
                         >
                           ویرایش
                         </button>
-                        <button className="px-3 py-1 bg-quaternary text-quinary-tint-800 rounded hover:bg-quaternary-tint-100 transition-colors duration-300">
+                        <button 
+                          onClick={() => handleOpenDeleteModal(player)}
+                          className="px-3 py-1 bg-quaternary text-quinary-tint-800 rounded hover:bg-quaternary-tint-100 transition-colors duration-300"
+                        >
                           حذف
                         </button>
                       </div>
@@ -266,6 +314,42 @@ const AdminPlayersTab = ({ navigate }) => {
           onItemsPerPageChange={handleItemsPerPageChange}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        title="تأیید حذف"
+        footer={
+          <>
+            <button
+              onClick={handleCloseDeleteModal}
+              className="px-4 py-2 bg-quinary-tint-500 text-primary rounded-lg hover:bg-quinary-tint-400 transition-colors duration-300"
+              disabled={isDeleteLoading}
+            >
+              صرف نظر
+            </button>
+            <button
+              onClick={handleDeletePlayer}
+              className="px-4 py-2 bg-quaternary text-quinary-tint-800 rounded-lg hover:bg-quaternary-tint-100 transition-colors duration-300 flex items-center gap-2"
+              disabled={isDeleteLoading}
+            >
+              {isDeleteLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  در حال حذف...
+                </>
+              ) : (
+                'بله'
+              )}
+            </button>
+          </>
+        }
+      >
+        <p className="text-lg text-secondary text-center py-2">
+          آیا قصد حذف بازیکن <span className="text-primary">{playerToDelete?.name || ''}</span> را دارید؟
+        </p>
+      </Modal>
     </div>
   );
 };

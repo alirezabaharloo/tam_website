@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import AdminPlayersTab from '../../components/admin/AdminPlayersTab';
+import AdminPlayersTab from '../../../components/admin/AdminPlayersTab';
 import { useNavigate } from 'react-router-dom';
 
 const Players = () => {

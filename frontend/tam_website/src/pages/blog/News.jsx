@@ -85,6 +85,7 @@ export default function News() {
     isLoading,
     isError,
     data: response,
+    errorMessage,
     sendRequest
   } = useHttp(requestUrl, false);
 
