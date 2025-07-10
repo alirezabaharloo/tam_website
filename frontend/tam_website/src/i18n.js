@@ -83,6 +83,8 @@ const commonResources = {
       noArticlesFoundDescription: "We couldn't find any articles matching your current filter. Try changing the filter or check back later for new content.",
       tryDifferentFilter: "Try Different Filter",
       refreshPage: "Refresh Page",
+      advancedFilter: "Advanced Filter",
+      applyFilter: "Apply Filter",
       // Search Results
       searchResultsFor: "Search results for",
       clearSearch: "Clear Search",
@@ -314,6 +316,8 @@ const commonResources = {
       noArticlesFoundDescription: "متأسفانه هیچ مقاله‌ای با فیلتر فعلی شما یافت نشد. لطفاً فیلتر را تغییر دهید یا بعداً برای محتوای جدید مراجعه کنید.",
       tryDifferentFilter: "تغییر فیلتر",
       refreshPage: "بارگذاری مجدد",
+      advancedFilter: "فیلتر پیشرفته",
+      applyFilter: "اعمال فیلتر",
       // Search Results
       searchResultsFor: "نتیجه جستجو برای",
       clearSearch: "پاک کردن جستجو",

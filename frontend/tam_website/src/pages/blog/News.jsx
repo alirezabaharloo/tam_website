@@ -73,6 +73,7 @@ export default function News() {
     return searchUrl.toString();
   });
   const [allArticles, setAllArticles] = useState([]);
+  const [selectedSport, setSelectedSport] = useState('');
 
 
   const activeFilter = new URLSearchParams(window.location.search).get("type");
@@ -153,6 +154,30 @@ export default function News() {
     setAllArticles([]);
   };
 
+  // Advanced filter: handle sport filter
+  const handleSportChange = (sportId) => {
+    setSelectedSport(sportId);
+  };
+
+  const handleApplySportFilter = () => {
+    const params = new URLSearchParams(window.location.search);
+    if (selectedSport) {
+      params.set('category', selectedSport);
+    } else {
+      params.delete('category');
+    }
+    params.delete('page');
+    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    // Update requestUrl to trigger fetch
+    const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
+    if (params.get('search')) searchUrl.searchParams.set('search', params.get('search'));
+    if (params.get('type')) searchUrl.searchParams.set('type', params.get('type'));
+    if (params.get('category')) searchUrl.searchParams.set('category', params.get('category'));
+    if (params.get('team')) searchUrl.searchParams.set('team', params.get('team'));
+    setRequestUrl(searchUrl.toString());
+    setAllArticles([]);
+  };
+
   if (isError) {
     return <SomethingWentWrong />;
   }
@@ -214,6 +239,9 @@ export default function News() {
         <NewsFilter 
           activeFilter={activeFilter} 
           onFilterChange={handleFilterChange} 
+          selectedSport={selectedSport}
+          onSportChange={handleSportChange}
+          onApplySportFilter={handleApplySportFilter}
         />
         {
           (((isLoading || allArticles.length == 0) && response?.detail !== 'no articles found!' && (!requestUrl.includes("page") || (requestUrl.includes("page") && requestUrl.includes("fetch-all"))))) ?  <SpinLoader /> :(

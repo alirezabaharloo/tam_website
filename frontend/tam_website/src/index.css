@@ -142,6 +142,29 @@
   display: none; /* Chrome/Safari/Webkit */
 }
 
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #980B1C #f3f4f6; /* primary and quinary-tint-800 fallback */
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #980B1C;
+  border-radius: 8px;
+  min-height: 24px;
+  transition: background 0.2s;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #A22333;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
 
 :root{
   --toastify-color-progress-success: #ffffff;
