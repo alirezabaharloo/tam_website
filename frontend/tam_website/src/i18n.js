@@ -157,7 +157,6 @@ const commonResources = {
       profileSubmit: "Submit Changes",
       profileEmailCodeMsg: "Enter the code sent to your email",
       profileNewEmail: "New Email",
-      
     },
     // Form and validation related translations - loaded when needed
     validation: {
@@ -176,6 +175,9 @@ const commonResources = {
       or: "OR",
       dontHaveAccount: "Don't have an account?",
       alreadyHaveAccount: "Already have an account?",
+      // register page
+      registerWelcomeTitle: "Welcome to TamSport",
+      registerWelcomeDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Egestas purus viverra accumsan in nisl nisi Arcu cursus vitae congue mauris rhoncus aenean vel elit scelerisque ...",
       // Validation messages
       invalidCredentials: "Phone number or password is incorrect",
       invalidPhoneNumber: "Your Phone Number is Invalid",
@@ -403,6 +405,9 @@ const commonResources = {
       or: "یا",
       dontHaveAccount: "حساب کاربری ندارید؟",
       alreadyHaveAccount: "قبلاً ثبت نام کرده‌اید؟",
+      // register page
+      registerWelcomeTitle: "به وبسایت خوش آمدید",
+      registerWelcomeDescription: "لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد...",
       // Validation messages
       invalidCredentials: "شماره موبایل یا رمز عبور اشتباه است",
       invalidPhoneNumber: "شماره موبایل نامعتبر است",

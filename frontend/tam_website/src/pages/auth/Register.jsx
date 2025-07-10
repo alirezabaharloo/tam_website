@@ -111,22 +111,22 @@ export default function Register() {
       <div className={`hidden lg:block w-[780px] h-full bg-gradient-to-br from-primary to-quaternary relative rounded-l-2xl ${isRTL ? 'order-2' : 'order-1'}`}>
         <div className={`absolute top-[96px] ${isRTL ? 'right-[64px]' : 'left-[64px]'}`}>
           <h1 className="text-[48px] font-bold text-quinary-tint-800">
-            {t('registerWelcomeTitle')}
+            {t('registerWelcomeTitle', { ns: 'validation' })}
           </h1>
           <p className="text-[24px] font-normal text-quinary-tint-800 mt-4 max-w-[600px]">
-            {t('registerWelcomeDescription')}
+            {t('registerWelcomeDescription', { ns: 'validation' })}
           </p>
         </div>
       </div>
 
       <div className={`w-full lg:w-[520px] h-full bg-quinary-tint-800 rounded-2xl lg:rounded-r-2xl lg:rounded-l-none flex flex-col items-center p-4 sm:p-8 ${isRTL ? 'order-1 lg:rounded-l-2xl lg:rounded-r-none' : 'order-2'}`}>
-        <h2 className="text-[28px] sm:text-[36px] font-bold text-primary mt-[32px]">{t('userRegister')}</h2>
+        <h2 className="text-[28px] sm:text-[36px] font-bold text-primary mt-[32px]">{t('userRegister', { ns: 'validation' })}</h2>
         <div className="w-full max-w-[400px] flex flex-col items-center">
           {/* Phone Input */}
           <Input
             icon={authIcons.User}
             type="text"
-            placeholder={t('phoneNumber')}
+            placeholder={t('phoneNumber', { ns: 'validation' })}
             value={registerState.phone}
             onChange={e => dispatchRegister({ type: 'SET_FIELD', field: 'phone', value: e.target.value })}
           />
@@ -136,7 +136,7 @@ export default function Register() {
           <Input
             icon={authIcons.Lock}
             type={registerState.showPassword ? 'text' : 'password'}
-            placeholder={t('password')}
+            placeholder={t('password', { ns: 'validation' })}
             value={registerState.password}
             onChange={e => dispatchRegister({ type: 'SET_FIELD', field: 'password', value: e.target.value })}
             showPassword={registerState.showPassword}
@@ -147,7 +147,7 @@ export default function Register() {
           <Input
             icon={authIcons.Lock}
             type={registerState.showConfirmPassword ? 'text' : 'password'}
-            placeholder={t('confirmPassword')}
+            placeholder={t('confirmPassword', { ns: 'validation' })}
             value={registerState.confirm}
             onChange={e => dispatchRegister({ type: 'SET_FIELD', field: 'confirm', value: e.target.value })}
             showPassword={registerState.showConfirmPassword}
@@ -178,20 +178,20 @@ export default function Register() {
             disabled={isDataEmpty() || hasErrors() || loading}
             loading={loading}
           >
-            {t('register')}
+            {t('register', { ns: 'validation' })}
           </Button>
 
           {/* OR Separator */}
           <div className="flex items-center w-full mt-[24px]">
             <div className="h-[1px] flex-1 bg-primary opacity-40" />
-            <span className="mx-4 text-[20px] sm:text-[24px] font-light text-primary">{t('or')}</span>
+            <span className="mx-4 text-[20px] sm:text-[24px] font-light text-primary">{t('or', { ns: 'validation' })}</span>
             <div className="h-[1px] flex-1 bg-primary opacity-40" />
           </div>
 
           {/* Login Row */}
           <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-4 mt-[16px]">
-            <span className="text-[16px] sm:text-[20px] font-semibold text-primary">{t('alreadyHaveAccount')}</span>
-            <Button onClick={() => navigate('/login')} variant="secondary">{t('login')}</Button>
+            <span className="text-[16px] sm:text-[20px] font-semibold text-primary">{t('alreadyHaveAccount', { ns: 'validation' })}</span>
+            <Button onClick={() => navigate('/login')} variant="secondary">{t('login', { ns: 'validation' })}</Button>
           </div>
         </div>
       </div>
