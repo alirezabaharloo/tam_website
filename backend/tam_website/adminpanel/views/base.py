@@ -1,23 +1,16 @@
-from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
+from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import *
+from ..serializers import *
 from rest_framework.decorators import api_view, permission_classes
 from accounts.models import User
-from permissions import IsSuperUser
-from accounts.serializers import UserInfoSerializer
+from permissions import *
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q, Count
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import UserFilter, PlayerFilter
 from rest_framework.views import APIView
-from django.shortcuts import render
-from django.utils.translation import gettext_lazy as _
-from rest_framework import viewsets, mixins, permissions
-from accounts.models.profiles import Profile
-from blog.models.partial import Player
-from blog.serializers import PlayerSerializer
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -31,55 +24,7 @@ def check_admin_access(request):
     if is_admin or is_author or is_seller:
         return Response("Access granted.", status=status.HTTP_200_OK)
     return Response('Access denied.', status=status.HTTP_403_FORBIDDEN)
-    
 
-class UserPagination(PageNumberPagination):
-    page_size = 8
-    page_size_query_param = 'page_size'
-    max_page_size = 50
-
-@api_view(['GET'])
-@permission_classes([IsSuperUser])
-def user_list_view(request):
-    """
-    View for listing users with pagination and filtering
-    """
-    queryset = User.objects.all().order_by('-created_date')
-    
-    # Apply filters
-    filter_backend = DjangoFilterBackend()
-    user_filter = UserFilter(request.GET, queryset=queryset)
-    filtered_queryset = user_filter.qs
-    
-    # Apply pagination
-    paginator = UserPagination()
-    page = paginator.paginate_queryset(filtered_queryset, request)
-    
-    # Serialize results
-    serializer = UserInfoSerializer(page, many=True)
-    
-    return paginator.get_paginated_response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes([IsSuperUser])
-def user_detail_view(request, id):
-    """
-    View for retrieving a single user's details
-    """
-    try:
-        user = User.objects.get(id=id)
-        serializer = UserDetailSerializer(user)
-        return Response(serializer.data)
-    except User.DoesNotExist:
-        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-@api_view(['GET'])
-@permission_classes([IsSuperUser])
-def user_permissions_list_view(request):
-    """
-    View for listing user permission types
-    """
-    return Response(User.get_user_permissions_dict())
 
 @api_view(['GET'])
 @permission_classes([IsSuperUser])
@@ -181,40 +126,10 @@ def dashboard_stats_view(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class PlayerListView(viewsets.ReadOnlyModelViewSet):
-    """
-    Viewset for listing or retrieving players.
-    """
-    queryset = Player.objects.all()
-    serializer_class = BilingualPlayerSerializer
-    filterset_class = PlayerFilter
-    filter_backends = [DjangoFilterBackend]
-    permission_classes = [permissions.IsAdminUser]
-    pagination_class = UserPagination
+
     
-    def get_serializer_context(self):
-        """
-        Add request to serializer context to access query parameters
-        """
-        context = super().get_serializer_context()
-        return context
 
-
-class PlayerPositionsView(APIView):
-    """
-    View to return all player positions for filtering.
-    """
-    permission_classes = [permissions.IsAdminUser]
-
-    def get(self, request, format=None):
-        """
-        Return a list of positions with their English keys and Persian display values.
-        """
-        positions = {
-            '': 'همه‌ی پست‌ها',  # Empty string for "All"
-        }
-        # Add all position choices
-        for choice_key, choice_value in Player.Positions.choices:
-            positions[choice_key] = choice_value
-        
-        return Response(positions)
+class BasePagination(PageNumberPagination):
+    page_size = 8
+    page_size_query_param = 'page_size'
+    max_page_size = 50

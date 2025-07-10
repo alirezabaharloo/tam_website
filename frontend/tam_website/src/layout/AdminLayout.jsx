@@ -8,12 +8,14 @@ import PageNotFound from '../pages/PageNotFound';
 import { AdminIcons } from '../data/Icons';
 import domainUrl from '../utils/api';
 import SomethingWentWrong from '../components/UI/SomethingWentWrong';
+import AccessDenied from '../components/UI/AccessDenied';
 
 const AdminLayout = () => {
   const { isAdminPannelAccess, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [hasRouteAccess, setHasRouteAccess] = useState(true);
 
   // گرفتن اطلاعات کاربر
   const {
@@ -22,29 +24,69 @@ const AdminLayout = () => {
     isError: userError
   } = useAuthHttp(`http://${domainUrl}:8000/api/auth/user/`);
 
+  // بررسی دسترسی کاربر به مسیر فعلی
+  useEffect(() => {
+    if (userData) {
+      const currentPath = location.pathname;
+      
+      // تعریف قوانین دسترسی برای هر مسیر
+      if (currentPath.includes('/admin/users')) {
+        // Users route: only superuser can access
+        setHasRouteAccess(userData.is_superuser === true);
+      } 
+      else if (currentPath.includes('/admin/news')) {
+        // News route: superuser OR author can access
+        setHasRouteAccess(userData.is_superuser === true || userData.is_author === true);
+      }
+      else if (currentPath.includes('/admin/shop')) {
+        // Shop route: superuser OR seller can access
+        setHasRouteAccess(userData.is_superuser === true || userData.is_seller === true);
+      }
+      else if (currentPath.includes('/admin/players')) {
+        // Players route: superuser OR author can access
+        setHasRouteAccess(userData.is_superuser === true || userData.is_author === true);
+      }
+      else if (currentPath === '/admin' || currentPath === '/admin/') {
+        // Dashboard route: anyone with admin panel access can access
+        setHasRouteAccess(true);
+      }
+      else {
+        // Default: allow access
+        setHasRouteAccess(true);
+      }
+    }
+  }, [location.pathname, userData]);
+
   // تعیین تب‌ها بر اساس سطح دسترسی
   const getTabs = () => {
     if (!userData) return [];
     
-    if (userData.is_superuser) {
-      return [
-        { id: 'dashboard', label: 'داشبورد', icon: AdminIcons.Dashboard, path: '/admin' },
-        { id: 'users', label: 'کاربران', icon: AdminIcons.Users, path: '/admin/users' },
-        { id: 'news', label: 'اخبار', icon: AdminIcons.News, path: '/admin/news' },
-        { id: 'shop', label: 'فروشگاه', icon: AdminIcons.Shop, path: '/admin/shop' },
-        { id: 'players', label: 'بازیکن‌ها', icon: AdminIcons.Teams, path: '/admin/players' },
-      ];
-    } else if (userData.is_author) {
-      return [
-        { id: 'news', label: 'اخبار', icon: AdminIcons.News, path: '/admin/news' },
-        { id: 'players', label: 'بازیکن‌ها', icon: AdminIcons.Teams, path: '/admin/players' },
-      ];
-    } else if (userData.is_seller) {
-      return [
-        { id: 'shop', label: 'فروشگاه', icon: AdminIcons.Shop, path: '/admin/shop' },
-      ];
+    const tabs = [];
+    
+    // Dashboard is accessible to anyone with admin panel access
+    tabs.push({ id: 'dashboard', label: 'داشبورد', icon: AdminIcons.Dashboard, path: '/admin' });
+    
+    // Users tab - only for superusers
+    if (userData.is_superuser === true) {
+      tabs.push({ id: 'users', label: 'کاربران', icon: AdminIcons.Users, path: '/admin/users' });
     }
-    return [];
+    
+    // News tab - for superusers OR authors
+    if (userData.is_superuser === true || userData.is_author === true) {
+      tabs.push({ id: 'news', label: 'اخبار', icon: AdminIcons.News, path: '/admin/news' });
+    }
+    
+    // Shop tab - for superusers OR sellers
+    if (userData.is_superuser === true || userData.is_seller === true) {
+      tabs.push({ id: 'shop', label: 'فروشگاه', icon: AdminIcons.Shop, path: '/admin/shop' });
+    }
+    
+    // Players tab - for superusers OR authors
+    if (userData.is_superuser === true || userData.is_author === true) {
+      tabs.push({ id: 'players', label: 'بازیکن‌ها', icon: AdminIcons.Teams, path: '/admin/players' });
+    }
+    
+    return tabs;
   };
 
   const tabs = getTabs();
@@ -174,7 +216,7 @@ const AdminLayout = () => {
                 ease: "easeInOut" 
               }}
             >
-              <Outlet />
+              {hasRouteAccess ? <Outlet /> : <AccessDenied />}
             </motion.div>
           </AnimatePresence>
         </main>
