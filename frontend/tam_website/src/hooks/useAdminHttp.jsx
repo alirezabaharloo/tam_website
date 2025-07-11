@@ -52,7 +52,7 @@ const useAdminHttp = (url, options = null) => {
       ...options,
       headers,
     };
-    console.log(requestOptions);
+
     let response = await fetch(url, requestOptions);
     let responseData;
 
@@ -109,11 +109,11 @@ const useAdminHttp = (url, options = null) => {
         isFormData = true;
       } else if (requestData !== null && typeof requestData === 'object') {
         body = JSON.stringify(requestData);
-      }
+      } 
 
       const options = {
         method: requestMethod || 'GET',
-        body: body || undefined,
+        body: body,
         headers: isFormData ? {} : {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

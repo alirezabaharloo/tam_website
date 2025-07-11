@@ -129,7 +129,7 @@ class PlayerCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError({"name_fa": "بازیکنی با این نام فارسی در سیستم موجود است."})
         
         if en_exists:
-            raise serializers.ValidationError({"name_en": "A player with this English name already exists."})
+            raise serializers.ValidationError({"name_en": "بازیکنی با این نام انگلیسی در سیستم موجود است."})
             
         return data
     
