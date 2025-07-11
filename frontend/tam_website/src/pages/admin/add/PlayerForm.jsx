@@ -102,11 +102,15 @@ const PlayerForm = () => {
     
     setIsLoading(true);
     
-    console.log("this is the form data", formData);
+    const formDataToSend = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSend.append(key, value);
+    });
+
     try {
       // Send request to API
-      const response = await sendRequest('http://localhost:8000/api/admin/player-create/', 'POST', formData);
-      console.log(formData);
+      const response = await sendRequest('http://localhost:8000/api/admin/player-create/', 'POST', formDataToSend);
+      
       if (response.isError) {
         // Handle validation errors from backend
         setErrors(response.errorContent || {});
