@@ -23,7 +23,7 @@ const Dashboard = () => {
   const {
     data: dashboardData,
     isLoading: dashboardLoading,
-    isError: dashboardError
+    isError: dashboardError,
   } = useAdminHttp(`http://${domainUrl}:8000/api/admin/admin-dashboard-data/`);
 
   if (dashboardLoading) {

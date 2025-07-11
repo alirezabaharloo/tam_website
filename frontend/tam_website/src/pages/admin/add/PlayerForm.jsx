@@ -16,7 +16,7 @@ const PlayerForm = () => {
   
   // Track if tabs have errors
   const [tabErrors, setTabErrors] = useState({
-    persian: false,
+    persian: false, 
     english: false
   });
   
@@ -196,16 +196,7 @@ const PlayerForm = () => {
   return (
     <div className="min-h-screen bg-quinary-tint-600">
       <style>{flashingDotCSS}</style>
-      <div className="max-w-[1200px] mx-auto px-4">
-        {/* Back Link - Replaces the header section */}
-        <div className="flex mb-6 justify-end">
-          <button
-            onClick={handleBack}
-            className="text-primary text-lg flex items-center  hover:underline focus:outline-none"
-          >
-            بازگشت
-          </button>
-        </div>
+      <div className="max-w-[1200px] mx-auto px-4 mt-[1rem]">
 
         {/* Form */}
         <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6">
@@ -215,35 +206,45 @@ const PlayerForm = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-          >
-            {/* Player Name Tabs */}
-            <div className="space-y-6">
-              {/* Tab Navigation */}
-              <div className="flex border-b border-quinary-tint-500">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`px-6 py-3 text-[16px] font-medium transition-all duration-300 border-b-2 relative ${
-                      activeTab === tab.id
-                        ? 'text-primary border-primary'
-                        : 'text-secondary border-transparent hover:text-primary hover:border-quinary-tint-400'
-                    }`}
+          >{/* Player Name Tabs */}
+          <div className="space-y-6">
+            {/* Tab Navigation */}
+            <div className="flex border-b border-quinary-tint-500 justify-between">
+             
+             <div>
+             {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`px-6 py-3 text-[16px] font-medium transition-all duration-300 border-b-2 relative ${
+                    activeTab === tab.id
+                      ? 'text-primary border-primary'
+                      : 'text-secondary border-transparent hover:text-primary hover:border-quinary-tint-400'
+                  }`}
+                >
+                  {tab.label}
+                  {/* Error indicator dot */}
+                  {activeTab !== tab.id && tabErrors[tab.id] && (
+                    <span 
+                      className="absolute -top-1 -right-1 w-3 h-3 bg-quaternary rounded-full" 
+                      style={{ animation: 'flash 1s infinite ease-in-out' }}
+                    />
+                  )}
+                </button>
+              ))}
+             </div>
+              <div>
+                <span
+                    onClick={handleBack}
+                    className="text-white bg-primary text-lg flex items-center py-[0.5rem] px-[1rem] rounded-lg cursor-pointer hover:bg-primary-tint-100 transition-colors duration-300"
                   >
-                    {tab.label}
-                    {/* Error indicator dot */}
-                    {activeTab !== tab.id && tabErrors[tab.id] && (
-                      <span 
-                        className="absolute -top-1 -right-1 w-3 h-3 bg-quaternary rounded-full" 
-                        style={{ animation: 'flash 1s infinite ease-in-out' }}
-                      />
-                    )}
-                  </button>
-                ))}
+                    بازگشت
+                </span>
               </div>
+            </div>
 
-              {/* Tab Content for Name */}
+            {/* Tab Content for Name */}
               <div className="space-y-6">
                 {activeTab === 'persian' && (
                   <div>

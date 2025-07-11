@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminPagination = ({ 
   currentPage, 
@@ -9,6 +9,23 @@ const AdminPagination = ({
   onPageChange, 
   onItemsPerPageChange 
 }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Style for pagination buttons
   const getPaginationButtonStyle = (isActive) => {
     return `px-3 py-1 rounded-md text-sm font-bold transition-colors duration-200 ${
@@ -74,25 +91,63 @@ const AdminPagination = ({
     return buttons;
   };
 
+  // Options for items per page
+  const options = [5, 8, 10, 25, 50];
+
+  // Convert number to Persian numeral
+  const toPersianNumeral = (num) => {
+    const persianNumerals = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    return num.toString().split('').map(digit => persianNumerals[parseInt(digit)]).join('');
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="flex flex-col sm:flex-row justify-between items-center mt-6 px-2"
     >
-      <div className="mb-4 sm:mb-0 flex items-center">
-        <span className="text-sm text-secondary mr-3">نمایش:</span>
-        <select
-          value={itemsPerPage}
-          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-          className="border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value={5}>۵</option>
-          <option value={8}>۸</option>
-          <option value={10}>۱۰</option>
-          <option value={25}>۲۵</option>
-          <option value={50}>۵۰</option>
-        </select>
+      <div className="mb-4 sm:mb-0 flex items-center relative " ref={dropdownRef}>
+        <span className="text-sm text-secondary mr-5">نمایش:</span>
+        <div className="relative">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center justify-center border border-gray-300 bg-quinary-tint-800 text-primary rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary min-w-[50px]"
+          >
+            <span>{toPersianNumeral(itemsPerPage)}</span>
+          </button>
+          
+          <AnimatePresence>
+            {isDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="absolute bottom-full mb-1 left-0 bg-quinary-tint-800 border border-gray-300 rounded-md shadow-lg overflow-hidden z-10"
+                style={{ transformOrigin: "bottom" }}
+              >
+                <div className="py-1">
+                  {options.map(option => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        onItemsPerPageChange(option);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`block w-full text-right px-4 py-2 text-sm transition-colors duration-150 ${
+                        itemsPerPage === option 
+                          ? 'bg-primary text-quinary-tint-800 font-bold' 
+                          : 'text-primary hover:bg-primary hover:text-quinary-tint-800'
+                      }`}
+                    >
+                      {toPersianNumeral(option)}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
       <div className="flex items-center justify-center">
         <button

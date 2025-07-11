@@ -5,6 +5,9 @@ import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import { validatePlayerNumber, validatePlayerForm, isFormValid } from '../../../validators/PlayerValidators';
 import LazyImage from '../../../components/UI/LazyImage';
+import Players from '../page/Players';
+import PlayerNotFound from '../../../components/UI/PlayerNotFound';
+import SomethingWentWrong from '../../../components/UI/SomethingWentWrong';
 
 const PlayerEditForm = () => {
   const navigate = useNavigate();
@@ -220,8 +223,10 @@ const PlayerEditForm = () => {
         formDataToSend.append(key, value);
       }
     });
+    
 
     try {
+      
       // Send request to API for updating the player
       const response = await sendRequest(`http://localhost:8000/api/admin/player-update/${playerId}/`, 'PATCH', formDataToSend);
       
@@ -272,21 +277,17 @@ const PlayerEditForm = () => {
     );
   }
 
-  // Show error state if player data fetch failed
-  if (playerDetailsError) {
+  if (playerDetails?.errorContent?.detail === "No Player matches the given query.") {
     return (
-      <div className="min-h-screen bg-quinary-tint-600 flex items-center justify-center">
-        <div className="bg-quaternary text-white p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-bold mb-2">خطا در دریافت اطلاعات بازیکن</h2>
-          <p>لطفا مجدد تلاش کنید یا با پشتیبانی تماس بگیرید.</p>
-          <button 
-            onClick={handleBack}
-            className="mt-4 px-4 py-2 bg-primary text-white rounded-lg"
-          >
-            بازگشت
-          </button>
-        </div>
-      </div>
+     <PlayerNotFound />
+    );
+  }
+  
+
+  // Show error state if player data fetch failed
+  if (playerDetails?.isError || positions?.isError) {
+    return (
+      <SomethingWentWrong />
     );
   }
 
@@ -294,16 +295,6 @@ const PlayerEditForm = () => {
     <div className="min-h-screen bg-quinary-tint-600">
       <style>{flashingDotCSS}</style>
       <div className="max-w-[1200px] mx-auto px-4">
-        {/* Back Link */}
-        <div className="flex mb-6 justify-end">
-          <button
-            onClick={handleBack}
-            className="text-primary text-lg flex items-center hover:underline focus:outline-none"
-          >
-            بازگشت
-          </button>
-        </div>
-
         {/* Form */}
         <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6">
           <motion.form
@@ -316,8 +307,10 @@ const PlayerEditForm = () => {
             {/* Player Name Tabs */}
             <div className="space-y-6">
               {/* Tab Navigation */}
-              <div className="flex border-b border-quinary-tint-500">
-                {tabs.map((tab) => (
+              <div className="flex border-b border-quinary-tint-500 justify-between">
+               
+               <div>
+               {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
@@ -338,6 +331,15 @@ const PlayerEditForm = () => {
                     )}
                   </button>
                 ))}
+               </div>
+                <div>
+                  <span
+                      onClick={handleBack}
+                      className="text-white bg-primary text-lg flex items-center py-[0.5rem] px-[1rem] rounded-lg cursor-pointer hover:bg-primary-tint-100 transition-colors duration-300"
+                    >
+                      بازگشت
+                  </span>
+                </div>
               </div>
 
               {/* Tab Content for Name */}
@@ -508,11 +510,19 @@ const PlayerEditForm = () => {
                 {/* Image Preview */}
                 {imagePreview && (
                   <div className="w-64 h-64 rounded-lg overflow-hidden">
-                    <LazyImage 
-                      src={imagePreview} 
-                      alt="Player preview" 
-                      className="w-full h-full object-cover rounded-lg"
-                    />
+                    {formData.image ? (
+                      <img
+                        src={imagePreview}
+                        alt="Player preview"
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : (
+                      <LazyImage
+                        src={imagePreview}
+                        alt="Player preview"
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    )}
                   </div>
                 )}
                 
