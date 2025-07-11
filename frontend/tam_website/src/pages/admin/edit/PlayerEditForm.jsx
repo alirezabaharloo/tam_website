@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import { validatePlayerNumber, isFormValid } from '../../../utils/PlayerValidators';
+import { validatePlayerNumber, validatePlayerForm, isFormValid } from '../../../validators/PlayerValidators';
 import LazyImage from '../../../components/UI/LazyImage';
 
 const PlayerEditForm = () => {
@@ -156,11 +156,6 @@ const PlayerEditForm = () => {
     }));
   };
   
-  // Handle triggering file input click
-  const handleChangeImageClick = () => {
-    fileInputRef.current.click();
-  };
-  
   // Handle image file selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -185,26 +180,27 @@ const PlayerEditForm = () => {
     }
   };
   
-  // Handle image removal
-  const handleRemoveImage = () => {
-    // Clear the image preview
-    setImagePreview(null);
-    
-    // Set the image field to null in form data
-    setFormData(prev => ({
-      ...prev,
-      image: null
-    }));
-  };
-  
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Second level validation: Only validate the number field when submitting
-    const numberError = validatePlayerNumber(formData.number);
-    if (numberError) {
-      setErrors({ number: numberError });
+    // Validate all fields
+    const validationErrors = validatePlayerForm(formData);
+    
+    // If there are validation errors, display them and stop submission
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      
+      // Switch to the appropriate tab if there's an error in a tab that's not active
+      if ((validationErrors.name_fa && activeTab !== 'persian') || 
+          (validationErrors.name_en && activeTab !== 'english')) {
+        if (validationErrors.name_fa) {
+          setActiveTab('persian');
+        } else if (validationErrors.name_en) {
+          setActiveTab('english');
+        }
+      }
+      
       return;
     }
     
@@ -510,53 +506,27 @@ const PlayerEditForm = () => {
               
               <div className="flex flex-col items-center space-y-4">
                 {/* Image Preview */}
-                {imagePreview ? (
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-64 h-64 rounded-lg overflow-hidden">
-                      <LazyImage 
-                        src={imagePreview} 
-                        alt="Player preview" 
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                    
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={handleChangeImageClick}
-                        className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 flex items-center gap-2 text-[14px] font-medium"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                        تغییر تصویر
-                      </button>
-                      
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="px-4 py-2 bg-quaternary text-quinary-tint-800 rounded-lg hover:bg-quaternary-tint-100 transition-colors duration-300 flex items-center gap-2 text-[14px] font-medium"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                        حذف تصویر
-                      </button>
-                    </div>
+                {imagePreview && (
+                  <div className="w-64 h-64 rounded-lg overflow-hidden">
+                    <LazyImage 
+                      src={imagePreview} 
+                      alt="Player preview" 
+                      className="w-full h-full object-cover rounded-lg"
+                    />
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleChangeImageClick}
-                    className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 flex items-center gap-2 text-[14px] font-medium"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10z" clipRule="evenodd" />
-                      <path d="M4 12l4-4 2 2 4-4 2 2v4H4z" />
-                    </svg>
-                    انتخاب تصویر
-                  </button>
                 )}
+                
+                {/* Change Image Button */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current.click()}
+                  className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 flex items-center gap-2 text-[14px] font-medium"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  </svg>
+                  تغییر تصویر
+                </button>
                 
                 {errors.image && (
                   <p className="text-quaternary text-[14px] mt-1">{errors.image}</p>

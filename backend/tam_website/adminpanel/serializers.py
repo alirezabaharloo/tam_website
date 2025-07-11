@@ -192,7 +192,7 @@ class PlayerUpdateSerializer(PlayerCreateSerializer):
     Serializer for updating an existing Player with bilingual support
     """
     image = serializers.ImageField(required=False)  # Image is optional during update
-    
+        
     def validate(self, data):
         """
         Override validate to check name uniqueness excluding the current instance

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import { validatePlayerNumber, isFormValid } from '../../../utils/PlayerValidators';
+import { validatePlayerNumber, isFormValid } from '../../../validators/PlayerValidators';
 
 const PlayerForm = () => {
   const navigate = useNavigate();
