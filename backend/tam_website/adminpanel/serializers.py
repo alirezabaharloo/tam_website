@@ -165,5 +165,93 @@ class PlayerCreateSerializer(serializers.Serializer):
         return player
 
 
+class PlayerDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer for retrieving detailed player information including translations
+    """
+    name_fa = serializers.SerializerMethodField()
+    name_en = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Player
+        fields = ['id', 'name_fa', 'name_en', 'image', 'number', 'position', 'goals', 'games']
+    
+    def get_name_fa(self, obj):
+        if obj.has_translation('fa'):
+            return obj.safe_translation_getter('name', language_code='fa', default="")
+        return obj.safe_translation_getter('name', any_language=True)
+    
+    def get_name_en(self, obj):
+        if obj.has_translation('en'):
+            return obj.safe_translation_getter('name', language_code='en', default="")
+        return obj.safe_translation_getter('name', any_language=True)
+
+
+class PlayerUpdateSerializer(PlayerCreateSerializer):
+    """
+    Serializer for updating an existing Player with bilingual support
+    """
+    image = serializers.ImageField(required=False)  # Image is optional during update
+    
+    def validate(self, data):
+        """
+        Override validate to check name uniqueness excluding the current instance
+        """
+        # Get the current instance being updated
+        instance = self.context.get('player_instance')
+        
+        # Check if Persian name exists for other players
+        fa_exists = False
+        if 'name_fa' in data:
+            for player in Player.objects.exclude(id=instance.id):
+                if player.has_translation('fa') and player.safe_translation_getter('name', language_code='fa') == data['name_fa']:
+                    fa_exists = True
+                    break
+        
+        # Check if English name exists for other players
+        en_exists = False
+        if 'name_en' in data:
+            for player in Player.objects.exclude(id=instance.id):
+                if player.has_translation('en') and player.safe_translation_getter('name', language_code='en') == data['name_en']:
+                    en_exists = True
+                    break
+                
+        if fa_exists:
+            raise serializers.ValidationError({"name_fa": "بازیکنی با این نام فارسی در سیستم موجود است."})
+        
+        if en_exists:
+            raise serializers.ValidationError({"name_en": "بازیکنی با این نام انگلیسی در سیستم موجود است."})
+            
+        return data
+    
+    def update(self, instance, validated_data):
+        """
+        Update an existing player with translations
+        """
+        # Extract name translations if provided
+        name_fa = validated_data.pop('name_fa', None)
+        name_en = validated_data.pop('name_en', None)
+        
+        # Update regular fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Save without translations first
+        instance.save()
+        
+        # Update translations if provided
+        if name_fa:
+            instance.set_current_language('fa')
+            instance.name = name_fa
+            instance.save()
+        
+        if name_en:
+            instance.set_current_language('en')
+            instance.name = name_en
+            instance.save()
+        
+        return instance
+
+
 
 

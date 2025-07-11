@@ -102,3 +102,51 @@ class CreatePlayerView(CreateAPIView):
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class PlayerDetailView(RetrieveAPIView):
+    """
+    View for retrieving player details for editing
+    """
+    queryset = Player.objects.all()
+    serializer_class = PlayerDetailSerializer
+    permission_classes = [IsSuperUser, IsAuthor]
+    lookup_url_kwarg = 'player_id'
+
+
+class UpdatePlayerView(UpdateAPIView):
+    """
+    View for updating an existing player
+    """
+    queryset = Player.objects.all()
+    serializer_class = PlayerUpdateSerializer
+    permission_classes = [IsSuperUser, IsAuthor]
+    lookup_url_kwarg = 'player_id'
+    
+    def get_serializer_context(self):
+        """
+        Add player instance to serializer context
+        """
+        context = super().get_serializer_context()
+        context['player_instance'] = self.get_object()
+        return context
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Update the player with bilingual support
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "اطلاعات بازیکن با موفقیت بروزرسانی شد."},
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )

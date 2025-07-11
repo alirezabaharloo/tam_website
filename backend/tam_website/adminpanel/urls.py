@@ -22,6 +22,8 @@ urlpatterns = [
     path('player-positions/', views.PlayerPositionsView.as_view(), name='player-positions'),
     path('player-delete/<int:player_id>/', views.delete_player, name='player-delete'),
     path('player-create/', views.CreatePlayerView.as_view(), name='player-create'),
+    path('player-detail/<int:player_id>/', views.PlayerDetailView.as_view(), name='player-detail'),
+    path('player-update/<int:player_id>/', views.UpdatePlayerView.as_view(), name='player-update'),
 ]
 
 urlpatterns += router.urls

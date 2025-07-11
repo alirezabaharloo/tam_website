@@ -276,7 +276,7 @@ const AdminPlayersTab = ({ navigate }) => {
                     <td className="px-6 py-4 text-right">
                       <div className="flex gap-2 justify-end">
                         <button 
-                          onClick={() => navigate(`/admin/player/edit/${player.id || ''}`)}
+                          onClick={() => navigate(`/admin/players/edit/${player.id || ''}`)}
                           className="px-3 py-1 bg-primary text-quinary-tint-800 rounded hover:bg-primary-tint-100 transition-colors duration-300"
                         >
                           ویرایش

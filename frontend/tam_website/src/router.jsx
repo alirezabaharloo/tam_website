@@ -21,6 +21,7 @@ import AdminShop from './pages/admin/page/Shop';
 import Players from './pages/admin/page/Players';
 import ArticleForm from './pages/admin/add/ArticleForm';
 import PlayerForm from './pages/admin/add/PlayerForm';
+import PlayerEditForm from './pages/admin/edit/PlayerEditForm';
 // import UserForm from './pages/admin/UserForm';
 import PreRegister from './pages/blog/PreRegister';
 
@@ -112,6 +113,7 @@ const WebsiteRoutes = () => {
           <Route path="shop" element={<AdminShop />} />
           <Route path="players" element={<Players />} />
           <Route path="players/add" element={<PlayerForm />} />
+          <Route path="players/edit/:playerId" element={<PlayerEditForm />} />
           <Route path="news/add" element={<ArticleForm />} />
         </Route>
       
