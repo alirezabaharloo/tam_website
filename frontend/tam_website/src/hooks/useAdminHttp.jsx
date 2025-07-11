@@ -1,147 +1,138 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from './useAuth';
 
+/**
+ * Custom hook for making authenticated HTTP requests to the admin API
+ * @param {string} url - The API URL to request (optional if using sendRequest directly)
+ * @param {object} options - Request options (optional)
+ * @returns {object} The state and methods for making HTTP requests
+ */
 const useAdminHttp = (url, options = null) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState({
-    isError: false,
-    errorContent: ""
-  });
+  const [error, setError] = useState({ isError: false, errorContent: '' });
   const [data, setData] = useState([]);
+
   const { tokens, refreshToken, logout } = useAuth();
 
+  /**
+   * Handles token expiration by trying to refresh it
+   */
   const handleUnauthorized = useCallback(async () => {
     try {
       const newTokens = await refreshToken();
-      
-      if (newTokens && newTokens.access) {
-        // Update tokens in localStorage and context
+
+      if (newTokens?.access) {
         localStorage.setItem('tokens', JSON.stringify(newTokens));
         return true;
       }
-    } catch (error) {
-      console.log('some error occurd!', error.message);
+    } catch (err) {
+      console.error('Token refresh error:', err.message);
     }
     return false;
-  }, [refreshToken, tokens, logout]);
+  }, [refreshToken]);
 
-  const customFetchFunction = async (url, options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-  }) => {
-    // Add auth headers to the request
-    const requestOptions = {
-      ...options,                                         
-      headers: {
-        ...options?.headers,
-        "Authorization": `Bearer ${JSON.parse(localStorage.getItem('tokens'))?.access}`,
-        'Content-Type': 'application/json',
-        'Accept-Language': 'en'
-      }
+  /**
+   * Custom fetch logic with token and FormData support
+   */
+  const customFetchFunction = async (url, options = {}) => {
+    const isFormData = options?.body instanceof FormData;
+
+    const headers = {
+      ...options?.headers,
+      Authorization: `Bearer ${JSON.parse(localStorage.getItem('tokens'))?.access}`,
     };
-    let res = await fetch(url, requestOptions);
-    
-    
-    const resData = await res.json();
-    
-    console.log(resData);
-    
-    if (res.status === 401 && resData?.messages[0].message === "Token is expired") {
-      // Try to refresh the token
-      
-      const refreshSuccess = await handleUnauthorized();
-      
-      if (refreshSuccess) {
-        // Retry the original request with new token
-        const newOptions = {
-          ...requestOptions,
-          headers: {
-            ...requestOptions.headers,
-          }   
-        };
-        res = await fetch(url, newOptions);
+
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+      headers['Accept'] = 'application/json';
+      headers['Accept-Language'] = 'fa';
+    }
+
+    const requestOptions = {
+      ...options,
+      headers,
+    };
+
+    let response = await fetch(url, requestOptions);
+    let responseData;
+
+    try {
+      responseData = await response.json();
+    } catch (err) {
+      responseData = { message: 'Invalid JSON response from server.' };
+    }
+
+    // Handle token expiration and retry
+    if (response.status === 401 && responseData?.messages?.[0]?.message === 'Token is expired') {
+      const refreshed = await handleUnauthorized();
+      if (refreshed) {
+        requestOptions.headers.Authorization = `Bearer ${JSON.parse(localStorage.getItem('tokens'))?.access}`;
+        response = await fetch(url, requestOptions);
+        responseData = await response.json();
       } else {
         throw new Error('Authentication failed');
       }
     }
 
-    if (res.status === 401 && resData.messages[0].message === "Token is expired") {
-      window.location.reload();
-    } 
-
-    if (res.status === 401 && resData.messages[0].message === "Token is invalid") {
-      logout();
+    if (response.status === 401) {
+      if (responseData?.messages?.[0]?.message === 'Token is expired') {
+        window.location.reload();
+      } else if (responseData?.messages?.[0]?.message === 'Token is invalid') {
+        logout();
+      }
     }
 
-    if (!res.ok) {
+    if (!response.ok) {
       return {
         isError: true,
-        errorContent: resData
+        errorContent: responseData,
       };
     }
-   
-    if (!res.ok) { 
-      setError({
-        isError: true,
-        errorContent: resData
-      })
-    }
-    
-    return resData;
+
+    return responseData;
   };
-  
+
+  /**
+   * Function to send requests manually (POST, PUT, DELETE, PATCH, GET)
+   */
   const sendRequest = useCallback(async (requestUrl = null, requestMethod = null, requestData = null) => {
     setIsLoading(true);
-    
     try {
       let responseData;
-      if (requestData) {
-        responseData = await customFetchFunction(requestUrl, 
-          {
-            method: requestMethod,
-            headers: {
-              "Authorization": `Bearer ${JSON.parse(localStorage.getItem('tokens'))?.access}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Accept-Language': 'en',
-            },
-            body: JSON.stringify(requestData),
-          }
-        );
-      } else if (!requestData && (requestMethod && requestUrl)) {
-        responseData = await customFetchFunction(requestUrl, 
-          {
-            method: requestMethod,
-            headers: {
-              "Authorization": `Bearer ${JSON.parse(localStorage.getItem('tokens'))?.access}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Accept-Language': 'en'
-            },
-          }
-        );
-      } else {
-        responseData = await customFetchFunction(url, options);
-      }
-      setData(responseData);
-      console.log(responseData);
-      
-      return responseData      
+      const finalUrl = requestUrl || url;
 
-    } catch (error) {
-      setError({
-        isError: true,
-        errorContent: error.message
-      })
-      throw new Error(error.message);
+      let body;
+      let isFormData = false;
+
+      if (requestData instanceof FormData) {
+        body = requestData;
+        isFormData = true;
+      } else if (requestData !== null && typeof requestData === 'object') {
+        body = JSON.stringify(requestData);
+      }
+
+      const options = {
+        method: requestMethod || 'GET',
+        body: requestData ? body : undefined,
+        headers: isFormData ? {} : {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Accept-Language': 'fa',
+        },
+      };
+
+      responseData = await customFetchFunction(finalUrl, options);
+      setData(responseData);
+      return responseData;
+    } catch (err) {
+      setError({ isError: true, errorContent: err.message });
+      throw new Error(err.message);
     } finally {
       setIsLoading(false);
     }
   }, [url, options]);
 
+  // Auto-fetch if URL is provided initially
   useEffect(() => {
     if (url) {
       sendRequest();
@@ -153,7 +144,7 @@ const useAdminHttp = (url, options = null) => {
     data,
     sendRequest,
     isError: error.isError,
-    errorContent: error.errorContent
+    errorContent: error.errorContent,
   };
 };
 

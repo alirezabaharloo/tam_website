@@ -76,3 +76,29 @@ def delete_player(request, player_id):
             {"error": str(e)}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+class CreatePlayerView(CreateAPIView):
+    """
+    View for creating a new player
+    """
+    serializer_class = PlayerCreateSerializer
+    permission_classes = [IsSuperUser, IsAuthor]
+    
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new player with bilingual support
+        """
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            player = serializer.save()
+            return Response(
+                {"message": "بازیکن جدید با موفقیت ایجاد شد."},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )

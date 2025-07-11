@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { fakeUsers } from '../../data/fakeUsers';
-import { newsData } from '../../data/newsData';
+import { fakeUsers } from '../../../data/fakeUsers';
+import { newsData } from '../../../data/newsData';
 import { ArticleFormIcons } from '../../../data/Icons';
 
 const Icons = ArticleFormIcons;
