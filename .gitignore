@@ -9,6 +9,7 @@
 ## Dependencies
 /frontend/tam_website/node_modules/
 /frontend/tam_website/bower_components/
+*node_modules/
 
 ## Build outputs
 /frontend/tam_website/build/

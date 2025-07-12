@@ -91,10 +91,14 @@ const AdminLayout = () => {
 
   const tabs = getTabs();
 
-  // تعیین تب فعال بر اساس مسیر فعلی
   const getActiveTab = () => {
     const currentPath = location.pathname;
-    const activeTab = tabs.find(tab => tab.path === currentPath);
+    const activeTab = tabs.find(tab => {
+      if (tab.path === '/admin') {
+        return currentPath === '/admin' || currentPath === '/admin/';
+      }
+      return currentPath.startsWith(tab.path);
+    });
     return activeTab ? activeTab.id : tabs[0]?.id || 'dashboard';
   };
 

@@ -27,7 +27,7 @@ export const successNotif = (message, options = {}) => {
       </div>
       {/* Text content */}
       <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
-        <div className="font-bold text-lg mb-1">{i18n.t('preRegisterSuccess', { ns: 'preRegister' })}</div>
+        <div className="font-bold text-lg mb-1">{message}</div>
       </div>
       {/* Vertical Divider */}
       <div className="w-px bg-quinary-tint-800 mx-0.5 my-2" />
