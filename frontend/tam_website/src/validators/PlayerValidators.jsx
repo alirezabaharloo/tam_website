@@ -61,10 +61,6 @@ export const validatePlayerForm = (formData) => {
   if (!formData.position) {
     errors.position = 'لطفا پست بازیکن را انتخاب کنید';
   }
-
-  if (!formData.image) {
-      errors.image = 'لطفا یک تصویر برای بازیکن انتخاب کنید'
-  }
   
   return errors;
 };

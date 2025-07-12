@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import { validatePlayerNumber, isFormValid } from '../../../validators/PlayerValidators';
+import { validatePlayerNumber, validatePlayerForm, isFormValid } from '../../../validators/PlayerValidators';
 
 const PlayerForm = () => {
   const navigate = useNavigate();
@@ -71,19 +71,17 @@ const PlayerForm = () => {
     };
     
     setTabErrors(newTabErrors);
+    
+    // This will ensure tab errors are always in sync with actual errors
+    // When an error is fixed, its indicator will disappear
   }, [errors]);
   
-  // Clear tab error when switching to that tab
+  // Handle tab switching without clearing error indicators
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
     
-    // Clear the tab error indicator when switching to that tab
-    if (tabErrors[tabId]) {
-      setTabErrors(prev => ({
-        ...prev,
-        [tabId]: false
-      }));
-    }
+    // We no longer clear the error indicator just because we switched to that tab
+    // The indicator should only clear when the actual error is fixed
   };
   
   // Handle form input changes
@@ -95,6 +93,10 @@ const PlayerForm = () => {
         delete newErrors[field];
         return newErrors;
       });
+      
+      // Note: We don't need to manually update tabErrors here
+      // The useEffect that watches errors will automatically update tabErrors
+      // when errors change, ensuring the indicator is only removed when the error is fixed
     }
     
     setFormData(prev => ({
@@ -118,6 +120,9 @@ const PlayerForm = () => {
           delete newErrors.image;
           return newErrors;
         });
+        
+        // The useEffect watching errors will automatically update tabErrors
+        // ensuring the indicator is only removed when the error is fixed
       }
       
       setFormData(prev => ({
@@ -131,10 +136,20 @@ const PlayerForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Second level validation: Only validate the number field when submitting
-    const numberError = validatePlayerNumber(formData.number);
-    if (numberError) {
-      setErrors({ number: numberError });
+    // Validate all fields using the shared validation function
+    const validationErrors = validatePlayerForm(formData);
+    
+    // If there are validation errors, display them and stop submission
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      
+      // Switch to the appropriate tab if there's an error in a tab that's not active
+      if (validationErrors.name_fa && activeTab !== 'persian') {
+        setActiveTab('persian');
+      } else if (validationErrors.name_en && activeTab !== 'english') {
+        setActiveTab('english');
+      }
+      
       return;
     }
     
@@ -149,9 +164,9 @@ const PlayerForm = () => {
       // Send request to API
       const response = await sendRequest('http://localhost:8000/api/admin/player-create/', 'POST', formDataToSend);
       
-      if (response.isError) {
+      if (response?.isError) {
         // Handle validation errors from backend
-        setErrors(response.errorContent || {});
+        setErrors(response?.errorContent || {});
         errorNotif('خطا در ایجاد بازیکن');
       } else {
         // Show success notification and redirect

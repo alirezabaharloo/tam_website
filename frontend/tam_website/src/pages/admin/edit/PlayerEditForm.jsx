@@ -127,19 +127,14 @@ const PlayerEditForm = () => {
     };
     
     setTabErrors(newTabErrors);
+    
+    // This will ensure tab errors are always in sync with actual errors
+    // When an error is fixed, its indicator will disappear
   }, [errors]);
   
-  // Clear tab error when switching to that tab
+  // Handle tab switching without clearing error indicators
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    
-    // Clear the tab error indicator when switching to that tab
-    if (tabErrors[tabId]) {
-      setTabErrors(prev => ({
-        ...prev,
-        [tabId]: false
-      }));
-    }
   };
   
   // Handle form input changes
@@ -151,6 +146,10 @@ const PlayerEditForm = () => {
         delete newErrors[field];
         return newErrors;
       });
+      
+      // Note: We don't need to manually update tabErrors here
+      // The useEffect that watches errors will automatically update tabErrors
+      // when errors change, ensuring the indicator is only removed when the error is fixed
     }
     
     setFormData(prev => ({
@@ -174,6 +173,9 @@ const PlayerEditForm = () => {
           delete newErrors.image;
           return newErrors;
         });
+        
+        // The useEffect watching errors will automatically update tabErrors
+        // ensuring the indicator is only removed when the error is fixed
       }
       
       setFormData(prev => ({
@@ -195,13 +197,10 @@ const PlayerEditForm = () => {
       setErrors(validationErrors);
       
       // Switch to the appropriate tab if there's an error in a tab that's not active
-      if ((validationErrors.name_fa && activeTab !== 'persian') || 
-          (validationErrors.name_en && activeTab !== 'english')) {
-        if (validationErrors.name_fa) {
-          setActiveTab('persian');
-        } else if (validationErrors.name_en) {
-          setActiveTab('english');
-        }
+      if (validationErrors.name_fa && activeTab !== 'persian') {
+        setActiveTab('persian');
+      } else if (validationErrors.name_en && activeTab !== 'english') {
+        setActiveTab('english');
       }
       
       return;
@@ -212,14 +211,7 @@ const PlayerEditForm = () => {
     const formDataToSend = new FormData();
     // Only send fields that have changed
     Object.entries(formData).forEach(([key, value]) => {
-      if (key === 'image') {
-        if (value !== null) {
-          formDataToSend.append(key, value);
-        } else if (originalData.image !== null && imagePreview === null) {
-          // Explicitly set image to null when removed
-          formDataToSend.append('remove_image', 'true');
-        }
-      } else if (originalData[key] !== value) {
+      if (originalData[key] !== value) {
         formDataToSend.append(key, value);
       }
     });
@@ -230,9 +222,9 @@ const PlayerEditForm = () => {
       // Send request to API for updating the player
       const response = await sendRequest(`http://localhost:8000/api/admin/player-update/${playerId}/`, 'PATCH', formDataToSend);
       
-      if (response.isError) {
+      if (response?.isError) {
         // Handle validation errors from backend
-        setErrors(response.errorContent || {});
+        setErrors(response?.errorContent || {});
         errorNotif('خطا در بروزرسانی بازیکن');
       } else {
         // Show success notification and redirect
@@ -561,11 +553,6 @@ const PlayerEditForm = () => {
                   'تغییر اطلاعات بازیکن'
                 )}
               </button>
-              {!hasChanges && (
-                <div className="text-quaternary text-[14px] mt-1 text-right">
-                  <p>لطفا حداقل یکی از فیلدها را تغییر دهید</p>
-                </div>
-              )}
             </div>
           </motion.form>
         </div>

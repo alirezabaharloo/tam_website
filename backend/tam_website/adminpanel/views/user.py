@@ -12,8 +12,6 @@ from accounts.serializers import UserInfoSerializer
 from ..filters import UserFilter
 
 
-
-
 @api_view(['GET'])
 @permission_classes([IsSuperUser])
 def user_list_view(request):
