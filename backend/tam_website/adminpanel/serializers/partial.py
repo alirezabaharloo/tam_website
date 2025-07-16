@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from blog.models.partial import Player
+from blog.models.article import Team
 
 
 
@@ -46,6 +47,23 @@ class BilingualPlayerSerializer(serializers.ModelSerializer):
         
         # Fallback to the raw position value
         return obj.position
+
+
+class BilingualTeamSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    class Meta:
+        model = Team
+        fields = ['id', 'name', 'image', 'slug']
+    def get_name(self, obj):
+        search_language = self.context.get('request').query_params.get('search_language', 'fa')
+        if search_language == 'en':
+            if obj.has_translation('en'):
+                return obj.safe_translation_getter('name', language_code='en', default="")
+            return obj.safe_translation_getter('name', any_language=True)
+        else:
+            if obj.has_translation('fa'):
+                return obj.safe_translation_getter('name', language_code='fa', default="")
+            return obj.safe_translation_getter('name', any_language=True)
 
 
 class PlayerCreateSerializer(serializers.Serializer):
@@ -211,6 +229,115 @@ class PlayerUpdateSerializer(PlayerCreateSerializer):
             instance.name = name_en
             instance.save()
         
+        return instance
+
+
+class TeamCreateSerializer(serializers.Serializer):
+    name_fa = serializers.CharField(max_length=250, required=True)
+    name_en = serializers.CharField(max_length=250, required=True)
+    image = serializers.ImageField(required=True)
+
+    def validate(self, data):
+        from blog.models.article import Team
+        # Check if Persian name exists
+        fa_exists = False
+        for team in Team.objects.all():
+            if team.has_translation('fa') and team.safe_translation_getter('name', language_code='fa') == data['name_fa']:
+                fa_exists = True
+                break
+        # Check if English name exists
+        en_exists = False
+        for team in Team.objects.all():
+            if team.has_translation('en') and team.safe_translation_getter('name', language_code='en') == data['name_en']:
+                en_exists = True
+                break
+        if fa_exists:
+            raise serializers.ValidationError({"name_fa": "تیمی با این نام فارسی در سیستم موجود است."})
+        if en_exists:
+            raise serializers.ValidationError({"name_en": "تیمی با این نام انگلیسی در سیستم موجود است."})
+        return data
+
+    def create(self, validated_data):
+        from blog.models.article import Team
+        name_fa = validated_data.pop('name_fa')
+        name_en = validated_data.pop('name_en')
+        team = Team(
+            image=validated_data.get('image')
+        )
+        team.save()
+        team.set_current_language('fa')
+        team.name = name_fa
+        team.save()
+        team.set_current_language('en')
+        team.name = name_en
+        team.save()
+        return team
+
+
+class TeamDetailSerializer(serializers.ModelSerializer):
+    name_fa = serializers.SerializerMethodField()
+    name_en = serializers.SerializerMethodField()
+    class Meta:
+        model = Team
+        fields = ['id', 'name_fa', 'name_en', 'image']
+    def get_name_fa(self, obj):
+        if obj.has_translation('fa'):
+            return obj.safe_translation_getter('name', language_code='fa', default="")
+        return obj.safe_translation_getter('name', any_language=True)
+    def get_name_en(self, obj):
+        if obj.has_translation('en'):
+            return obj.safe_translation_getter('name', language_code='en', default="")
+        return obj.safe_translation_getter('name', any_language=True)
+
+
+class TeamUpdateSerializer(TeamCreateSerializer):
+    """
+    Serializer for updating an existing Team with bilingual support
+    """
+    image = serializers.ImageField(required=False)  # Image is optional during update
+
+    def validate(self, data):
+        from blog.models.article import Team
+        # Get the current instance being updated
+        instance = self.context.get('team_instance')
+        # Check if Persian name exists for other teams
+        fa_exists = False
+        if 'name_fa' in data:
+            for team in Team.objects.exclude(id=instance.id):
+                if team.has_translation('fa') and team.safe_translation_getter('name', language_code='fa') == data['name_fa']:
+                    fa_exists = True
+                    break
+        # Check if English name exists for other teams
+        en_exists = False
+        if 'name_en' in data:
+            for team in Team.objects.exclude(id=instance.id):
+                if team.has_translation('en') and team.safe_translation_getter('name', language_code='en') == data['name_en']:
+                    en_exists = True
+                    break
+        if fa_exists:
+            raise serializers.ValidationError({"name_fa": "تیمی با این نام فارسی در سیستم موجود است."})
+        if en_exists:
+            raise serializers.ValidationError({"name_en": "تیمی با این نام انگلیسی در سیستم موجود است."})
+        return data
+
+    def update(self, instance, validated_data):
+        # Extract name translations if provided
+        name_fa = validated_data.pop('name_fa', None)
+        name_en = validated_data.pop('name_en', None)
+        # Update regular fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        # Save without translations first
+        instance.save()
+        # Update translations if provided
+        if name_fa:
+            instance.set_current_language('fa')
+            instance.name = name_fa
+            instance.save()
+        if name_en:
+            instance.set_current_language('en')
+            instance.name = name_en
+            instance.save()
         return instance
 
 

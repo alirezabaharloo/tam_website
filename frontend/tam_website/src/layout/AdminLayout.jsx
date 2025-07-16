@@ -85,6 +85,10 @@ const AdminLayout = () => {
     if (userData.is_superuser === true || userData.is_author === true) {
       tabs.push({ id: 'players', label: 'بازیکن‌ها', icon: AdminIcons.Teams, path: '/admin/players' });
     }
+    // Teams tab - for superusers OR authors
+    if (userData.is_superuser === true || userData.is_author === true) {
+      tabs.push({ id: 'teams', label: 'تیم‌ها', icon: AdminIcons.Teams, path: '/admin/teams' });
+    }
     
     return tabs;
   };

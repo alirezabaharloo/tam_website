@@ -83,6 +83,14 @@ const Players = () => {
     setSearchParams(new URLSearchParams({ page: '1', pageSize: itemsPerPage.toString() }));
   };
 
+  const handlePageChangeAfterDelete = () => {
+    if (players.length === 1 && currentPage > 1) {
+      updateSearchParams({ page: (currentPage - 1).toString() });
+    } else {
+      getPlayers();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">   
@@ -117,6 +125,9 @@ const Players = () => {
           navigate={navigate}
           players={players}
           getPlayers={getPlayers}
+          currentPage={currentPage}
+          totalItems={paginationInfo.count}
+          onPageChangeAfterDelete={handlePageChangeAfterDelete}
         />
       )}
       

@@ -193,7 +193,7 @@ class ArticleDetailView(IpAddressMixin, RetrieveAPIView):
     Supports language selection via query parameter 'lang' (defaults to 'fa').
     """
     serializer_class = ArticleSerializer
-    queryset = Article.objects.filter(status=Article.Status.ACCEPT)
+    queryset = Article.objects.filter(status=Article.Status.DRAFT)
     lookup_field = 'slug'
 
 

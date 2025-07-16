@@ -3,10 +3,11 @@ from rest_framework.response import Response
 from ..serializers import *
 from permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
-from ..filters import UserFilter, PlayerFilter
+from ..filters import UserFilter, PlayerFilter, TeamFilter
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from blog.models.partial import Player
+from blog.models.article import Team
 from .base import BasePagination
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
@@ -150,3 +151,73 @@ class UpdatePlayerView(UpdateAPIView):
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class TeamListView(ListAPIView):
+    queryset = Team.objects.all()
+    serializer_class = BilingualTeamSerializer
+    filterset_class = TeamFilter
+    filter_backends = [DjangoFilterBackend]
+    permission_classes = [IsSuperUser, IsAuthor]
+    pagination_class = BasePagination
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        return context
+
+@api_view(['DELETE'])
+@permission_classes([IsSuperUser, IsAuthor])
+def delete_team(request, team_id):
+    try:
+        team = Team.objects.get(id=team_id)
+        team_name = team.get_name()
+        team.delete()
+        return Response({"message": f"Team '{team_name}' deleted successfully"}, status=status.HTTP_200_OK)
+    except Team.DoesNotExist:
+        return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CreateTeamView(CreateAPIView):
+    serializer_class = TeamCreateSerializer
+    permission_classes = [IsSuperUser, IsAuthor]
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "تیم جدید با موفقیت ایجاد شد."}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TeamDetailView(RetrieveAPIView):
+    queryset = Team.objects.all()
+    serializer_class = TeamDetailSerializer
+    permission_classes = [IsSuperUser, IsAuthor]
+    lookup_url_kwarg = 'team_id'
+
+
+class UpdateTeamView(UpdateAPIView):
+    """
+    View for updating an existing team
+    """ 
+    queryset = Team.objects.all()
+    serializer_class = TeamUpdateSerializer
+    permission_classes = [IsSuperUser, IsAuthor]
+    lookup_url_kwarg = 'team_id'
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['team_instance'] = self.get_object()
+        return context
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "اطلاعات تیم با موفقیت بروزرسانی شد."}, status=status.HTTP_200_OK)
+        else:
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

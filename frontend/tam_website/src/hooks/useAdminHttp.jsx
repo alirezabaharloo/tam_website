@@ -81,6 +81,13 @@ const useAdminHttp = (url, options = null) => {
         logout();
       }
     }
+    
+    if (!response.ok && response.status === 404) {
+      return {
+        isError: true,
+        errorContent: {detail:"page not found."},
+      };
+    }
 
     if (!response.ok) {
       return {

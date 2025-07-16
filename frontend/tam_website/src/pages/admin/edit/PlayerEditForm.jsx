@@ -269,7 +269,7 @@ const PlayerEditForm = () => {
     );
   }
 
-  if (playerDetails?.errorContent?.detail === "No Player matches the given query.") {
+  if (playerDetails?.errorContent?.detail === "No Player matches the given query." || playerDetails?.errorContent?.detail === "page not found.") {
     return (
      <PlayerNotFound />
     );
@@ -277,7 +277,7 @@ const PlayerEditForm = () => {
   
 
   // Show error state if player data fetch failed
-  if (playerDetails?.isError || positions?.isError) {
+  if (playerDetails?.isError || positions?.isError || positionsError || playerDetailsError) {
     return (
       <SomethingWentWrong />
     );

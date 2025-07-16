@@ -222,23 +222,23 @@ const PlayerForm = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >{/* Player Name Tabs */}
-          <div className="space-y-6">
-            {/* Tab Navigation */}
+            <div className="space-y-6">
+              {/* Tab Navigation */}
             <div className="flex border-b border-quinary-tint-500 justify-between">
              
              <div>
-             {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
                   onClick={() => handleTabChange(tab.id)}
                   className={`px-6 py-3 text-[16px] font-medium transition-all duration-300 border-b-2 relative ${
-                    activeTab === tab.id
-                      ? 'text-primary border-primary'
-                      : 'text-secondary border-transparent hover:text-primary hover:border-quinary-tint-400'
-                  }`}
-                >
-                  {tab.label}
+                      activeTab === tab.id
+                        ? 'text-primary border-primary'
+                        : 'text-secondary border-transparent hover:text-primary hover:border-quinary-tint-400'
+                    }`}
+                  >
+                    {tab.label}
                   {/* Error indicator dot */}
                   {activeTab !== tab.id && tabErrors[tab.id] && (
                     <span 
@@ -246,8 +246,8 @@ const PlayerForm = () => {
                       style={{ animation: 'flash 1s infinite ease-in-out' }}
                     />
                   )}
-                </button>
-              ))}
+                  </button>
+                ))}
              </div>
               <div>
                 <span
@@ -257,9 +257,9 @@ const PlayerForm = () => {
                     بازگشت
                 </span>
               </div>
-            </div>
+              </div>
 
-            {/* Tab Content for Name */}
+              {/* Tab Content for Name */}
               <div className="space-y-6">
                 {activeTab === 'persian' && (
                   <div>
@@ -460,7 +460,7 @@ const PlayerForm = () => {
                 <div className="text-quaternary text-[14px] mt-1 text-right">
                   <p>لطفا همه ی فیلد های فارسی و انگلیسی رو پر کنید</p>
                 </div>
-              )}
+                )}
             </div>
           </motion.form>
         </div>

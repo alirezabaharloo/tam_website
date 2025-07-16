@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import DeletePlayerModal from '../modal/DeletePlayerModal';
 
-const PlayerTable = ({ navigate, players, getPlayers }) => {
+const PlayerTable = ({ navigate, players, getPlayers, currentPage, totalItems, onPageChangeAfterDelete }) => {
   // Delete player state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [playerToDelete, setPlayerToDelete] = useState(null);
@@ -34,8 +34,8 @@ const PlayerTable = ({ navigate, players, getPlayers }) => {
       setDeleteModalOpen(false);
       setPlayerToDelete(null);
       
-      // Refresh the players list
-      getPlayers();
+      // After delete, handle page change if needed
+      onPageChangeAfterDelete();
       
     } catch (error) {
       console.error('Failed to delete player:', error);

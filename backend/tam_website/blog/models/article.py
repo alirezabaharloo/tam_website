@@ -19,8 +19,7 @@ class Article(TranslatableModel):
 
     class Status(models.TextChoices):
         DRAFT = 'DR', 'Draft'
-        ACCEPT = 'AC', 'Accept'
-        REJECT = 'RJ', 'Reject'
+        PUBLISHED = 'PB', 'Published'
 
     # Relationships
     author = models.ForeignKey(
@@ -166,6 +165,11 @@ class Team(TranslatableModel):
     )
     image = models.ImageField(upload_to='team_pictures/', null=True, blank=True)
     slug = models.SlugField(max_length=250, unique=True, blank=True)
+
+    def get_name(self, language_code='fa'):
+        if self.has_translation(language_code):
+            return self.safe_translation_getter('name', language_code=language_code, default="")
+        return ""
 
     def save(self, *args, **kwargs):
         title_en = self.safe_translation_getter("name", language_code='en', default="")

@@ -3,6 +3,7 @@ from accounts.models import User
 from django.db.models import Q
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from blog.models.partial import Player
+from blog.models.article import Team, Article
 
 class UserFilter(filters.FilterSet):
     type = filters.CharFilter(method='filter_type')
@@ -75,6 +76,90 @@ class PlayerFilter(filters.FilterSet):
                 Q(translations__name__icontains=value) & Q(translations__language_code='fa')
             ).distinct()
     
+    def filter_search_language(self, queryset, name, value):
+        # This is just a parameter holder for the serializer
+        # The actual filtering is done in filter_search
+        return queryset
+
+
+class TeamFilter(filters.FilterSet):
+    search = filters.CharFilter(method='filter_search')
+    search_language = filters.CharFilter(method='filter_search_language')
+
+    class Meta:
+        model = Team
+        fields = ['search', 'search_language']
+    
+    def filter_search(self, queryset, name, value):
+        if not value:
+            return queryset
+        search_language = self.request.query_params.get('search_language', 'fa')
+        if search_language == 'en':
+            return queryset.filter(
+                Q(translations__name__icontains=value) & Q(translations__language_code='en')
+            ).distinct()
+        else:
+            return queryset.filter(
+                Q(translations__name__icontains=value) & Q(translations__language_code='fa')
+            ).distinct()
+    def filter_search_language(self, queryset, name, value):
+        return queryset
+
+
+class ArticleFilter(filters.FilterSet):
+    status = filters.CharFilter(field_name='status')
+    type = filters.CharFilter(field_name='type')
+    team = filters.CharFilter(field_name='team')
+    search = filters.CharFilter(method='filter_search')
+    search_language = filters.CharFilter(method='filter_search_language')
+
+    class Meta:
+        model = Article
+        fields = ['status', 'type', 'team', 'search', 'search_language']
+    
+    def filter_search(self, queryset, name, value):
+        if not value:
+            return queryset
+        
+        try:
+            # Get search language from request, default to 'fa'
+            search_language = self.request.query_params.get('search_language', 'fa')
+            
+            # Use 'simple' configuration as a fallback if language-specific config doesn't exist
+            config = 'simple'
+            
+            # Create search vectors for title and body
+            title_vector = SearchVector('translations__title', weight='A', config=config)
+            body_vector = SearchVector('translations__body', weight='B', config=config)
+            
+            # Combine vectors
+            search_vector = title_vector + body_vector
+            
+            # Create search query with proper escaping
+            search_query = SearchQuery(value, config=config)
+            
+            # Perform the search with ranking
+            return queryset.filter(
+                translations__language_code=search_language
+            ).annotate(
+                rank=SearchRank(search_vector, search_query)
+            ).filter(
+                rank__gt=0.3
+            ).order_by(
+                '-rank',  # Sort by search rank first
+                '-created_date'  # Then by creation date
+            ).distinct()
+        except Exception as e:
+            # If search fails, fall back to simple contains search
+            if search_language == 'en':
+                return queryset.filter(
+                    Q(translations__title__icontains=value) & Q(translations__language_code='en')
+                ).distinct()
+            else:
+                return queryset.filter(
+                    Q(translations__title__icontains=value) & Q(translations__language_code='fa')
+                ).distinct()
+        
     def filter_search_language(self, queryset, name, value):
         # This is just a parameter holder for the serializer
         # The actual filtering is done in filter_search
