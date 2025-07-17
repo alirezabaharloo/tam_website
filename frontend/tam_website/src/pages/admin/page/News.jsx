@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import ArticleTable from '../../../components/admin/Table/NewsTable';
-import ArticleFilter from '../../../components/admin/Filter/NewsFilter';
+import NewsTable from '../../../components/admin/Table/NewsTable';
+import NewsFilter from '../../../components/admin/Filter/NewsFilter';
 import AdminPagination from '../../../components/admin/AdminPagination';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import SpinLoader from '../../../components/UI/SpinLoader';
@@ -111,7 +111,7 @@ const News = () => {
       </div>
       
       {/* Filter Component */}
-      <ArticleFilter 
+      <NewsFilter 
         search={search}
         searchLanguage={searchLanguage}
         status={status}
@@ -127,7 +127,7 @@ const News = () => {
       ) : isError ? (
         <SomethingWentWrong />
       ) : (
-        <ArticleTable 
+        <NewsTable 
           navigate={navigate}
           articles={articles}
           getArticles={getArticles}

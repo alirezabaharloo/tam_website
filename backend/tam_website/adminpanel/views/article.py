@@ -1,6 +1,6 @@
 from rest_framework.generics import *
 from rest_framework.response import Response
-from ..serializers.article import BilingualArticleSerializer
+from ..serializers.article import BilingualArticleSerializer, CreateArticleSerializer
 from permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
 from ..filters import ArticleFilter
@@ -29,6 +29,47 @@ class AdminArticleListView(viewsets.ReadOnlyModelViewSet):
         """
         context = super().get_serializer_context()
         return context
+
+
+class CreateArticleView(CreateAPIView):
+    """
+    View for creating a new article
+    """
+    serializer_class = CreateArticleSerializer
+    permission_classes = [IsSuperUser, IsAuthor]
+    
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new article with bilingual support
+        """
+        # Add the author to the request data
+        request.data._mutable = True
+        request.data['author'] = request.user.id
+        request.data._mutable = False
+        
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            article = serializer.save()
+            return Response(
+                {"message": "مقاله جدید با موفقیت ایجاد شد."},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class ArticleDetailView(RetrieveAPIView):
+    """
+    View for retrieving article details for editing
+    """
+    queryset = Article.objects.all()
+    serializer_class = BilingualArticleSerializer
+    permission_classes = [IsSuperUser, IsAuthor]
+    lookup_url_kwarg = 'article_id'
 
 
 class ArticleFilterDataView(APIView):

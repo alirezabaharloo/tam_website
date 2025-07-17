@@ -77,6 +77,8 @@ const NewsFilter = ({
   if (filterLoading) return <SpinLoader />;
   if (filterError) return <SomethingWentWrong />;
 
+  console.log(teamOptions);
+
   return (
     <div className="bg-quinary-tint-700 rounded-xl p-4 shadow-sm">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
@@ -92,96 +94,106 @@ const NewsFilter = ({
         )}
       </div>
 
-      <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* Search group */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-secondary">جستجو</label>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-grow">
-              <input
-                type="text"
-                placeholder="عنوان مقاله را وارد کنید..."
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                className="px-3 py-2 pr-4 rounded-lg border border-quinary-tint-400 focus:outline-none focus:ring-2 focus:ring-primary text-right w-full bg-quinary-tint-800 text-primary pl-8"
-                dir="rtl"
-              />
-              {search !== '' && (
-                <button
-                  type="button"
-                  onClick={handleClearSearch}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-quaternary transition-colors duration-200"
-                >
-                  <AdminIcons.ClearSearch />
-                </button>
-              )}
+      <form onSubmit={handleSearchSubmit} className="grid grid-cols-12 gap-3">
+        {/* Search group - takes more space */}
+        <div className="col-span-12 md:col-span-5 lg:col-span-4">
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-secondary">جستجو</label>
+            <div className="flex items-center gap-2">
+              <div className="relative flex-grow">
+                <input
+                  type="text"
+                  placeholder="عنوان مقاله را وارد کنید..."
+                  value={searchInput}
+                  onChange={e => setSearchInput(e.target.value)}
+                  className="px-3 py-2 pr-4 rounded-lg border border-quinary-tint-400 focus:outline-none focus:ring-2 focus:ring-primary text-right w-full bg-quinary-tint-800 text-primary pl-8"
+                  dir="rtl"
+                />
+                {search !== '' && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-quaternary transition-colors duration-200"
+                  >
+                    <AdminIcons.ClearSearch />
+                  </button>
+                )}
+              </div>
+              <button
+                type="submit"
+                className="px-3 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 font-medium whitespace-nowrap"
+              >
+                جستجو
+              </button>
             </div>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 font-medium"
-            >
-              جستجو
-            </button>
           </div>
         </div>
 
-        {/* Language group */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-secondary">زبان جستجو</label>
-          <select
-            value={searchLanguage}
-            onChange={handleSearchLanguageChange}
-            className="px-3 py-2 rounded-lg border border-quinary-tint-400 bg-quinary-tint-800 text-primary focus:outline-none focus:ring-2 focus:ring-primary text-right"
-            dir="rtl"
-          >
-            <option value="fa">سرچ فارسی</option>
-            <option value="en">سرچ انگلیسی</option>
-          </select>
+        {/* Language group - smaller */}
+        <div className="col-span-6 md:col-span-2 lg:col-span-2">
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-secondary">زبان جستجو</label>
+            <select
+              value={searchLanguage}
+              onChange={handleSearchLanguageChange}
+              className="px-2 py-2 text-sm rounded-lg border border-quinary-tint-400 bg-quinary-tint-800 text-primary focus:outline-none focus:ring-2 focus:ring-primary text-right"
+              dir="rtl"
+            >
+              <option value="fa">فارسی</option>
+              <option value="en">انگلیسی</option>
+            </select>
+          </div>
         </div>
 
-        {/* Status group */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-secondary">وضعیت مقاله</label>
-          <select
-            value={status}
-            onChange={handleStatusChange}
-            className="px-3 py-2 rounded-lg border border-quinary-tint-400 bg-quinary-tint-800 text-primary focus:outline-none focus:ring-2 focus:ring-primary text-right"
-            dir="rtl"
-          >
-            {Object.entries(statusOptions).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
+        {/* Status group - smaller */}
+        <div className="col-span-6 md:col-span-2 lg:col-span-2">
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-secondary">وضعیت</label>
+            <select
+              value={status}
+              onChange={handleStatusChange}
+              className="px-2 py-2 text-sm rounded-lg border border-quinary-tint-400 bg-quinary-tint-800 text-primary focus:outline-none focus:ring-2 focus:ring-primary text-right"
+              dir="rtl"
+            >
+              {Object.entries(statusOptions).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Type group */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-secondary">نوع مقاله</label>
-          <select
-            value={type}
-            onChange={handleTypeChange}
-            className="px-3 py-2 rounded-lg border border-quinary-tint-400 bg-quinary-tint-800 text-primary focus:outline-none focus:ring-2 focus:ring-primary text-right"
-            dir="rtl"
-          >
-            {Object.entries(typeOptions).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
+        {/* Type group - smaller */}
+        <div className="col-span-6 md:col-span-2 lg:col-span-2">
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-secondary">نوع</label>
+            <select
+              value={type}
+              onChange={handleTypeChange}
+              className="px-2 py-2 text-sm rounded-lg border border-quinary-tint-400 bg-quinary-tint-800 text-primary focus:outline-none focus:ring-2 focus:ring-primary text-right"
+              dir="rtl"
+            >
+              {Object.entries(typeOptions).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Team group */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-secondary">تیم مربوطه</label>
-          <select
-            value={team}
-            onChange={handleTeamChange}
-            className="px-3 py-2 rounded-lg border border-quinary-tint-400 bg-quinary-tint-800 text-primary focus:outline-none focus:ring-2 focus:ring-primary text-right"
-            dir="rtl"
-          >
-            {Object.entries(teamOptions).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
+        {/* Team group - smaller */}
+        <div className="col-span-6 md:col-span-3 lg:col-span-2">
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-secondary">تیم</label>
+            <select
+              value={team}
+              onChange={handleTeamChange}
+              className="px-2 py-2 text-sm rounded-lg border border-quinary-tint-400 bg-quinary-tint-800 text-primary focus:outline-none focus:ring-2 focus:ring-primary text-right"
+              dir="rtl"
+            >
+              {Object.entries(teamOptions).reverse().map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </form>
     </div>

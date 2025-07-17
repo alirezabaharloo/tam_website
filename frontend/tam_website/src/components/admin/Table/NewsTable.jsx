@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useAdminHttp from '../../../hooks/useAdminHttp';
-import DeleteArticleModal from '../modal/DeleteArticleModal';
+import DeleteArticleModal from '../Modal/DeleteNewsModal';
 
 const NewsTable = ({ navigate, articles, getArticles, currentPage, totalItems, onPageChangeAfterDelete }) => {
   // Delete article state
@@ -70,6 +70,25 @@ const NewsTable = ({ navigate, articles, getArticles, currentPage, totalItems, o
     }
   };
 
+  // Helper function to format date (YYYY-MM-DD)
+  const formatDate = (dateString) => {
+    if (!dateString) return '---';
+    
+    // Extract just the date part (YYYY-MM-DD)
+    const dateParts = dateString.split(' ')[0];
+    return dateParts;
+  };
+
+  // Helper function to truncate title
+  const truncateTitle = (title, wordCount = 5) => {
+    if (!title) return '---';
+    
+    const words = title.split(' ');
+    if (words.length <= wordCount) return title;
+    
+    return words.slice(0, wordCount).join(' ') + '...';
+  };
+
   return (
     <div className="space-y-6">
       {/* Articles table */}
@@ -93,14 +112,14 @@ const NewsTable = ({ navigate, articles, getArticles, currentPage, totalItems, o
               {articles && articles.length > 0 ? (
                 articles.map((article, index) => (
                   <tr key={article.id || index} className="hover:bg-quinary-tint-500 transition-colors duration-200">
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{article.title || '---'}</td>
+                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{truncateTitle(article.title)}</td>
                     <td className="px-6 py-4 text-[16px] text-secondary text-right">{renderStatus(article.status)}</td>
                     <td className="px-6 py-4 text-[16px] text-secondary text-right">{renderType(article.type)}</td>
                     <td className="px-6 py-4 text-[16px] text-secondary text-right">{article.team || '---'}</td>
                     <td className="px-6 py-4 text-[16px] text-secondary text-right">{article.hits_count || '0'}</td>
                     <td className="px-6 py-4 text-[16px] text-secondary text-right">{article.likes_count || '0'}</td>
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{article.updated_date || '---'}</td>
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{article.created_date || '---'}</td>
+                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{formatDate(article.updated_date)}</td>
+                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{formatDate(article.created_date)}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex gap-2 justify-end">
                         <button 

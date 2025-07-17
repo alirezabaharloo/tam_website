@@ -26,6 +26,7 @@ import PreRegister from './pages/blog/PreRegister';
 import Teams from './pages/admin/page/Teams';
 import TeamForm from './pages/admin/add/TeamForm';
 import EditTeamForm from './pages/admin/edit/EditTeamForm';
+import NewsForm from './pages/admin/add/NewsForm';
 
 
 const PageTransition = ({ children }) => {
@@ -119,6 +120,7 @@ const WebsiteRoutes = () => {
           <Route path="players/edit/:playerId" element={<PlayerEditForm />} />
           <Route path="teams/add" element={<TeamForm />} />
           <Route path="teams/edit/:teamId" element={<EditTeamForm />} />
+          <Route path="news/add" element={<NewsForm />} />
           <Route path="*" element={<PageNotFound />} />
         </Route>
       
