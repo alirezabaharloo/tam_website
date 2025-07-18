@@ -603,7 +603,7 @@ const NewsForm = () => {
 
               {/* Image Upload Section - Above the tabs */}
             <div className="space-y-6">
-              <label className="block text-[18px] font-bold text-primary mb-2 text-right">
+              <label className="block mb-2 text-right">
                 تصویر اصلی مقاله *
               </label>
               <div 

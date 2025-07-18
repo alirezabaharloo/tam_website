@@ -97,30 +97,30 @@ const NewsTable = ({ navigate, articles, getArticles, currentPage, totalItems, o
           <table className="w-full">
             <thead>
               <tr className="bg-primary text-quinary-tint-800">
-                <th className="px-6 py-3 text-[16px] font-semibold text-right">عنوان مقاله</th>
-                <th className="px-6 py-3 text-[16px] font-semibold text-right">وضعیت مقاله</th>
-                <th className="px-6 py-3 text-[16px] font-semibold text-right">نوع مقاله</th>
-                <th className="px-6 py-3 text-[16px] font-semibold text-right">تیم مربوطه</th>
-                <th className="px-6 py-3 text-[16px] font-semibold text-right">تعداد بازدید</th>
-                <th className="px-6 py-3 text-[16px] font-semibold text-right">تعداد پسند</th>
-                <th className="px-6 py-3 text-[16px] font-semibold text-right">تاریخ آخرین بروزرسانی</th>
-                <th className="px-6 py-3 text-[16px] font-semibold text-right">تاریخ انتشار</th>
-                <th className="px-6 py-3"></th>
+                <th className="px-4 py-3 text-[14px] font-semibold text-right w-[20%]">عنوان مقاله</th>
+                <th className="px-4 py-3 text-[14px] font-semibold text-right w-[12%]">وضعیت</th>
+                <th className="px-4 py-3 text-[14px] font-semibold text-right w-[12%]">نوع</th>
+                <th className="px-4 py-3 text-[14px] font-semibold text-right w-[12%]">تیم</th>
+                <th className="px-4 py-3 text-[14px] font-semibold text-right w-[7%]">بازدید</th>
+                <th className="px-4 py-3 text-[14px] font-semibold text-right w-[7%]">پسند</th>
+                <th className="px-4 py-3 text-[14px] font-semibold text-right w-[15%]">آخرین بروزرسانی</th>
+                <th className="px-4 py-3 text-[14px] font-semibold text-right w-[15%]">تاریخ انتشار</th>
+                <th className="px-4 py-3 w-1/12"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-quinary-tint-500">
               {articles && articles.length > 0 ? (
                 articles.map((article, index) => (
                   <tr key={article.id || index} className="hover:bg-quinary-tint-500 transition-colors duration-200">
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{truncateTitle(article.title)}</td>
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{renderStatus(article.status)}</td>
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{renderType(article.type)}</td>
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{article.team || '---'}</td>
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{article.hits_count || '0'}</td>
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{article.likes_count || '0'}</td>
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{formatDate(article.updated_date)}</td>
-                    <td className="px-6 py-4 text-[16px] text-secondary text-right">{formatDate(article.created_date)}</td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-3 text-[14px] text-secondary text-right">{truncateTitle(article.title)}</td>
+                    <td className="px-4 py-3 text-[14px] text-secondary text-right">{renderStatus(article.status)}</td>
+                    <td className="px-4 py-3 text-[14px] text-secondary text-right">{renderType(article.type)}</td>
+                    <td className="px-4 py-3 text-[14px] text-secondary text-right">{article.team || '---'}</td>
+                    <td className="px-4 py-3 text-[14px] text-secondary text-right">{article.hits_count || '0'}</td>
+                    <td className="px-4 py-3 text-[14px] text-secondary text-right">{article.likes_count || '0'}</td>
+                    <td className="px-4 py-3 text-[14px] text-secondary text-right">{formatDate(article.updated_date)}</td>
+                    <td className="px-4 py-3 text-[14px] text-secondary text-right">{formatDate(article.created_date)}</td>
+                    <td className="px-4 py-3 text-right">
                       <div className="flex gap-2 justify-end">
                         <button 
                           onClick={() => navigate(`/admin/news/edit/${article.id || ''}`)}
