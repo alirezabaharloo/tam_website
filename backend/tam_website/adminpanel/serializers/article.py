@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from blog.models.article import Article, Team
+from blog.models.article import Article, Team, Image
 from django.db.models import Count
+from accounts.models import Profile
 
 class BilingualArticleSerializer(serializers.ModelSerializer):
     """
@@ -76,6 +77,8 @@ class CreateArticleSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=Article.Type.choices, required=True)
     video_url = serializers.URLField(required=False, allow_blank=True)
     author = serializers.IntegerField(required=False)  # Will be set in the view
+    main_image = serializers.ImageField(required=True)  # Main image for all article types
+    slideshow_image_count = serializers.IntegerField(required=False, default=0)  # Number of slideshow images
     
     def validate(self, data):
         """
@@ -120,6 +123,10 @@ class CreateArticleSerializer(serializers.Serializer):
         
         if en_body_exists:
             raise serializers.ValidationError({"body_en": "مقاله‌ای با این متن انگلیسی در سیستم موجود است."})
+        
+        # Validate slideshow images for slideshow type articles
+        if data['type'] == Article.Type.SLIDE_SHOW and data.get('slideshow_image_count', 0) < 1:
+            raise serializers.ValidationError({"slideshow_images": "لطفا حداقل یک تصویر برای اسلایدشو انتخاب کنید."})
             
         return data
     
@@ -133,13 +140,17 @@ class CreateArticleSerializer(serializers.Serializer):
         body_fa = validated_data.pop('body_fa')
         body_en = validated_data.pop('body_en')
         
+        # Extract images
+        main_image = validated_data.pop('main_image')
+        slideshow_image_count = validated_data.pop('slideshow_image_count', 0)
+        
         # Create the article instance
         article = Article(
             team=validated_data.get('team'),
             status=validated_data.get('status'),
             type=validated_data.get('type'),
             video_url=validated_data.get('video_url', ''),
-            author_id=validated_data.get('author')
+            author=Profile.objects.get(author=validated_data.get('author'))
         )
         
         # Save without translations first
@@ -156,5 +167,18 @@ class CreateArticleSerializer(serializers.Serializer):
         article.title = title_en
         article.body = body_en
         article.save()
+        
+        # Save main image
+        main_image_obj = Image.objects.create(image=main_image)
+        main_image_obj.article.add(article)
+        
+        # Extract and save slideshow images if present
+        slideshow_images = []
+        for i in range(slideshow_image_count):
+            if f'slideshow_image_{i}' in self.context['request'].FILES:
+                slideshow_image = self.context['request'].FILES[f'slideshow_image_{i}']
+                slideshow_image_obj = Image.objects.create(image=slideshow_image)
+                slideshow_image_obj.article.add(article)
+                slideshow_images.append(slideshow_image_obj)
         
         return article

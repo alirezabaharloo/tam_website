@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
@@ -16,6 +16,10 @@ const NewsForm = () => {
   const [activeTab, setActiveTab] = useState('persian');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [mainImagePreview, setMainImagePreview] = useState(null); // Main image preview URL
+  const [slideshowImages, setSlideshowImages] = useState([]); // Array of slideshow image objects
+  const mainImageInputRef = useRef(null);
+  const slideshowImageInputRef = useRef(null);
   
   // Track if tabs have errors
   const [tabErrors, setTabErrors] = useState({
@@ -32,7 +36,9 @@ const NewsForm = () => {
     team: '',
     status: 'DR', // Draft by default
     type: 'TX', // Text by default
-    video_url: ''
+    video_url: '',
+    main_image: null,
+    slideshow_images: []
   });
   
   // Fetch filter data for dropdown options
@@ -90,6 +96,116 @@ const NewsForm = () => {
     }));
   };
   
+  // Handle main image file selection
+  const handleMainImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Create preview URL for the selected image
+      const previewUrl = URL.createObjectURL(file);
+      setMainImagePreview(previewUrl);
+      
+      // Clear image error if exists
+      if (errors.main_image) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.main_image;
+          return newErrors;
+        });
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        main_image: file
+      }));
+    }
+  };
+  
+  // Handle slideshow image file selection
+  const handleSlideshowImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      const newImage = { file, preview: previewUrl };
+      
+      // Add new image to the slideshow images array
+      setSlideshowImages(prev => [...prev, newImage]);
+      
+      // Clear slideshow images error if exists
+      if (errors.slideshow_images) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.slideshow_images;
+          return newErrors;
+        });
+      }
+      
+      // Update form data with the new slideshow image
+      setFormData(prev => ({
+        ...prev,
+        slideshow_images: [...prev.slideshow_images, file]
+      }));
+    }
+  };
+  
+  // Handle viewing image in full size
+  const handleViewImage = (imageUrl) => {
+    window.open(imageUrl, '_blank');
+  };
+  
+  // Handle changing main image
+  const handleChangeMainImage = () => {
+    if (mainImageInputRef.current) {
+      mainImageInputRef.current.click();
+    }
+  };
+  
+  // Handle removing a slideshow image
+  const handleRemoveSlideshowImage = (index) => {
+    setSlideshowImages(prev => {
+      const newImages = [...prev];
+      newImages.splice(index, 1);
+      return newImages;
+    });
+    
+    setFormData(prev => {
+      const newSlideshowImages = [...prev.slideshow_images];
+      newSlideshowImages.splice(index, 1);
+      return {
+        ...prev,
+        slideshow_images: newSlideshowImages
+      };
+    });
+  };
+  
+  // Handle changing a slideshow image
+  const handleChangeSlideshowImage = (index) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const previewUrl = URL.createObjectURL(file);
+        
+        setSlideshowImages(prev => {
+          const newImages = [...prev];
+          newImages[index] = { file, preview: previewUrl };
+          return newImages;
+        });
+        
+        setFormData(prev => {
+          const newSlideshowImages = [...prev.slideshow_images];
+          newSlideshowImages[index] = file;
+          return {
+            ...prev,
+            slideshow_images: newSlideshowImages
+          };
+        });
+      }
+    };
+    input.click();
+  };
+  
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -114,9 +230,26 @@ const NewsForm = () => {
     setIsLoading(true);
     
     const formDataToSend = new FormData();
+    
+    // Add text fields to FormData
     Object.entries(formData).forEach(([key, value]) => {
-      formDataToSend.append(key, value);
+      if (key !== 'main_image' && key !== 'slideshow_images') {
+        formDataToSend.append(key, value);
+      }
     });
+    
+    // Add main image to FormData
+    if (formData.main_image) {
+      formDataToSend.append('main_image', formData.main_image);
+    }
+    
+    // Add slideshow images to FormData in order
+    formData.slideshow_images.forEach((image, index) => {
+      formDataToSend.append(`slideshow_image_${index}`, image);
+    });
+    
+    // Add the total count of slideshow images
+    formDataToSend.append('slideshow_image_count', formData.slideshow_images.length);
 
     try {
       // Send request to API
@@ -209,6 +342,7 @@ const NewsForm = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
+            
             {/* Title and Body Tabs */}
             <div className="space-y-6">
               {/* Tab Navigation */}
@@ -400,9 +534,16 @@ const NewsForm = () => {
                     })}
                   </select>
                 </div>
+                <div className='relative'>
                 {errors.type && (
-                  <p className="text-quaternary text-[14px] mt-1 text-right">{errors.type}</p>
+                  <p className="text-quaternary text-[14px] text-right mt-1 absolute">{errors.type}</p>
                 )}
+                {formData.type === 'SS' && (
+                  <p className="text-yellow-500 text-[14px] text-right mt-1 absolute">
+                    حتما حداقل دو عکس برای ایجاد مقاله اسلاید شو انتخاب کنید.
+                  </p>
+                )}
+                </div>
               </div>
 
               {/* Status */}
@@ -459,6 +600,135 @@ const NewsForm = () => {
                 </div>
               )}
             </div>
+
+              {/* Image Upload Section - Above the tabs */}
+            <div className="space-y-6">
+              <label className="block text-[18px] font-bold text-primary mb-2 text-right">
+                تصویر اصلی مقاله *
+              </label>
+              <div 
+                className={`w-full h-[25rem] rounded-lg border-2 ${
+                  errors.main_image ? 'border-quaternary' : 'border-quinary-tint-500'
+                } relative overflow-hidden cursor-pointer group`}
+                onClick={handleChangeMainImage}
+              >
+                {mainImagePreview ? (
+                  <>
+                    <img 
+                      src={mainImagePreview} 
+                      alt="Article main image" 
+                      className="w-full h-full object-cover transition-all duration-300 group-hover:blur-sm group-hover:brightness-50"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="flex gap-4">
+                        <button
+                          type="button"
+                          className="p-3 bg-white bg-opacity-20 rounded-full hover:bg-opacity-50 transition-all duration-300"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewImage(mainImagePreview);
+                          }}
+                        >
+                          <Icons.View className="text-white text-xl" />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-3 bg-white bg-opacity-20 rounded-full hover:bg-opacity-50 transition-all duration-300"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleChangeMainImage();
+                          }}
+                        >
+                          <Icons.Edit className="text-white text-xl" />
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-quinary-tint-600 hover:bg-quinary-tint-500 transition-colors duration-300">
+                    <Icons.Add className="text-secondary text-4xl mb-2" />
+                    <span className="text-secondary">انتخاب تصویر</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  ref={mainImageInputRef}
+                  onChange={handleMainImageChange}
+                  className="hidden"
+                  accept="image/*"
+                />
+              </div>
+              {errors.main_image && (
+                <p className="text-quaternary text-[14px] mt-1 text-right">{errors.main_image}</p>
+              )}
+            </div>
+              {/* Slideshow Images Section (only shown when type is Slideshow) */}
+            {formData.type === 'SS' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  {/* Existing slideshow images */}
+                  {slideshowImages.map((image, index) => (
+                    <div 
+                      key={index}
+                      className="h-[150px] rounded-lg border-2 border-quinary-tint-500 relative overflow-hidden group"
+                    >
+                      <img 
+                        src={image.preview} 
+                        alt={`Slideshow image ${index + 1}`} 
+                        className="w-full h-full object-cover transition-all duration-300 group-hover:blur-sm group-hover:brightness-50"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="flex gap-4">
+                          <button
+                            type="button"
+                            className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-50 transition-all duration-300"
+                            onClick={() => handleViewImage(image.preview)}
+                          >
+                            <Icons.View className="text-white" />
+                          </button>
+                          <button
+                            type="button"
+                            className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-50 transition-all duration-300"
+                            onClick={() => handleChangeSlideshowImage(index)}
+                          >
+                            <Icons.Edit className="text-white" />
+                          </button>
+                          <button
+                            type="button"
+                            className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-50 transition-all duration-300"
+                            onClick={() => handleRemoveSlideshowImage(index)}
+                          >
+                            <Icons.Delete className="text-white" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Add new slideshow image box */}
+                  <div 
+                    className="h-[150px] rounded-lg border-2 border-dashed border-quinary-tint-500 relative overflow-hidden cursor-pointer hover:border-primary transition-colors duration-300 flex items-center justify-center"
+                    onClick={() => slideshowImageInputRef.current.click()}
+                  >
+                    <div className="flex flex-col items-center justify-center">
+                      <Icons.Add className="text-secondary text-2xl mb-2" />
+                      <span className="text-secondary text-sm">افزودن تصویر</span>
+                    </div>
+                    <input
+                      type="file"
+                      ref={slideshowImageInputRef}
+                      onChange={handleSlideshowImageChange}
+                      className="hidden"
+                      accept="image/*"
+                    />
+                  </div>
+                </div>
+                {errors.slideshow_images && (
+                  <p className="text-quaternary text-[14px] mt-1 text-right">{errors.slideshow_images}</p>
+                )}
+              </div>
+            )}
+            
 
             {/* Form Actions */}
             <div className="flex flex-col sm:flex-row gap-4 pt-6">

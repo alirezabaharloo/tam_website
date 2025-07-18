@@ -47,7 +47,8 @@ class CreateArticleView(CreateAPIView):
         request.data['author'] = request.user.id
         request.data._mutable = False
         
-        serializer = self.get_serializer(data=request.data)
+        # Create serializer with context to access request.FILES
+        serializer = self.get_serializer(data=request.data, context={'request': request})
         
         if serializer.is_valid():
             article = serializer.save()

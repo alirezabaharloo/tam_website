@@ -38,6 +38,16 @@ export const validateArticleForm = (formData) => {
     errors.video_url = 'لطفا آدرس ویدیو را وارد کنید';
   }
   
+  // Validate main image
+  if (!formData.main_image) {
+    errors.main_image = 'لطفا تصویر اصلی مقاله را انتخاب کنید';
+  }
+  
+  // Validate slideshow images for slideshow type articles
+  if (formData.type === 'SS' && (!formData.slideshow_images || formData.slideshow_images.length < 1)) {
+    errors.slideshow_images = 'لطفا حداقل یک تصویر برای اسلایدشو انتخاب کنید';
+  }
+  
   return errors;
 };
 
@@ -47,7 +57,7 @@ export const validateArticleForm = (formData) => {
  * @returns {Boolean} Whether all fields have values
  */
 export const isFormValid = (formData) => {
-  return (
+  const hasRequiredFields = 
     formData.title_fa?.trim() !== '' && 
     formData.title_en?.trim() !== '' && 
     formData.body_fa?.trim() !== '' && 
@@ -55,8 +65,20 @@ export const isFormValid = (formData) => {
     formData.team !== '' &&
     formData.status !== '' &&
     formData.type !== '' &&
-    (formData.type !== 'VD' || (formData.type === 'VD' && formData.video_url?.trim() !== ''))
-  );
+    formData.main_image !== null;
+    
+  // Check type-specific requirements
+  if (!hasRequiredFields) return false;
+  
+  if (formData.type === 'VD' && formData.video_url?.trim() === '') {
+    return false;
+  }
+  
+  if (formData.type === 'SS' && (!formData.slideshow_images || formData.slideshow_images.length < 1)) {
+    return false;
+  }
+  
+  return true;
 };
   
 export default { validateArticleForm, isFormValid }; 
