@@ -121,7 +121,7 @@ class ArticleListView(ListAPIView):
     Supports search by title and body in the current language.
     """
     serializer_class = ArticleSerializer
-    queryset = Article.objects.accepted()
+    queryset = Article.objects.filter(status=Article.Status.PUBLISHED)
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ArticleFilter
     pagination_class = ArticlePagination
@@ -193,7 +193,7 @@ class ArticleDetailView(IpAddressMixin, RetrieveAPIView):
     Supports language selection via query parameter 'lang' (defaults to 'fa').
     """
     serializer_class = ArticleSerializer
-    queryset = Article.objects.filter(status=Article.Status.DRAFT)
+    queryset = Article.objects.filter(status=Article.Status.PUBLISHED)
     lookup_field = 'slug'
 
 

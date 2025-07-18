@@ -36,42 +36,42 @@ class ArticleSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField()
     time_ago = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
-    first_category = serializers.SerializerMethodField()
-    categories = serializers.SerializerMethodField()
+    # first_category = serializers.SerializerMethodField()
+    # categories = serializers.SerializerMethodField()
     team = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
-        fields = ['id', 'title', 'body', 'author_name', 'slug', 'view_count', 'time_ago', 'likes', 'images', 'type', 'video_url', 'categories', 'first_category', 'team']
+        fields = ['id', 'title', 'body', 'author_name', 'slug', 'view_count', 'time_ago', 'likes', 'images', 'type', 'video_url', 'team']
         read_only_fields = ['author']
 
     def get_author_name(self, obj):
         """Get formatted author name from profile"""
         return str(obj.author) if obj.author else "Unknown"
     
-    def get_first_category(self, obj):
-        """Get the first category of the article"""
-        if self.context.get('list'):
-            # For list view, we'll use the prefetched first category
-            first_category = obj.category.first()
-            if first_category:
-                return {
-                    'id': first_category.id,
-                    'name': first_category.safe_translation_getter('name', language_code=self.lang, default=""),
-                    'slug': first_category.slug
-                }
-        return None
+    # def get_first_category(self, obj):
+    #     """Get the first category of the article"""
+    #     if self.context.get('list'):
+    #         # For list view, we'll use the prefetched first category
+    #         first_category = obj.category.first()
+    #         if first_category:
+    #             return {
+    #                 'id': first_category.id,
+    #                 'name': first_category.safe_translation_getter('name', language_code=self.lang, default=""),
+    #                 'slug': first_category.slug
+    #             }
+    #     return None
 
-    def get_categories(self, obj):
-        """Get all categories for detail view"""
-        if not self.context.get('list'):
-            categories = obj.category.all()
-            return [{
-                'id': category.id,
-                'name': category.safe_translation_getter('name', language_code=self.lang, default=""),
-                'slug': category.slug
-            } for category in categories]
-        return None
+    # def get_categories(self, obj):
+    #     """Get all categories for detail view"""
+    #     if not self.context.get('list'):
+    #         categories = obj.category.all()
+    #         return [{
+    #             'id': category.id,
+    #             'name': category.safe_translation_getter('name', language_code=self.lang, default=""),
+    #             'slug': category.slug
+    #         } for category in categories]
+    #     return None
 
     def get_title(self, obj: Article):
         """Get translated title based on language preference"""
@@ -108,12 +108,12 @@ class ArticleSerializer(serializers.ModelSerializer):
             if instance.get_body(language_code=self.lang).strip():
                 data['body'] = filter_vocabulary(data['body'], 10)
             # Remove categories field for list view since we use first_category
-            del data['categories']
+            # del data['categories']
         else:
             data['is_liked'] = instance.likes.filter(ip=self.client_ip).exists()
             del data['slug']
             # Remove first_category field for detail view since we use categories
-            del data['first_category']
+            # del data['first_category']
             
         # Include status for preview
         if self.context.get('preview_article'):

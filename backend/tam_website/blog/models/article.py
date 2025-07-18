@@ -30,11 +30,6 @@ class Article(TranslatableModel):
         help_text="The user who wrote this article"
     )
 
-    # category = models.ManyToManyField(
-    #     "Category",
-    #     help_text="The category of this article",
-    #     blank=True,
-    # )
 
     team = models.ForeignKey("Team", on_delete=models.SET_NULL, related_name='articles', null=True)
 
