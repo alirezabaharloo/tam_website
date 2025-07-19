@@ -2,6 +2,8 @@ from rest_framework import serializers
 from blog.models.article import Article, Team, Image
 from django.db.models import Count
 from accounts.models import Profile
+from django.utils.html import strip_tags
+
 
 class BilingualArticleSerializer(serializers.ModelSerializer):
     """
@@ -82,7 +84,7 @@ class CreateArticleSerializer(serializers.Serializer):
     
     def validate(self, data):
         """
-        Validate that both language titles and bodies are unique
+        Validate that both language titles are unique and bodies are not empty.
         """
         # Check if Persian title exists
         fa_title_exists = False
@@ -98,31 +100,18 @@ class CreateArticleSerializer(serializers.Serializer):
                 en_title_exists = True
                 break
         
-        # Check if Persian body exists
-        fa_body_exists = False
-        for article in Article.objects.all():
-            if article.has_translation('fa') and article.safe_translation_getter('body', language_code='fa') == data['body_fa']:
-                fa_body_exists = True
-                break
-        
-        # Check if English body exists
-        en_body_exists = False
-        for article in Article.objects.all():
-            if article.has_translation('en') and article.safe_translation_getter('body', language_code='en') == data['body_en']:
-                en_body_exists = True
-                break
+        # Check if content is empty (strip HTML tags for comparison)
+        if not strip_tags(data['body_fa']).strip():
+            raise serializers.ValidationError({"body_fa": "متن مقاله فارسی نمی‌تواند خالی باشد."})
+            
+        if not strip_tags(data['body_en']).strip():
+            raise serializers.ValidationError({"body_en": "متن مقاله انگلیسی نمی‌تواند خالی باشد."})
                 
         if fa_title_exists:
             raise serializers.ValidationError({"title_fa": "مقاله‌ای با این عنوان فارسی در سیستم موجود است."})
         
         if en_title_exists:
             raise serializers.ValidationError({"title_en": "مقاله‌ای با این عنوان انگلیسی در سیستم موجود است."})
-            
-        if fa_body_exists:
-            raise serializers.ValidationError({"body_fa": "مقاله‌ای با این متن فارسی در سیستم موجود است."})
-        
-        if en_body_exists:
-            raise serializers.ValidationError({"body_en": "مقاله‌ای با این متن انگلیسی در سیستم موجود است."})
         
         # Validate slideshow images for slideshow type articles
         if data['type'] == Article.Type.SLIDE_SHOW and data.get('slideshow_image_count', 0) < 1:
@@ -150,7 +139,7 @@ class CreateArticleSerializer(serializers.Serializer):
             status=validated_data.get('status'),
             type=validated_data.get('type'),
             video_url=validated_data.get('video_url', ''),
-            author=Profile.objects.get(author=validated_data.get('author'))
+            author=Profile.objects.get(user=self.context['request'].user)
         )
         
         # Save without translations first

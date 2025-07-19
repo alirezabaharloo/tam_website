@@ -1,0 +1,36 @@
+/* Custom styles for React-Quill Light Theme */
+
+.quill-editor-container .ql-toolbar {
+  background-color: #f7fafc; /* Light gray background */
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.5rem 0.5rem 0 0; /* Rounded top corners */
+  font-family: inherit;
+}
+
+.quill-editor-container .ql-container {
+  border: 1px solid #e2e8f0 !important;
+  border-top: none !important;
+  border-radius: 0 0 0.5rem 0.5rem; /* Rounded bottom corners */
+  background-color: #ffffff; /* White editing area */
+  font-family: inherit;
+  font-size: 1rem;
+  color: #2d3748; /* Dark text color */
+}
+
+.quill-editor-container .ql-editor {
+  min-height: 200px;
+}
+
+.quill-editor-container .ql-editor.ql-blank::before {
+  color: #a0aec0; /* Lighter placeholder text */
+  font-style: italic;
+  font-family: inherit;
+}
+
+.quill-editor-container .ql-stroke {
+  stroke: #2d3748 !important; /* Darker icons */
+}
+
+.quill-editor-container .ql-picker-label {
+  color: #2d3748 !important; /* Darker text for dropdowns */
+} 

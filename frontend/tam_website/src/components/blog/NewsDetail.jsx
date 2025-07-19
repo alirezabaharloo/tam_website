@@ -8,6 +8,7 @@ import SomethingWentWrong from '../UI/SomethingWentWrong.jsx'
 import LazyImage from '../UI/LazyImage.jsx'
 import ArticleNotFound from '../UI/ArticleNotFound.jsx'
 import domainUrl from '../../utils/api.js'
+import './NewsDetail.css';
 
 
 export default function NewsDetail() {
@@ -121,9 +122,10 @@ export default function NewsDetail() {
               </h1>
               
               {/* Main content */}
-              <div className="text-[16px] sm:text-[18px] md:text-[20px] lg:text-[24px] font-regular text-secondary mt-4 sm:mt-6 whitespace-pre-line">
-                {article.body}
-              </div>
+              <div 
+                className="article-content text-[16px] sm:text-[18px] md:text-[20px] lg:text-[24px] font-regular text-secondary mt-4 sm:mt-6"
+                dangerouslySetInnerHTML={{ __html: article.body }}
+              />
 
               {/* Slideshow section - only for slideshow type */}
               {article.type === 'SS' && article.images.length > 1 && (

@@ -37,6 +37,9 @@ const NewsBox = ({
     }
   };
 
+  // Strip HTML tags for plain text display
+  const plainTextBody = body ? String(body).replace(/<[^>]+>/g, '') : '';
+
 
   return (
     <div 
@@ -98,7 +101,7 @@ const NewsBox = ({
           </h3>
         </div>
         <p className="text-[12px] sm:text-[13px] md:text-[14px] font-medium text-secondary-tint-100 mt-2 line-clamp-2">
-          {body}
+          {plainTextBody}
         </p>
         <div className="mt-auto flex items-center justify-between">
           <div className="flex items-center">

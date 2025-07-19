@@ -7,6 +7,7 @@ import { ArticleFormIcons } from '../../../data/Icons';
 import SpinLoader from '../../../components/UI/SpinLoader';
 import SomethingWentWrong from '../../../components/UI/SomethingWentWrong';
 import { validateArticleForm, isFormValid } from '../../../validators/ArticleValidators';
+import QuillEditor from '../../../components/UI/QuillEditor'; // Import the new editor
 
 const Icons = ArticleFormIcons;
 
@@ -79,7 +80,7 @@ const NewsForm = () => {
     setActiveTab(tabId);
   };
   
-  // Handle form input changes
+  // Handle form input changes, including QuillEditor
   const handleInputChange = (field, value) => {
     // Clear error for the field being edited
     if (errors[field]) {
@@ -406,15 +407,12 @@ const NewsForm = () => {
                       <label className="block text-[16px] text-secondary mb-2 text-right">
                         متن مقاله (فارسی) *
                       </label>
-                      <div className="relative">
-                        <textarea
+                      <div className={`rounded-lg border-2 ${errors.body_fa ? 'border-quaternary' : 'border-transparent'}`}>
+                        <QuillEditor
                           value={formData.body_fa}
-                          onChange={(e) => handleInputChange('body_fa', e.target.value)}
-                          className={`w-full p-4 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                            errors.body_fa ? 'border-quaternary' : 'border-quinary-tint-500'
-                          } focus:border-primary outline-none transition-colors duration-300 min-h-[200px]`}
-                          placeholder="متن مقاله"
-                          dir="rtl"
+                          onChange={(data) => handleInputChange('body_fa', data)}
+                          placeholder="متن مقاله خود را اینجا وارد کنید..."
+                          isRTL={true}
                         />
                       </div>
                       {errors.body_fa && (
@@ -456,15 +454,12 @@ const NewsForm = () => {
                       <label className="block text-[16px] text-secondary mb-2 text-left">
                         Article Body (English) *
                       </label>
-                      <div className="relative">
-                        <textarea
+                      <div className={`rounded-lg border-2 ${errors.body_en ? 'border-quaternary' : 'border-transparent'}`}>
+                        <QuillEditor
                           value={formData.body_en}
-                          onChange={(e) => handleInputChange('body_en', e.target.value)}
-                          className={`w-full p-4 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                            errors.body_en ? 'border-quaternary' : 'border-quinary-tint-500'
-                          } focus:border-primary outline-none transition-colors duration-300 min-h-[200px]`}
-                          placeholder="Article body"
-                          dir="ltr"
+                          onChange={(data) => handleInputChange('body_en', data)}
+                          placeholder="Enter your article body here..."
+                          isRTL={false}
                         />
                       </div>
                       {errors.body_en && (
