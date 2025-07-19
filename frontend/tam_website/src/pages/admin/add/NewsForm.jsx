@@ -10,6 +10,7 @@ import QuillEditor from '../../../components/admin/Editor/QuillEditor';
 import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
 import FormActions from '../../../components/UI/FormActions';
+import SlideshowImages from '../../../components/admin/SlideshowImages';
 
 const NewsForm = () => {
   const navigate = useNavigate();
@@ -94,6 +95,10 @@ const NewsForm = () => {
   };
   
   const handleSlideshowImageChange = (e) => {
+    if (!mainImagePreview) {
+      errorNotif('ابتدا باید تصویر اصلی مقاله را انتخاب کنید.');
+      return;
+    }
     const file = e.target.files[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
@@ -111,19 +116,35 @@ const NewsForm = () => {
   };
 
   const handleRemoveSlideshowImage = (index) => {
-    setSlideshowImages(prev => {
-      const newImages = [...prev];
-      newImages.splice(index, 1);
-      return newImages;
-    });
+    setSlideshowImages(prev => prev.filter((_, i) => i !== index));
     setFormData(prev => {
       const newSlideshowImages = [...prev.slideshow_images];
       newSlideshowImages.splice(index, 1);
-      return {
-        ...prev,
-        slideshow_images: newSlideshowImages
-      };
+      return { ...prev, slideshow_images: newSlideshowImages };
     });
+  };
+
+  const handleChangeSlideshowImage = (index) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const previewUrl = URL.createObjectURL(file);
+        setSlideshowImages(prev => {
+          const newImages = [...prev];
+          newImages[index] = { file, preview: previewUrl };
+          return newImages;
+        });
+        setFormData(prev => {
+          const newSlideshowImages = [...prev.slideshow_images];
+          newSlideshowImages[index] = file;
+          return { ...prev, slideshow_images: newSlideshowImages };
+        });
+      }
+    };
+    input.click();
   };
 
   const handleSubmit = async (e) => {
@@ -439,56 +460,13 @@ const NewsForm = () => {
               label="تصویر اصلی مقاله"
             />
             {formData.type === 'SS' && (
-            <div className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                {slideshowImages.map((image, index) => (
-                    <div 
-                    key={index}
-                    className="h-[150px] rounded-lg border-2 border-quinary-tint-500 relative overflow-hidden group"
-                    >
-                    <img 
-                        src={image.preview} 
-                        alt={`Slideshow image ${index + 1}`} 
-                        className="w-full h-full object-cover transition-all duration-300 group-hover:blur-sm group-hover:brightness-50"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="flex gap-4">
-                        <button
-                            type="button"
-                            className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-50 transition-all duration-300"
-                            onClick={() => window.open(image.preview, '_blank')}
-                        >
-                        </button>
-                        <button
-                            type="button"
-                            className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-50 transition-all duration-300"
-                            onClick={() => handleRemoveSlideshowImage(index)}
-                        >
-                        </button>
-                        </div>
-                    </div>
-                    </div>
-                ))}
-                <div 
-                    className="h-[150px] rounded-lg border-2 border-dashed border-quinary-tint-500 relative overflow-hidden cursor-pointer hover:border-primary transition-colors duration-300 flex items-center justify-center"
-                    onClick={() => document.getElementById('slideshow-image-input').click()}
-                >
-                    <div className="flex flex-col items-center justify-center">
-                    <span className="text-secondary text-sm">افزودن تصویر</span>
-                    </div>
-                    <input
-                      type="file"
-                      id="slideshow-image-input"
-                      onChange={handleSlideshowImageChange}
-                      className="hidden"
-                      accept="image/*"
-                    />
-                </div>
-                </div>
-                {errors.slideshow_images && (
-                <p className="text-quaternary text-[14px] mt-1 text-right">{errors.slideshow_images}</p>
-                )}
-            </div>
+              <SlideshowImages
+                images={slideshowImages}
+                onAddImage={handleSlideshowImageChange}
+                onRemoveImage={handleRemoveSlideshowImage}
+                onChangeImage={handleChangeSlideshowImage}
+                error={errors.slideshow_images}
+              />
             )}
             <FormActions
               onCancel={handleBack}
