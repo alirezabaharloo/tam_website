@@ -1,26 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
-import { validateTeamForm, isFormValid } from '../../../validators/TeamValidators';
+import { validateTeamForm } from '../../../validators/TeamValidators';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
-import FormHeader from '../../../components/UI/FormHeader';
-import ImagePicker from '../../../components/UI/ImagePicker';
-import FormActions from '../../../components/UI/FormActions';
+import SomethingWentWrong from '../../UI/SomethingWentWrong';
+import TeamNotFound from '../../UI/TeamNotFound';
+import FormHeader from '../../UI/FormHeader';
+import ImagePicker from '../../UI/ImagePicker';
+import FormActions from '../../UI/FormActions';
 
-const TeamForm = () => {
+const EditTeamForm = () => {
   const navigate = useNavigate();
+  const { teamId } = useParams();
   const [activeTab, setActiveTab] = useState('persian');
-  const [formData, setFormData] = useState({
-    name_fa: '',
-    name_en: '',
-    image: null
-  });
+  const [formData, setFormData] = useState({ name_fa: '', name_en: '', image: null });
+  const [originalData, setOriginalData] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [tabErrors, setTabErrors] = useState({ persian: false, english: false });
-  const { isError, isLoading, sendRequest } = useAdminHttp();
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const {
+    isLoading: isFetching,
+    isError: fetchError,
+    data: teamDetails,
+    sendRequest: fetchTeamDetails
+  } = useAdminHttp(`http://localhost:8000/api/admin/team-detail/${teamId}/`);
+
+  const {
+    isLoading: submitLoading,
+    sendRequest: submitUpdate
+  } = useAdminHttp();
+
+  useEffect(() => {
+    fetchTeamDetails();
+  }, [teamId]);
+
+  useEffect(() => {
+    if (teamDetails && teamDetails.id) {
+      const initialFormData = {
+        name_fa: teamDetails.name_fa || '',
+        name_en: teamDetails.name_en || '',
+        image: null
+      };
+      setFormData(initialFormData);
+      setOriginalData(initialFormData);
+      if (teamDetails.image) setImagePreview(teamDetails.image);
+    }
+  }, [teamDetails]);
 
   useEffect(() => {
     setTabErrors({
@@ -29,9 +57,7 @@ const TeamForm = () => {
     });
   }, [errors]);
 
-  const handleTabChange = (tabId) => {
-    setActiveTab(tabId);
-  };
+  const handleTabChange = (tabId) => setActiveTab(tabId);
 
   const handleInputChange = (field, value) => {
     if (errors[field]) {
@@ -59,9 +85,23 @@ const TeamForm = () => {
     }
   };
 
+  useEffect(() => {
+    if (!originalData) {
+      setHasChanges(false);
+      return;
+    }
+    const fieldsChanged =
+      formData.name_fa !== originalData.name_fa ||
+      formData.name_en !== originalData.name_en;
+    const imageChanged =
+      (formData.image !== null) ||
+      (!imagePreview && originalData && originalData.image);
+    setHasChanges(fieldsChanged || imageChanged);
+  }, [formData, originalData, imagePreview]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateTeamForm(formData);
+    const validationErrors = validateTeamForm({ ...formData, image: imagePreview || formData.image });
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       if (validationErrors.name_fa && activeTab !== 'persian') setActiveTab('persian');
@@ -70,24 +110,18 @@ const TeamForm = () => {
     }
     setErrors({});
     const formDataToSend = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataToSend.append(key, value);
-    });
+    if (formData.name_fa !== originalData.name_fa) formDataToSend.append('name_fa', formData.name_fa);
+    if (formData.name_en !== originalData.name_en) formDataToSend.append('name_en', formData.name_en);
+    if (formData.image) formDataToSend.append('image', formData.image);
     try {
-      const response = await sendRequest('http://localhost:8000/api/admin/team-create/', 'POST', formDataToSend);
-      if (response?.isError) {
-        setErrors(response?.errorContent || {});
-        errorNotif('خطا در ایجاد تیم');
-      } else {
-        successNotif('تیم جدید اضافه شد');
-        setTimeout(() => {
-          navigate('/admin/teams', {
-            state: {
-              preserveFilters: true
-            }
-          });
-        }, 2000);
+      const response = await submitUpdate(`http://localhost:8000/api/admin/team-update/${teamId}/`, 'PATCH', formDataToSend);
+      if (response?.isError || response?.name_fa || response?.name_en || response?.image) {
+        setErrors(response?.errorContent || response);
+        errorNotif('خطا در بروزرسانی تیم');
+        return;
       }
+      successNotif('تیم با موفقیت بروزرسانی شد');
+      fetchTeamDetails();
     } catch (err) {
       errorNotif('خطا در ارتباط با سرور');
       if (err && err.response && err.response.data) {
@@ -103,7 +137,7 @@ const TeamForm = () => {
   const handleBack = () => {
     window.history.back();
   };
-  
+
   const tabs = [
     { id: 'persian', label: 'فارسی', lang: 'fa' },
     { id: 'english', label: 'English', lang: 'en' }
@@ -115,21 +149,21 @@ const TeamForm = () => {
       50% { opacity: 0.3; }
     }
   `;
-
-  if (isError) {
-    return <SomethingWentWrong />;
-  }
   
+  if (isFetching) return <div className="min-h-screen bg-quinary-tint-600 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
+  if (teamDetails?.errorContent?.detail === "No Team matches the given query.") return <TeamNotFound />;
+  if (teamDetails?.isError || fetchError) return <SomethingWentWrong />;
+
   return (
     <div className="min-h-screen bg-quinary-tint-600">
       <style>{flashingDotCSS}</style>
       <div className="max-w-[1200px] mx-auto px-4 mt-[1rem]">
         <FormHeader
-          title="افزودن تیم جدید"
-          subtitle="در این صفحه می توانید تیم جدیدی ایجاد کنید"
+          title="ویرایش تیم"
+          subtitle="در این صفحه می توانید اطلاعات تیم را ویرایش کنید"
           onBack={handleBack}
         />
-        <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6">
+        <div className="bg-quinary-tint-800 rounded-2xl shadow p-6">
           <motion.form
             onSubmit={handleSubmit}
             className="space-y-8"
@@ -162,7 +196,7 @@ const TeamForm = () => {
             <div className="grid grid-cols-1 gap-6">
               {activeTab === 'persian' && (
                 <div>
-                  <label className="block text-[16px] text-secondary mb-2 text-right">نام تیم (فارسی) *</label>
+                  <label className="block text-[16px] text-secondary mb-2 text-right">نام تیم (فارسی)</label>
                   <input
                     type="text"
                     value={formData.name_fa}
@@ -175,7 +209,7 @@ const TeamForm = () => {
               )}
               {activeTab === 'english' && (
                 <div>
-                  <label className="block text-[16px] text-secondary mb-2 text-left">Team Name (English) *</label>
+                  <label className="block text-[16px] text-secondary mb-2 text-left">Team name (Enlgish) *</label>
                   <input
                     type="text"
                     value={formData.name_en}
@@ -188,18 +222,18 @@ const TeamForm = () => {
               )}
             </div>
             <ImagePicker
-                imagePreview={imagePreview}
-                onImageChange={handleImageChange}
-                error={errors.image}
-                label="تصویر تیم"
+              imagePreview={imagePreview}
+              onImageChange={handleImageChange}
+              error={errors.image}
+              label="تصویر تیم"
             />
             {errors.general && <div className="text-red-500 text-sm mt-2">{errors.general}</div>}
             <FormActions
               onCancel={handleBack}
               onSubmit={handleSubmit}
-              isSubmitting={isLoading}
-              isSubmitDisabled={!isFormValid(formData)}
-              submitText="ایجاد تیم"
+              isSubmitting={submitLoading}
+              isSubmitDisabled={!hasChanges}
+              submitText="ذخیره تغییرات"
             />
           </motion.form>
         </div>
@@ -208,4 +242,4 @@ const TeamForm = () => {
   );
 };
 
-export default TeamForm; 
+export default EditTeamForm; 

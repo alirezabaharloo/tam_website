@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import { isFormValid } from '../../../validators/PlayerValidators';
-import LazyImage from '../../../components/UI/LazyImage';
 import PlayerNotFound from '../../../pages/UI/PlayerNotFound';
 import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
-import { ArticleFormIcons } from '../../../data/Icons';
-
-const Icons = ArticleFormIcons;
+import FormHeader from '../../../components/UI/FormHeader';
+import ImagePicker from '../../../components/UI/ImagePicker';
+import FormActions from '../../../components/UI/FormActions';
 
 const PlayerEditForm = () => {
   const navigate = useNavigate();
@@ -21,13 +19,12 @@ const PlayerEditForm = () => {
   const [positionOptions, setPositionOptions] = useState({});
   const [originalData, setOriginalData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
-  const imageInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name_fa: '',
     name_en: '',
     number: '',
-    goals: '',  
+    goals: '',
     games: '',
     position: '',
     image: null
@@ -164,22 +161,10 @@ const PlayerEditForm = () => {
     window.history.back();
   };
 
-  const handleViewImage = (imageUrl) => {
-    window.open(imageUrl, '_blank');
-  };
-
-  const handleChangeImage = () => {
-    if (imageInputRef.current) {
-      imageInputRef.current.click();
-    }
-  };
-
   const tabs = [
     { id: 'persian', label: 'فارسی', lang: 'fa' },
     { id: 'english', label: 'English', lang: 'en' }
   ];
-
-  const isRTL = true;
 
   const flashingDotCSS = `
     @keyframes flash {
@@ -208,29 +193,12 @@ const PlayerEditForm = () => {
     <div className="min-h-screen bg-quinary-tint-600">
       <style>{flashingDotCSS}</style>
       <div className="max-w-[1200px] mx-auto px-4 mt-[1rem]">
-        {/* Header */}
-        <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <button
-                onClick={handleBack}
-                className={`p-2 bg-quinary-tint-600 rounded-lg hover:bg-quinary-tint-500 transition-colors duration-300 ${isRTL ? 'ml-4' : 'mr-4'}`}
-              >
-                <Icons.ArrowLeft isRTL={isRTL} />
-              </button>
-              <div className={`${isRTL ? 'mr-4 text-right' : 'ml-4 text-left'}`}>
-                <h1 className="text-[24px] sm:text-[32px] font-bold text-primary">
-                  ویرایش بازیکن
-                </h1>
-                <p className="text-[16px] text-secondary">
-                  در این صفحه می توانید اطلاعات بازیکن را ویرایش کنید
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <FormHeader
+          title="ویرایش بازیکن"
+          subtitle="در این صفحه می توانید اطلاعات بازیکن را ویرایش کنید"
+          onBack={handleBack}
+        />
 
-        {/* Form */}
         <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6">
           <motion.form
             onSubmit={handleSubmit}
@@ -400,86 +368,19 @@ const PlayerEditForm = () => {
                 )}
               </div>
             </div>
-            <div className="space-y-4">
-              <label className="block text-[16px] text-secondary mb-2 text-right">
-                تصویر بازیکن
-              </label>
-              <div
-                className={`w-full h-[300px] rounded-lg border-2 ${
-                  errors.image ? 'border-quaternary' : 'border-quinary-tint-500'
-                } relative overflow-hidden cursor-pointer group`}
-                onClick={handleChangeImage}
-              >
-                {imagePreview ? (
-                  <>
-                    <LazyImage
-                      src={imagePreview}
-                      alt="Player preview"
-                      className="w-full h-full object-cover transition-all duration-300 group-hover:blur-sm group-hover:brightness-50"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="flex gap-4">
-                        <button
-                          type="button"
-                          className="p-3 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all duration-300"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewImage(imagePreview);
-                          }}
-                        >
-                          <Icons.View className="text-white text-xl" />
-                        </button>
-                        <button
-                          type="button"
-                          className="p-3 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all duration-300"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleChangeImage();
-                          }}
-                        >
-                          <Icons.Edit className="text-white text-xl" />
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-quinary-tint-600 hover:bg-quinary-tint-500 transition-colors duration-300">
-                    <Icons.Add className="text-secondary text-4xl mb-2" />
-                    <span className="text-secondary">انتخاب تصویر</span>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  ref={imageInputRef}
-                  onChange={handleImageChange}
-                  className="hidden"
-                  accept="image/*"
-                />
-              </div>
-              {errors.image && (
-                <p className="text-quaternary text-[14px] mt-1 text-right">{errors.image}</p>
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 pt-6">
-              <button
-                type="submit"
-                disabled={submitLoading || !hasChanges}
-                className="flex-1 px-6 py-3 bg-primary text-quinary-tint-800 text-[16px] font-semibold rounded-lg hover:bg-primary-tint-200 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {submitLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-quinary-tint-800"></div>
-                ) : (
-                  'ذخیره تغییرات'
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={handleBack}
-                className="flex-1 px-6 py-3 border-2 border-primary text-primary text-[16px] font-semibold rounded-lg hover:bg-primary hover:text-quinary-tint-800 transition-colors duration-300"
-              >
-                انصراف
-              </button>
-            </div>
+            <ImagePicker
+              imagePreview={imagePreview}
+              onImageChange={handleImageChange}
+              error={errors.image}
+              label="تصویر بازیکن"
+            />
+            <FormActions
+              onCancel={handleBack}
+              onSubmit={handleSubmit}
+              isSubmitting={submitLoading}
+              isSubmitDisabled={!hasChanges}
+              submitText="ذخیره تغییرات"
+            />
           </motion.form>
         </div>
       </div>
