@@ -14,7 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from 'react-i18next';
 import useLanguageChange from './hooks/useLanguageChange';
 import { SearchProvider } from './context/SearchContext';
-import SpinLoader from './components/UI/SpinLoader.jsx';
+import SpinLoader from './pages/UI/SpinLoader.jsx';
 
 function ScrollToTop() {
   const { pathname } = useLocation();

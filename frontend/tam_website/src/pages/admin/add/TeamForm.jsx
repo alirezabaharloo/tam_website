@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { validateTeamForm, isFormValid } from '../../../validators/TeamValidators';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import SomethingWentWrong from '../../../components/UI/SomethingWentWrong';
+import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
 import { ArticleFormIcons } from '../../../data/Icons';
 
 const Icons = ArticleFormIcons;

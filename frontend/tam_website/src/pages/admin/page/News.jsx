@@ -6,8 +6,8 @@ import NewsTable from '../../../components/admin/Table/NewsTable';
 import NewsFilter from '../../../components/admin/Filter/NewsFilter';
 import AdminPagination from '../../../components/admin/AdminPagination';
 import useAdminHttp from '../../../hooks/useAdminHttp';
-import SpinLoader from '../../../components/UI/SpinLoader';
-import SomethingWentWrong from '../../../components/UI/SomethingWentWrong';
+import SpinLoader from '../../../pages/UI/SpinLoader';
+import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
 
 const News = () => {
   const navigate = useNavigate();

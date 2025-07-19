@@ -5,8 +5,8 @@ import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import { isFormValid } from '../../../validators/PlayerValidators';
 import LazyImage from '../../../components/UI/LazyImage';
-import PlayerNotFound from '../../../components/UI/PlayerNotFound';
-import SomethingWentWrong from '../../../components/UI/SomethingWentWrong';
+import PlayerNotFound from '../../../pages/UI/PlayerNotFound';
+import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
 import { ArticleFormIcons } from '../../../data/Icons';
 
 const Icons = ArticleFormIcons;
@@ -27,7 +27,7 @@ const PlayerEditForm = () => {
     name_fa: '',
     name_en: '',
     number: '',
-    goals: '',
+    goals: '',  
     games: '',
     position: '',
     image: null

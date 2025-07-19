@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminPagination from './AdminPagination';
-import SpinLoader from '../UI/SpinLoader';
-import SomethingWentWrong from '../UI/SomethingWentWrong';
+import SpinLoader from '../../pages/UI/SpinLoader';
+import SomethingWentWrong from '../../pages/UI/SomethingWentWrong';
 import { AdminIcons } from '../../data/Icons';
 import useAdminHttp from '../../hooks/useAdminHttp';
 

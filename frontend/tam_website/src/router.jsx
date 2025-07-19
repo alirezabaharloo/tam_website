@@ -9,7 +9,7 @@ import NewsDetail from './components/blog/NewsDetail';
 // auth routes
 import Login from './pages/auth/Login';
 import Profile from './pages/auth/Profile';
-import PageNotFound from './pages/PageNotFound';
+import PageNotFound from './pages/UI/PageNotFound';
 import OtpVerification from './pages/auth/OtpVerification';
 import Register from './pages/auth/Register';
 // admin routes
@@ -25,7 +25,7 @@ import PlayerEditForm from './pages/admin/edit/PlayerEditForm';
 import PreRegister from './pages/blog/PreRegister';
 import Teams from './pages/admin/page/Teams';
 import TeamForm from './pages/admin/add/TeamForm';
-import EditTeamForm from './pages/admin/edit/EditTeamForm';
+import EditTeamForm from './pages/admin/edit/TeamEditForm';
 import NewsForm from './pages/admin/add/NewsForm';
 
 

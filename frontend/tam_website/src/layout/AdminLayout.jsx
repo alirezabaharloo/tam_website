@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
 import useAuthHttp from '../hooks/useAuthHttp';
-import SpinLoader from '../components/UI/SpinLoader';
-import PageNotFound from '../pages/PageNotFound';
+import SpinLoader from '../pages/UI/SpinLoader';
+import PageNotFound from '../pages/UI/PageNotFound';
 import { AdminIcons } from '../data/Icons';
 import domainUrl from '../utils/api';
-import SomethingWentWrong from '../components/UI/SomethingWentWrong';
-import AccessDenied from '../components/UI/AccessDenied';
+import SomethingWentWrong from '../pages/UI/SomethingWentWrong';
+import AccessDenied from '../pages/UI/AccessDenied';
 
 const AdminLayout = () => {
   const { isAdminPannelAccess, logout } = useAuth();

@@ -4,8 +4,8 @@ import LatestNews from '../../components/blog/LatestNews.jsx';
 import LatestVideos from '../../components/blog/LatestVideos.jsx';
 import TeamBoxes from '../../components/blog/TeamBoxes.jsx';
 import PlayerSection from '../../components/blog/PlayerSection.jsx';
-import SpinLoader from '../../components/UI/SpinLoader.jsx';
-import SomethingWentWrong from '../../components/UI/SomethingWentWrong.jsx';
+import SpinLoader from '../../pages/UI/SpinLoader.jsx';
+import SomethingWentWrong from '../../pages/UI/SomethingWentWrong.jsx';
 import { useHome } from '../../context/HomeContext.jsx';
 import Slider from '../../components/blog/Slider.jsx'
 import ShopSection from '../../components/blog/ShopSection.jsx'

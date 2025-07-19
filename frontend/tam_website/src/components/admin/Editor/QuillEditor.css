@@ -34,3 +34,29 @@
 .quill-editor-container .ql-picker-label {
   color: #2d3748 !important; /* Darker text for dropdowns */
 } 
+
+/* RTL-specific fixes for the toolbar picker */
+.quill-editor-container[dir='rtl'] .ql-toolbar .ql-picker-label {
+  padding-right: 0;
+  padding-left: 24px; /* Make space for the icon on the left */
+  text-align: right; /* Ensure text is aligned to the right */
+}
+
+.quill-editor-container[dir='rtl'] .ql-toolbar .ql-picker svg {
+  left: 4px;
+  right: auto;
+}
+
+.quill-editor-container .ql-picker-label {
+  color: #2d3748 !important; /* Darker text for dropdowns */
+}
+
+/* Fix for cursor position and text alignment in RTL mode */
+.quill-editor-container[dir="rtl"] .ql-editor {
+  direction: rtl;
+  text-align: right;
+}
+
+.quill-editor-container[dir="rtl"] .ql-editor.ql-blank::before {
+  text-align: right;
+}

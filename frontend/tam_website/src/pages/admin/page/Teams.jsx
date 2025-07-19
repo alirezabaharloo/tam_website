@@ -4,8 +4,8 @@ import TeamTable from '../../../components/admin/Table/TeamTable';
 import TeamFilter from '../../../components/admin/Filter/TeamFilter';
 import AdminPagination from '../../../components/admin/AdminPagination';
 import useAdminHttp from '../../../hooks/useAdminHttp';
-import SpinLoader from '../../../components/UI/SpinLoader';
-import SomethingWentWrong from '../../../components/UI/SomethingWentWrong';
+import SpinLoader from '../../../pages/UI/SpinLoader';
+import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
 
 const Teams = () => {
   const navigate = useNavigate();

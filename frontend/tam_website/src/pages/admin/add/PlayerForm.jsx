@@ -199,7 +199,7 @@ const PlayerForm = () => {
       imageInputRef.current.click();
     }
   };
-
+  
   // Define tabs for bilingual input
   const tabs = [
     { id: 'persian', label: 'فارسی', lang: 'fa' },
@@ -254,29 +254,29 @@ const PlayerForm = () => {
             {/* Player Name Tabs */}
             <div className="space-y-6">
               {/* Tab Navigation */}
-              <div className="flex border-b border-quinary-tint-500 justify-between">
-                <div>
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => handleTabChange(tab.id)}
-                      className={`px-6 py-3 text-[16px] font-medium transition-all duration-300 border-b-2 relative ${
-                        activeTab === tab.id
-                          ? 'text-primary border-primary'
-                          : 'text-secondary border-transparent hover:text-primary hover:border-quinary-tint-400'
-                      }`}
-                    >
-                      {tab.label}
-                      {activeTab !== tab.id && tabErrors[tab.id] && (
-                        <span
-                          className="absolute -top-1 -right-1 w-3 h-3 bg-quaternary rounded-full"
-                          style={{ animation: 'flash 1s infinite ease-in-out' }}
-                        />
-                      )}
-                    </button>
-                  ))}
-                </div>
+            <div className="flex border-b border-quinary-tint-500 justify-between">
+             <div>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`px-6 py-3 text-[16px] font-medium transition-all duration-300 border-b-2 relative ${
+                      activeTab === tab.id
+                        ? 'text-primary border-primary'
+                        : 'text-secondary border-transparent hover:text-primary hover:border-quinary-tint-400'
+                    }`}
+                  >
+                    {tab.label}
+                  {activeTab !== tab.id && tabErrors[tab.id] && (
+                    <span 
+                      className="absolute -top-1 -right-1 w-3 h-3 bg-quaternary rounded-full" 
+                      style={{ animation: 'flash 1s infinite ease-in-out' }}
+                    />
+                  )}
+                  </button>
+                ))}
+              </div>
               </div>
 
               {/* Tab Content for Name */}

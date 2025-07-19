@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import useAdminHttp from '../../../hooks/useAdminHttp';
-import SpinLoader from '../../../components/UI/SpinLoader';
-import SomethingWentWrong from '../../../components/UI/SomethingWentWrong';
+import SpinLoader from '../../../pages/UI/SpinLoader';
+import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
 import { useNavigate } from 'react-router-dom';
 import { AdminIcons } from '../../../data/Icons';
 import domainUrl from '../../../utils/api';

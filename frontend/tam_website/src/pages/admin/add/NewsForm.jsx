@@ -4,10 +4,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import { ArticleFormIcons } from '../../../data/Icons';
-import SpinLoader from '../../../components/UI/SpinLoader';
-import SomethingWentWrong from '../../../components/UI/SomethingWentWrong';
+import SpinLoader from '../../UI/SpinLoader';
+import SomethingWentWrong from '../../UI/SomethingWentWrong';
 import { validateArticleForm, isFormValid } from '../../../validators/ArticleValidators';
-import QuillEditor from '../../../components/UI/QuillEditor'; // Import the new editor
+import QuillEditor from '../../../components/admin/Editor/QuillEditor'; // Import the new editor
 
 const Icons = ArticleFormIcons;
 

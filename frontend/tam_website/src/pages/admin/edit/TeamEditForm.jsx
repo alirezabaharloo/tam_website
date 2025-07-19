@@ -4,9 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { validateTeamForm } from '../../../validators/TeamValidators';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import SomethingWentWrong from '../../../components/UI/SomethingWentWrong';
+import SomethingWentWrong from '../../UI/SomethingWentWrong';
 import LazyImage from '../../../components/UI/LazyImage';
-import TeamNotFound from '../../../components/UI/TeamNotFound';
+import TeamNotFound from '../../UI/TeamNotFound';
 import { ArticleFormIcons } from '../../../data/Icons';
 
 const Icons = ArticleFormIcons;
