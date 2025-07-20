@@ -11,6 +11,8 @@ import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
 import FormActions from '../../../components/UI/FormActions';
 import SlideshowImages from '../../../components/admin/SlideshowImages';
+import ImportTranslationModal from '../../../components/admin/Modal/ImportTranslationModal';
+import { ArticleFormIcons } from '../../../data/Icons';
 
 const NewsForm = () => {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ const NewsForm = () => {
   const [errors, setErrors] = useState({});
   const [mainImagePreview, setMainImagePreview] = useState(null);
   const [slideshowImages, setSlideshowImages] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const [tabErrors, setTabErrors] = useState({
     persian: false, 
@@ -206,6 +209,38 @@ const NewsForm = () => {
     window.history.back();
   };
   
+  const handleCopyPrompt = () => {
+    if (!formData.body_fa || formData.body_fa === '<p><br></p>') {
+      errorNotif('ابتدا متن مقاله فارسی را وارد کنید.');
+      return;
+    }
+
+    const prompt = `=== Prompt Purpose ===Translate the provided Persian article content into natural English, ensuring that all HTML formatting is preserved exactly as presented.
+=== Output Format ===Return the result in .md (Markdown) format. Maintain all headings, bold text, italics, text alignments, links, and other formatting precisely as in the original HTML. Ensure that the formatting applied to specific text in Persian is identically applied to its English translation equivalent. For example, if a word or phrase in Persian is bold, italicized, or linked, the corresponding translated word or phrase in English must retain the same formatting in the same position.
+=== Examples ===Input (Persian with Formatting):
+<p style="text-align: justify;">سلام <a href="www.google.com" rel="noopener noreferrer" target="_blank">دنیا</a>، من یه متن ساختگی هستم که شامل فرمت های زیادی هستم به فارسی و باید به زبان انگلیسی دقیقا به همین فرمت ترجمه بشم، برای مثال اگه <a href="www.google.com" rel="noopener noreferrer" target="_blank">اینجا </a>یه لینک باشه باید توی متن انگلیسی همون قسمت لینک بخوره، یا اگه <strong>اینجا </strong>بولد باشه باید همونجا توی متن فارسی بولد بشه، یا اگه کلمه <em>برنامه نویسی</em> ایتالیک باشه باید توی زبان انگلیسی هم همونجا ایتالیک بشه.</p>
+
+Expected Output (English with Formatting):
+<p style="text-align: justify;">Hello <a href="www.google.com" rel="noopener noreferrer" target="_blank">world</a>, I am a dummy text that contains many formats in Persian and must be translated into English exactly with the same formatting. For example, if <a href="www.google.com" rel="noopener noreferrer" target="_blank">here</a> is a link, that part should remain linked in the English version as well. Or if <strong>here</strong> is bold, it should be bold in the English version too. Or if the word <em>programming</em> is italicized, it should also be italicized in the English version at the same spot.</p>
+
+=== Persian Article Body (Formatted) ===
+Provide only the prompt text as shown above, without any additional content.
+the persian text with format is between this >>> <<<:
+>>> ${formData.body_fa} <<< 
+    `;
+    navigator.clipboard.writeText(prompt).then(() => {
+      successNotif('پرامپت ترجمه در کلیپ‌برد کپی شد.');
+    }).catch(err => {
+      errorNotif('خطا در کپی کردن پرامپت.');
+      console.error('Could not copy text: ', err);
+    });
+  };
+
+  const handleImportTranslation = (importedHtml) => {
+    handleInputChange('body_en', importedHtml);
+    successNotif('متن ترجمه شده با موفقیت وارد شد.');
+  };
+
   const tabs = [
     { id: 'persian', label: 'فارسی', lang: 'fa' },
     { id: 'english', label: 'English', lang: 'en' }
@@ -304,6 +339,16 @@ const NewsForm = () => {
                       {errors.body_fa && (
                         <p className="text-quaternary text-[14px] mt-1 text-right">{errors.body_fa}</p>
                       )}
+                      <div className="mt-4 flex justify-start">
+                        <button
+                          type="button"
+                          onClick={handleCopyPrompt}
+                          className="flex items-center gap-2 px-4 py-2 bg-quaternary text-white font-semibold rounded-lg hover:bg-quaternary/90 transition-colors duration-300"
+                        >
+                          <ArticleFormIcons.Copy className="w-5 h-5" />
+                          <span>کپی کردن پرامپت ترجمه برای AI</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -342,6 +387,15 @@ const NewsForm = () => {
                       {errors.body_en && (
                         <p className="text-quaternary text-[14px] mt-1 text-left">{errors.body_en}</p>
                       )}
+                      <div className="mt-4 flex justify-start">
+                        <button
+                          type="button"
+                          onClick={() => setIsModalOpen(true)}
+                          className="flex items-center gap-2 px-4 py-2 bg-quaternary text-white font-semibold rounded-lg hover:bg-quaternary/90 transition-colors duration-300"
+                        >
+                          <span>وارد کردن متن از طریق کلیپ‌برد</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -478,6 +532,11 @@ const NewsForm = () => {
           </motion.form>
         </div>
       </div>
+      <ImportTranslationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onImport={handleImportTranslation}
+      />
     </div>
   );
 };

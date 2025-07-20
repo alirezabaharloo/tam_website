@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.utils.translation import get_language, activate as set_language
 from blog.serializers import ArticleSerializer, ArticleDetailSerializer
-from permissions import IsAuthor
+from permissions import IsAuthor, IsSuperUser
 from blog.models import Article
 from accounts.mixins import LocalizationMixin, IpAddressMixin
 from .models import IpAddress
@@ -278,7 +278,7 @@ class ArticleDetailForAuthorsView(ArticleDetailView):
     View for authors to retrieve any of their articles regardless of status.
     Only allows access to articles belonging to the requesting author.
     """
-    permission_classes = [IsAuthor]
+    permission_classes = [IsAuthor, IsSuperUser]
 
     def get_queryset(self):
         # Get the user's profile
