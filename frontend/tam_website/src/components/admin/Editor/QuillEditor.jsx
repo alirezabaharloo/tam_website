@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactQuill, { Quill } from 'react-quill';
+import QuillWrapper, { Quill } from '../../../utils/quillFix.jsx';
 import 'react-quill/dist/quill.snow.css'; // Using the snow theme
 import './QuillEditor.css'; // Custom styles for light theme
 
@@ -34,13 +34,14 @@ const QuillEditor = ({ value, onChange, placeholder, isRTL }) => {
 
   return (
     <div className="quill-editor-container" dir={isRTL ? 'rtl' : 'ltr'}>
-      <ReactQuill
+      <QuillWrapper
         theme="snow"
         value={value}
         onChange={onChange}
         modules={modules}
         formats={formats}
         placeholder={placeholder}
+        isRTL={isRTL}
       />
     </div>
   );
