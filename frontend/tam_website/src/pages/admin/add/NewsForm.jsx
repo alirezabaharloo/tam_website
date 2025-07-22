@@ -12,7 +12,9 @@ import ImagePicker from '../../../components/UI/ImagePicker';
 import FormActions from '../../../components/UI/FormActions';
 import SlideshowImages from '../../../components/admin/SlideshowImages';
 import ImportTranslationModal from '../../../components/admin/Modal/ImportTranslationModal';
+import SchedulePublishModal from '../../../components/admin/Modal/SchedulePublishModal';
 import { ArticleFormIcons } from '../../../data/Icons';
+import { formatJalaliDateTime } from '../../../utils/dateUtils';
 
 const NewsForm = () => {
   const navigate = useNavigate();
@@ -22,6 +24,8 @@ const NewsForm = () => {
   const [mainImagePreview, setMainImagePreview] = useState(null);
   const [slideshowImages, setSlideshowImages] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [scheduledPublishDate, setScheduledPublishDate] = useState(null);
   
   const [tabErrors, setTabErrors] = useState({
     persian: false, 
@@ -38,7 +42,8 @@ const NewsForm = () => {
     type: 'TX',
     video_url: '',
     main_image: null,
-    slideshow_images: []
+    slideshow_images: [],
+    scheduled_publish_at: null
   });
   
   const {
@@ -168,7 +173,9 @@ const NewsForm = () => {
     
     Object.entries(formData).forEach(([key, value]) => {
       if (key !== 'main_image' && key !== 'slideshow_images') {
-        formDataToSend.append(key, value);
+        if (value !== null && value !== undefined) {
+          formDataToSend.append(key, value);
+        }
       }
     });
     
@@ -239,6 +246,11 @@ the persian text with format is between this >>> <<<:
   const handleImportTranslation = (importedHtml) => {
     handleInputChange('body_en', importedHtml);
     successNotif('متن ترجمه شده با موفقیت وارد شد.');
+  };
+  
+  const handleSchedulePublication = (scheduledDate) => {
+    setScheduledPublishDate(scheduledDate);
+    setFormData(prev => ({ ...prev, scheduled_publish_at: scheduledDate.toISOString() }));
   };
 
   const tabs = [
@@ -460,30 +472,51 @@ the persian text with format is between this >>> <<<:
                 <p className="text-quaternary text-[14px] text-right mt-1">{errors.type}</p>
                 )}
               </div>
-              <div>
+              <div className="relative">
                 <label className="block text-[16px] text-secondary mb-2 text-right">
                   وضعیت مقاله *
                 </label>
-                <select
-                    value={formData.status}
-                    onChange={(e) => handleInputChange('status', e.target.value)}
-                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                    errors.status ? 'border-quaternary' : 'border-quinary-tint-500'
-                    } focus:border-primary outline-none transition-colors duration-300`}
-                >
-                    {filterData && filterData.status && Object.entries(filterData.status).map(([id, name]) => {
-                    if (id !== '') {
-                        return (
-                        <option key={id} value={id}>
-                            {name}
-                        </option>
-                        );
-                    }
-                    return null;
-                    })}
-                </select>
+                <div className="flex items-center space-x-2">
+                  <select
+                      value={formData.status}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
+                      errors.status ? 'border-quaternary' : 'border-quinary-tint-500'
+                      } focus:border-primary outline-none transition-colors duration-300`}
+                  >
+                      {filterData && filterData.status && Object.entries(filterData.status).map(([id, name]) => {
+                      if (id !== '') {
+                          return (
+                          <option key={id} value={id}>
+                              {name}
+                          </option>
+                          );
+                      }
+                      return null;
+                      })}
+                  </select>
+                  {formData.status === 'DR' && (
+                    <button
+                      type="button"
+                      onClick={() => setIsScheduleModalOpen(true)}
+                      className="flex-shrink-0 px-3 py-3 bg-quaternary text-white rounded-lg hover:bg-quaternary/90 transition-colors duration-300 mr-2"
+                      title="زمان‌بندی انتشار"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
                 {errors.status && (
                 <p className="text-quaternary text-[14px] mt-1 text-right">{errors.status}</p>
+                )}
+                {scheduledPublishDate && formData.status === 'DR' && (
+                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                    <p className="text-blue-600 text-sm">
+                      زمان‌بندی شده برای انتشار در: {formatJalaliDateTime(scheduledPublishDate)}
+                    </p>
+                  </div>
                 )}
               </div>
               {formData.type === 'VD' && (
@@ -536,6 +569,12 @@ the persian text with format is between this >>> <<<:
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onImport={handleImportTranslation}
+      />
+      <SchedulePublishModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        articleId={null} // For new articles, we'll handle scheduling in the form submission
+        onSuccess={handleSchedulePublication}
       />
     </div>
   );

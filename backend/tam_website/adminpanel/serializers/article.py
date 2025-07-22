@@ -3,6 +3,8 @@ from blog.models.article import Article, Team, Image
 from django.db.models import Count
 from accounts.models import Profile
 from django.utils.html import strip_tags
+from django.utils import timezone
+from datetime import datetime
 
 
 class BilingualArticleSerializer(serializers.ModelSerializer):
@@ -15,10 +17,12 @@ class BilingualArticleSerializer(serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     updated_date = serializers.SerializerMethodField()
     created_date = serializers.SerializerMethodField()
+    scheduled_publish_at = serializers.DateTimeField(required=False, allow_null=True)
+    remaining_time = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
-        fields = ['id', 'title', 'status', 'type', 'team', 'hits_count', 'likes_count', 'updated_date', 'created_date']
+        fields = ['id', 'title', 'status', 'type', 'team', 'hits_count', 'likes_count', 'updated_date', 'created_date', 'scheduled_publish_at', 'remaining_time']
     
     def get_title(self, obj):
         # Get the language from request query params or default to 'fa'
@@ -64,6 +68,30 @@ class BilingualArticleSerializer(serializers.ModelSerializer):
     
     def get_created_date(self, obj):
         return obj.created_date.strftime('%Y-%m-%d')
+    
+    def get_remaining_time(self, obj):
+        """
+        Calculate and return the remaining time until scheduled publication
+        """
+        if not obj.scheduled_publish_at or obj.status != Article.Status.DRAFT:
+            return None
+        
+        now = timezone.now()
+        if obj.scheduled_publish_at <= now:
+            return "0"
+        
+        # Calculate the time difference
+        time_diff = obj.scheduled_publish_at - now
+        days = time_diff.days
+        hours, remainder = divmod(time_diff.seconds, 3600)
+        minutes, _ = divmod(remainder, 60)
+        
+        if days > 0:
+            return f"{days} روز و {hours} ساعت و {minutes} دقیقه"
+        elif hours > 0:
+            return f"{hours} ساعت و {minutes} دقیقه"
+        else:
+            return f"{minutes} دقیقه"
 
 
 class CreateArticleSerializer(serializers.Serializer):
@@ -81,10 +109,12 @@ class CreateArticleSerializer(serializers.Serializer):
     author = serializers.IntegerField(required=False)  # Will be set in the view
     main_image = serializers.ImageField(required=True)  # Main image for all article types
     slideshow_image_count = serializers.IntegerField(required=False, default=0)  # Number of slideshow images
+    scheduled_publish_at = serializers.DateTimeField(required=False, allow_null=True)  # Scheduled publishing time
     
     def validate(self, data):
         """
         Validate that both language titles are unique and bodies are not empty.
+        Also validate the scheduled_publish_at date if provided.
         """
         # Check if Persian title exists
         fa_title_exists = False
@@ -116,6 +146,12 @@ class CreateArticleSerializer(serializers.Serializer):
         # Validate slideshow images for slideshow type articles
         if data['type'] == Article.Type.SLIDE_SHOW and data.get('slideshow_image_count', 0) < 1:
             raise serializers.ValidationError({"slideshow_images": "لطفا حداقل یک تصویر برای اسلایدشو انتخاب کنید."})
+        
+        # Validate scheduled_publish_at if provided
+        if data.get('scheduled_publish_at') and data.get('status') == Article.Status.DRAFT:
+            # Ensure the scheduled date is in the future
+            if data['scheduled_publish_at'] <= timezone.now():
+                raise serializers.ValidationError({"scheduled_publish_at": "زمان انتشار باید در آینده باشد."})
             
         return data
     
@@ -133,13 +169,17 @@ class CreateArticleSerializer(serializers.Serializer):
         main_image = validated_data.pop('main_image')
         slideshow_image_count = validated_data.pop('slideshow_image_count', 0)
         
+        # Extract scheduled_publish_at if present
+        scheduled_publish_at = validated_data.pop('scheduled_publish_at', None)
+        
         # Create the article instance
         article = Article(
             team=validated_data.get('team'),
             status=validated_data.get('status'),
             type=validated_data.get('type'),
             video_url=validated_data.get('video_url', ''),
-            author=Profile.objects.get(user=self.context['request'].user)
+            author=Profile.objects.get(user=self.context['request'].user),
+            scheduled_publish_at=scheduled_publish_at
         )
         
         # Save without translations first
@@ -169,5 +209,14 @@ class CreateArticleSerializer(serializers.Serializer):
                 slideshow_image_obj = Image.objects.create(image=slideshow_image)
                 slideshow_image_obj.article.add(article)
                 slideshow_images.append(slideshow_image_obj)
+        
+        # Schedule publication if needed
+        if scheduled_publish_at and article.status == Article.Status.DRAFT:
+            from blog.tasks import publish_scheduled_article
+            # Use apply_async with the eta parameter to schedule the task
+            publish_scheduled_article.apply_async(
+                args=[article.id],
+                eta=scheduled_publish_at
+            )
         
         return article

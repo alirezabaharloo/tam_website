@@ -19,7 +19,7 @@ const PlayerEditForm = () => {
   const [positionOptions, setPositionOptions] = useState({});
   const [originalData, setOriginalData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
-
+  
   const [formData, setFormData] = useState({
     name_fa: '',
     name_en: '',
@@ -29,23 +29,23 @@ const PlayerEditForm = () => {
     position: '',
     image: null
   });
-
+  
   const {
     data: positions,
   } = useAdminHttp('http://localhost:8000/api/admin/player-positions/');
-
+  
   const {
     data: playerDetails,
     isLoading: playerDetailsLoading,
     isError: playerDetailsError,
     sendRequest: fetchPlayers,
   } = useAdminHttp(`http://localhost:8000/api/admin/player-detail/${playerId}/`);
-
+  
   const {
     isLoading: submitLoading,
     sendRequest
   } = useAdminHttp();
-
+  
   useEffect(() => {
     if (playerDetails) {
       const initialFormData = {
@@ -64,7 +64,7 @@ const PlayerEditForm = () => {
       }
     }
   }, [playerDetails]);
-
+  
   useEffect(() => {
     if (positions) {
       const filteredPositions = { ...positions };
@@ -72,7 +72,7 @@ const PlayerEditForm = () => {
       setPositionOptions(filteredPositions);
     }
   }, [positions]);
-
+  
   useEffect(() => {
     if (originalData) {
       const hasFormChanges = Object.keys(formData).some(key => {
@@ -81,29 +81,29 @@ const PlayerEditForm = () => {
         }
         return formData[key] !== originalData[key];
       });
-      const hasImageChanges =
+      const hasImageChanges = 
         (imagePreview === null && playerDetails?.image) ||
         formData.image !== null;
       setHasChanges(hasFormChanges || hasImageChanges);
     }
   }, [formData, originalData, imagePreview, playerDetails]);
-
+  
   const [tabErrors, setTabErrors] = useState({
     persian: false,
     english: false
   });
-
+  
   useEffect(() => {
     setTabErrors({
       persian: !!errors.name_fa,
       english: !!errors.name_en
     });
   }, [errors]);
-
+  
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
   };
-
+  
   const handleInputChange = (field, value) => {
     if (errors[field]) {
       setErrors(prev => {
@@ -114,7 +114,7 @@ const PlayerEditForm = () => {
     }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
-
+  
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -130,7 +130,7 @@ const PlayerEditForm = () => {
       setFormData(prev => ({ ...prev, image: file }));
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -156,11 +156,11 @@ const PlayerEditForm = () => {
       setIsLoading(false);
     }
   };
-
+  
   const handleBack = () => {
     window.history.back();
   };
-
+  
   const tabs = [
     { id: 'persian', label: 'فارسی', lang: 'fa' },
     { id: 'english', label: 'English', lang: 'en' }
@@ -184,7 +184,7 @@ const PlayerEditForm = () => {
   if (playerDetails?.errorContent?.detail === "No Player matches the given query." || playerDetails?.errorContent?.detail === "page not found.") {
     return <PlayerNotFound />;
   }
-
+  
   if (playerDetails?.isError || positions?.isError || playerDetailsError) {
     return <SomethingWentWrong />;
   }
@@ -209,27 +209,27 @@ const PlayerEditForm = () => {
           >
             <div className="space-y-6">
               <div className="flex border-b border-quinary-tint-500 justify-between">
-                <div>
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => handleTabChange(tab.id)}
-                      className={`px-6 py-3 text-[16px] font-medium transition-all duration-300 border-b-2 relative ${
-                        activeTab === tab.id
-                          ? 'text-primary border-primary'
-                          : 'text-secondary border-transparent hover:text-primary hover:border-quinary-tint-400'
-                      }`}
-                    >
-                      {tab.label}
-                      {activeTab !== tab.id && tabErrors[tab.id] && (
-                        <span
-                          className="absolute -top-1 -right-1 w-3 h-3 bg-quaternary rounded-full"
-                          style={{ animation: 'flash 1s infinite ease-in-out' }}
-                        />
-                      )}
-                    </button>
-                  ))}
+               <div>
+               {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`px-6 py-3 text-[16px] font-medium transition-all duration-300 border-b-2 relative ${
+                      activeTab === tab.id
+                        ? 'text-primary border-primary'
+                        : 'text-secondary border-transparent hover:text-primary hover:border-quinary-tint-400'
+                    }`}
+                  >
+                    {tab.label}
+                    {activeTab !== tab.id && tabErrors[tab.id] && (
+                      <span 
+                        className="absolute -top-1 -right-1 w-3 h-3 bg-quaternary rounded-full" 
+                        style={{ animation: 'flash 1s infinite ease-in-out' }}
+                      />
+                    )}
+                  </button>
+                ))}
                 </div>
               </div>
               <div className="space-y-6">
@@ -373,7 +373,7 @@ const PlayerEditForm = () => {
               onImageChange={handleImageChange}
               error={errors.image}
               label="تصویر بازیکن"
-            />
+                      />
             <FormActions
               onCancel={handleBack}
               onSubmit={handleSubmit}

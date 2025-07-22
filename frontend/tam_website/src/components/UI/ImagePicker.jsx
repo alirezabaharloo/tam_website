@@ -31,7 +31,7 @@ const ImagePicker = ({
         {label} *
       </label>
       <div
-        className={`w-full h-[300px] rounded-lg border-2 ${
+        className={`w-full h-[25rem] rounded-lg border-2 ${
           error ? 'border-quaternary' : 'border-quinary-tint-500'
         } relative overflow-hidden cursor-pointer group`}
         onClick={handleChangeImage}
@@ -41,7 +41,7 @@ const ImagePicker = ({
             <LazyImage
               src={imagePreview}
               alt="Preview"
-              className="w-full h-full object-cover transition-all duration-300 group-hover:blur-sm group-hover:brightness-50"
+              className="w-full h-full object-cover transition-all duration-300 group-hover:blur-sm group-hover:brightness-70"
             />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="flex gap-4">

@@ -57,6 +57,9 @@ class Article(TranslatableModel):
     # video url field for storing a video url for video type articles
     video_url = models.URLField(null=True, blank=True)
 
+    # Scheduled publishing date and time
+    scheduled_publish_at = models.DateTimeField(null=True, blank=True, help_text="Date and time when the article should be published automatically")
+
     # Timestamps
     created_date = jmodels.jDateTimeField(
         auto_now_add=True,

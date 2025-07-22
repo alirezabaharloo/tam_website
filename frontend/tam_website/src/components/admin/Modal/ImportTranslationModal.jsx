@@ -4,6 +4,7 @@ import { ArticleFormIcons } from '../../../data/Icons';
 
 const ImportTranslationModal = ({ isOpen, onClose, onImport }) => {
   const [htmlContent, setHtmlContent] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleImport = () => {
     onImport(htmlContent);
@@ -23,7 +24,7 @@ const ImportTranslationModal = ({ isOpen, onClose, onImport }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4"
           onClick={handleClose}
         >
           <motion.div
@@ -33,9 +34,10 @@ const ImportTranslationModal = ({ isOpen, onClose, onImport }) => {
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.3)] w-full max-w-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
+            dir="rtl"
           >
             <div className="p-6 border-b border-quinary-tint-700 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-primary">Import Translated Content</h2>
+              <h2 className="text-xl font-bold text-primary">وارد کردن محتوای ترجمه شده</h2>
               <button
                 onClick={handleClose}
                 className="text-secondary hover:text-primary transition-colors duration-300"
@@ -44,14 +46,20 @@ const ImportTranslationModal = ({ isOpen, onClose, onImport }) => {
               </button>
             </div>
             <div className="p-6">
-              <p className="text-secondary mb-4 text-left">
-                Paste the HTML content translated by the AI into the text area below. All formatting will be preserved.
+              <p className="text-secondary mb-4 text-right">
+                محتوای HTML ترجمه شده توسط هوش مصنوعی را در قسمت زیر وارد کنید. تمام قالب‌بندی حفظ خواهد شد.
               </p>
               <textarea
                 value={htmlContent}
                 onChange={(e) => setHtmlContent(e.target.value)}
-                className="w-full h-64 p-4 bg-quinary-tint-600 text-primary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300 resize-none"
-                placeholder="<p>Paste your translated HTML here...</p>"
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                className={`w-full h-64 p-4 bg-quinary-tint-600 text-primary rounded-lg border-2 transition-colors duration-300 resize-none ${
+                  isFocused 
+                    ? 'border-quaternary shadow-[0_0_0_1px_rgba(221,44,44,0.3)]' 
+                    : 'border-quinary-tint-500 focus:border-primary'
+                } outline-none`}
+                placeholder="<p>کد HTML ترجمه شده را اینجا وارد کنید...</p>"
                 dir="ltr"
               />
             </div>
@@ -60,14 +68,14 @@ const ImportTranslationModal = ({ isOpen, onClose, onImport }) => {
                 onClick={handleClose}
                 className="px-6 py-2.5 rounded-lg bg-quinary-tint-700 text-secondary hover:bg-quinary-tint-600 font-semibold transition-all duration-300"
               >
-                Cancel
+                انصراف
               </button>
               <button
                 onClick={handleImport}
                 disabled={!htmlContent}
-                className="px-8 py-2.5 rounded-lg bg-quaternary-tint-200 text-primary-text-tint-800 hover:bg-quaternary-tint-100 disabled:bg-quinary-tint-600 disabled:text-secondary disabled:cursor-not-allowed font-semibold transition-all duration-300 shadow-sm"
+                className="px-8 py-2.5 rounded-lg bg-quaternary text-quinary-tint-800 hover:bg-quaternary-tint-100 disabled:bg-quinary-tint-600 disabled:text-secondary disabled:cursor-not-allowed font-semibold transition-all duration-300 shadow-sm"
               >
-                Import Text
+                وارد کردن متن
               </button>
             </div>
           </motion.div>

@@ -60,22 +60,22 @@ services:
     volumes:
       - redis_data:/data
 
-  # celery:
-  #   container_name: celery
-  #   build:
-  #     context: .
-  #     dockerfile: ./docker/django/Dockerfile
-  #   command: celery -A core worker -l INFO
-  #   volumes:
-  #     - ./backend/tam_website:/app
-  #   depends_on:
-  #     - redis
-  #     - backend
-  #   networks:
-  #     - tam-network
-  #   restart: always
-  #   env_file:
-  #     - ./backend/tam_website/core/.env
+  celery:
+    container_name: celery
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    command: celery -A core worker -l INFO
+    volumes:
+      - ./backend/tam_website:/app
+    depends_on:
+      - redis
+      - backend
+    networks:
+      - tam-network
+    restart: always
+    env_file:
+      - ./backend/tam_website/core/.env
 
 volumes:
   tam_db_data:

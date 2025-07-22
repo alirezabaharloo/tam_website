@@ -10,6 +10,8 @@ from blog.models.article import Team, Article
 from .base import BasePagination
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
+from django.utils import timezone
+from blog.tasks import publish_scheduled_article
 
 
 class AdminArticleListView(viewsets.ReadOnlyModelViewSet):
@@ -148,6 +150,77 @@ def delete_article(request, article_id):
     except Article.DoesNotExist:
         return Response(
             {"error": "Article not found"}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {"error": str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperUser, IsAuthor])
+def schedule_article_publication(request, article_id):
+    """
+    Schedule an article for publication at a specific date and time.
+    """
+    try:
+        # Get the article
+        article = Article.objects.get(id=article_id)
+        
+        # Get the scheduled time from the request
+        scheduled_time = request.data.get('scheduled_publish_at')
+        if not scheduled_time:
+            return Response(
+                {"error": "زمان انتشار مشخص نشده است."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Convert to datetime object if it's a string
+        if isinstance(scheduled_time, str):
+            try:
+                scheduled_time = timezone.datetime.fromisoformat(scheduled_time.replace('Z', '+00:00'))
+                scheduled_time = timezone.make_aware(scheduled_time)
+            except ValueError:
+                return Response(
+                    {"error": "فرمت زمان نامعتبر است."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # Ensure the scheduled time is in the future
+        if scheduled_time <= timezone.now():
+            return Response(
+                {"error": "زمان انتشار باید در آینده باشد."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update the article's scheduled_publish_at field
+        article.scheduled_publish_at = scheduled_time
+        
+        # Only schedule if the article is in draft status
+        if article.status == Article.Status.DRAFT:
+            # Schedule the task using apply_async with eta parameter
+            publish_scheduled_article.apply_async(
+                args=[article.id],
+                eta=scheduled_time
+            )
+            
+            article.save()
+            
+            return Response(
+                {"message": f"انتشار مقاله '{article.get_title()}' برای تاریخ {scheduled_time} زمان‌بندی شد."}, 
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"error": "فقط مقالات پیش‌نویس می‌توانند زمان‌بندی شوند."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+    except Article.DoesNotExist:
+        return Response(
+            {"error": "مقاله مورد نظر یافت نشد."}, 
             status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
