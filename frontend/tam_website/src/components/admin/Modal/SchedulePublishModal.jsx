@@ -329,7 +329,7 @@ const SchedulePublishModal = ({ isOpen, onClose, articleId, onSuccess }) => {
                   </div>
                   
                   {showTimePicker && (
-                    <div className="absolute top-full left-0 right-0 mt-2 p-4 bg-quinary-tint-700 rounded-lg shadow-lg z-10 border-2 border-quinary-tint-600">
+                    <div className="absolute bottom-full left-0 right-0 mb-2 p-4 bg-quinary-tint-700 rounded-lg shadow-lg z-10 border-2 border-quinary-tint-600">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <h3 className="text-sm font-medium text-secondary mb-2 text-center">ساعت</h3>

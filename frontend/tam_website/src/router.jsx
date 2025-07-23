@@ -27,6 +27,7 @@ import Teams from './pages/admin/page/Teams';
 import TeamForm from './pages/admin/add/TeamForm';
 import EditTeamForm from './pages/admin/edit/TeamEditForm';
 import NewsForm from './pages/admin/add/NewsForm';
+import EditNewsForm from './pages/admin/edit/EditNewsForm';
 
 
 const PageTransition = ({ children }) => {
@@ -121,6 +122,7 @@ const WebsiteRoutes = () => {
           <Route path="teams/add" element={<TeamForm />} />
           <Route path="teams/edit/:teamId" element={<EditTeamForm />} />
           <Route path="news/add" element={<NewsForm />} />
+          <Route path="news/edit/:articleId" element={<EditNewsForm />} />
           <Route path="*" element={<PageNotFound />} />
         </Route>
       

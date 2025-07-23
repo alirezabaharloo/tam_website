@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import SpinLoader from '../../../pages/UI/SpinLoader';
 import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
-import { validateArticleForm, isFormValid } from '../../../validators/ArticleValidators';
+import ArticleNotFound from '../../../pages/UI/ArticleNotFound';
+import { validateArticleForm } from '../../../validators/ArticleValidators';
 import QuillEditor from '../../../components/admin/Editor/QuillEditor';
 import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
@@ -16,8 +17,11 @@ import SchedulePublishModal from '../../../components/admin/Modal/SchedulePublis
 import { ArticleFormIcons } from '../../../data/Icons';
 import { formatJalaliDateTime } from '../../../utils/dateUtils';
 
-const NewsForm = () => {
+const EditNewsForm = () => {
   const navigate = useNavigate();
+  const { articleId } = useParams();
+  const location = useLocation();
+  const isNewArticle = location.state?.newArticle || false;
   const [activeTab, setActiveTab] = useState('persian');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -26,6 +30,10 @@ const NewsForm = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [scheduledPublishDate, setScheduledPublishDate] = useState(null);
+  const [originalData, setOriginalData] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(isNewArticle);
+  const [deletedImageIds, setDeletedImageIds] = useState([]); // New state to track deleted image IDs
   
   const [tabErrors, setTabErrors] = useState({
     persian: false, 
@@ -47,6 +55,13 @@ const NewsForm = () => {
   });
   
   const {
+    data: articleDetails,
+    isLoading: articleDetailsLoading,
+    isError: articleDetailsError,
+    sendRequest: fetchArticleDetails
+  } = useAdminHttp(`http://localhost:8000/api/admin/article-detail/${articleId}/`);
+  
+  const {
     data: filterData,
     isLoading: filterLoading,
     isError: filterError
@@ -57,11 +72,107 @@ const NewsForm = () => {
     sendRequest
   } = useAdminHttp();
   
-  const [formIsComplete, setFormIsComplete] = useState(false);
-  
+  // Cargar detalles del artículo cuando el componente se monta
   useEffect(() => {
-    setFormIsComplete(isFormValid(formData));
-  }, [formData]);
+    console.log("Fetching article details for ID:", articleId);
+    fetchArticleDetails()
+      .then(response => {
+        if (response?.isError) {
+          console.error("Error fetching article details:", response.errorContent);
+          errorNotif('خطا در دریافت اطلاعات مقاله');
+        }
+      })
+      .catch(error => {
+        console.error("Exception fetching article details:", error);
+        errorNotif('خطا در ارتباط با سرور');
+      });
+    
+    // اگر مقاله جدید است، بعد از 5 ثانیه پیام خوش‌آمدگویی را حذف کن
+    if (showWelcomeMessage) {
+      const timer = setTimeout(() => {
+        setShowWelcomeMessage(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [articleId, showWelcomeMessage]);
+  
+  // Initialize formData with the data from articleDetails
+  useEffect(() => {
+    if (articleDetails) {
+      console.log("Article details received:", articleDetails);
+      
+      // Make sure team_id is properly set
+      let teamId = '';
+      if (articleDetails.team_id) {
+        teamId = articleDetails.team_id.toString();
+      } else if (articleDetails.team && typeof articleDetails.team === 'object' && articleDetails.team.id) {
+        teamId = articleDetails.team.id.toString();
+      }
+      
+      const initialFormData = {
+        title_fa: articleDetails.title_fa || '',
+        title_en: articleDetails.title_en || '',
+        body_fa: articleDetails.body_fa || '',
+        body_en: articleDetails.body_en || '',
+        team: teamId,
+        status: articleDetails.status || 'DR',
+        type: articleDetails.type || 'TX',
+        video_url: articleDetails.video_url || '',
+        main_image: null, // This will hold the new main image file if changed
+        slideshow_images: [], // This will hold *newly uploaded* slideshow files
+        scheduled_publish_at: articleDetails.scheduled_publish_at || null
+      };
+      
+      console.log("Initializing form data:", initialFormData);
+      
+      setFormData(initialFormData);
+      setOriginalData(initialFormData);
+      setDeletedImageIds([]); // Reset deleted IDs on new article load
+      
+      // Configurar imagen principal
+      if (articleDetails.main_image) {
+        setMainImagePreview(articleDetails.main_image);
+      }
+      
+      // Configurar imágenes de slideshow (now including IDs)
+      if (articleDetails.slideshow_images && articleDetails.slideshow_images.length > 0) {
+        const images = articleDetails.slideshow_images.map(img => ({
+          id: img.id, // Now we have the ID from backend
+          preview: img.url,
+          file: null, // No new file initially for existing images
+          isNew: false // Flag to differentiate new uploads
+        }));
+        setSlideshowImages(images);
+      } else {
+        setSlideshowImages([]); // Ensure it's an empty array if no images
+      }
+      
+      // Configurar fecha de publicación programada
+      if (articleDetails.scheduled_publish_at) {
+        setScheduledPublishDate(new Date(articleDetails.scheduled_publish_at));
+      }
+    }
+  }, [articleDetails]);
+  
+  // Detectar cambios en el formulario
+  useEffect(() => {
+    if (originalData) {
+      const formFieldsChanged = Object.keys(formData).some(key => {
+        if (key === 'main_image' || key === 'slideshow_images') {
+          // Handle file changes separately, check if actual files are present
+          return formData[key] !== null && (Array.isArray(formData[key]) ? formData[key].length > 0 : true);
+        }
+        return formData[key] !== originalData[key];
+      });
+      
+      const mainImageChanged = formData.main_image !== null;
+      const newSlideshowFilesExist = slideshowImages.some(img => img.file && img.isNew);
+      const existingSlideshowImagesRemoved = deletedImageIds.length > 0;
+      
+      setHasChanges(formFieldsChanged || mainImageChanged || newSlideshowFilesExist || existingSlideshowImagesRemoved);
+    }
+  }, [formData, originalData, mainImagePreview, slideshowImages, deletedImageIds]);
   
   useEffect(() => {
     const newTabErrors = {
@@ -124,12 +235,12 @@ const NewsForm = () => {
   };
 
   const handleRemoveSlideshowImage = (index) => {
+    const imageToRemove = slideshowImages[index];
+    if (imageToRemove.id) { // If it's an existing image with an ID
+      setDeletedImageIds(prev => [...prev, imageToRemove.id]);
+    }
     setSlideshowImages(prev => prev.filter((_, i) => i !== index));
-    setFormData(prev => {
-      const newSlideshowImages = [...prev.slideshow_images];
-      newSlideshowImages.splice(index, 1);
-      return { ...prev, slideshow_images: newSlideshowImages };
-    });
+    // No direct update to formData.slideshow_images here, as it only holds new files now.
   };
 
   const handleChangeSlideshowImage = (index) => {
@@ -140,16 +251,17 @@ const NewsForm = () => {
       const file = e.target.files[0];
       if (file) {
         const previewUrl = URL.createObjectURL(file);
+        const oldImage = slideshowImages[index];
+        if (oldImage.id) { // If replacing an existing image
+          setDeletedImageIds(prev => [...prev, oldImage.id]);
+        }
         setSlideshowImages(prev => {
           const newImages = [...prev];
-          newImages[index] = { file, preview: previewUrl };
+          newImages[index] = { id: null, preview: previewUrl, file: file, isNew: true }; // Mark as new
           return newImages;
         });
-        setFormData(prev => {
-          const newSlideshowImages = [...prev.slideshow_images];
-          newSlideshowImages[index] = file;
-          return { ...prev, slideshow_images: newSlideshowImages };
-        });
+        // Add the new file to formData.slideshow_images (which only tracks new files)
+        setFormData(prev => ({ ...prev, slideshow_images: [...prev.slideshow_images.filter(f => f !== oldImage.file), file] }));
       }
     };
     input.click();
@@ -157,7 +269,12 @@ const NewsForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateArticleForm(formData);
+    const validationErrors = validateArticleForm({
+      ...formData,
+      main_image: formData.main_image || mainImagePreview, // Use new file or current preview URL for validation
+      slideshow_images: slideshowImages.filter(img => !img.file).map(img => img.preview).concat(formData.slideshow_images) // All current slideshow images for validation
+    });
+    
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       if ((validationErrors.title_fa || validationErrors.body_fa) && activeTab !== 'persian') {
@@ -171,42 +288,52 @@ const NewsForm = () => {
     setIsLoading(true);
     const formDataToSend = new FormData();
     
+    // Append fields that have changed (excluding images, handled separately)
     Object.entries(formData).forEach(([key, value]) => {
       if (key !== 'main_image' && key !== 'slideshow_images') {
-        if (value !== null && value !== undefined) {
-          formDataToSend.append(key, value);
+        if (value !== originalData[key]) {
+          if (value !== null && value !== undefined) {
+            formDataToSend.append(key, value);
+          }
         }
       }
     });
     
+    // Append main image if changed
     if (formData.main_image) {
       formDataToSend.append('main_image', formData.main_image);
     }
     
-    formData.slideshow_images.forEach((image, index) => {
-      formDataToSend.append(`slideshow_image_${index}`, image);
+    // Append IDs of images to be deleted
+    if (deletedImageIds.length > 0) {
+      formDataToSend.append('deleted_image_ids', JSON.stringify(deletedImageIds));
+    }
+
+    // Append newly uploaded slideshow image files
+    const newSlideshowFiles = slideshowImages.filter(img => img.file && img.isNew).map(img => img.file);
+    newSlideshowFiles.forEach((file, index) => {
+      formDataToSend.append(`slideshow_image_${index}`, file);
     });
-    
-    formDataToSend.append('slideshow_image_count', formData.slideshow_images.length);
+    formDataToSend.append('slideshow_image_count', newSlideshowFiles.length);
 
     try {
-      const response = await sendRequest('http://localhost:8000/api/admin/article-create/', 'POST', formDataToSend);
+      console.log("Sending update request for article:", articleId);
+      console.log("FormData entries:", [...formDataToSend.entries()].map(([key, value]) => `${key}: ${value instanceof File ? value.name : value}`));
+      
+      const response = await sendRequest(`http://localhost:8000/api/admin/article-update/${articleId}/`, 'PATCH', formDataToSend);
+      
       if (response?.isError) {
+        console.error("Error response:", response.errorContent);
         setErrors(response?.errorContent || {});
-        errorNotif('خطا در ایجاد مقاله');
+        errorNotif('خطا در ویرایش مقاله');
       } else {
-        successNotif('مقاله جدید اضافه شد');
-        setTimeout(() => {
-          navigate(`/admin/news/edit/${response.id}`, { 
-            state: { 
-              newArticle: true 
-            }
-          });
-        }, 2000);
+        successNotif('مقاله با موفقیت ویرایش شد');
+        fetchArticleDetails(); // Reload article details
+        setDeletedImageIds([]); // Clear deleted IDs after successful update
       }
     } catch (error) {
-      errorNotif('خطا در ارتباط با سرور');
       console.error('Error submitting form:', error);
+      errorNotif('خطا در ارتباط با سرور');
     } finally {
       setIsLoading(false);
     }
@@ -265,11 +392,15 @@ the persian text with format is between this >>> <<<:
     }
   `;
 
-  if (filterLoading) {
+  if (articleDetailsLoading || filterLoading) {
     return <SpinLoader />;
   }
 
-  if (filterError) {
+  if (articleDetails?.errorContent?.detail === "No Article matches the given query.") {
+    return <ArticleNotFound />;
+  }
+
+  if (articleDetailsError || filterError) {
     return <SomethingWentWrong />;
   }
 
@@ -278,10 +409,32 @@ the persian text with format is between this >>> <<<:
       <style>{flashingDotCSS}</style>
       <div className="max-w-[1200px] mx-auto px-4 mt-[1rem]">
         <FormHeader
-          title="افزودن مقاله جدید"
-          subtitle="در این صفحه می توانید مقاله جدیدی ایجاد کنید"
+          title="ویرایش مقاله"
+          subtitle="در این صفحه می توانید مقاله را ویرایش کنید"
           onBack={handleBack}
         />
+        
+        {showWelcomeMessage && (
+          <motion.div 
+            className="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg shadow-md"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <div className="flex items-center">
+              <div className="flex-shrink-0 bg-green-500 rounded-full p-2">
+                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="mr-3">
+                <p className="text-lg font-medium text-green-800">مقاله با موفقیت ایجاد شد!</p>
+                <p className="text-sm text-green-700">اکنون می‌توانید جزئیات بیشتری را ویرایش کنید یا مقاله را منتشر کنید.</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+        
         <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6">
           <motion.form
             onSubmit={handleSubmit}
@@ -546,7 +699,7 @@ the persian text with format is between this >>> <<<:
               error={errors.main_image}
               label="تصویر اصلی مقاله"
             />
-            {formData.type === 'SS' && (
+                        {formData.type === 'SS' && (
               <SlideshowImages
                 images={slideshowImages}
                 onAddImage={handleSlideshowImageChange}
@@ -559,8 +712,8 @@ the persian text with format is between this >>> <<<:
               onCancel={handleBack}
               onSubmit={handleSubmit}
               isSubmitting={submitLoading}
-              isSubmitDisabled={!formIsComplete}
-              submitText="ایجاد مقاله"
+              isSubmitDisabled={!hasChanges}
+              submitText="ذخیره تغییرات"
             />
           </motion.form>
         </div>
@@ -573,11 +726,11 @@ the persian text with format is between this >>> <<<:
       <SchedulePublishModal
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
-        articleId={null} // For new articles, we'll handle scheduling in the form submission
+        articleId={articleId}
         onSuccess={handleSchedulePublication}
       />
     </div>
   );
 };
 
-export default NewsForm; 
+export default EditNewsForm;

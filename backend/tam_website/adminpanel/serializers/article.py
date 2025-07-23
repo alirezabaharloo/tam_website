@@ -13,16 +13,26 @@ class BilingualArticleSerializer(serializers.ModelSerializer):
     """
     title = serializers.SerializerMethodField()
     team = serializers.SerializerMethodField()
+    team_id = serializers.SerializerMethodField()
     hits_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     updated_date = serializers.SerializerMethodField()
     created_date = serializers.SerializerMethodField()
     scheduled_publish_at = serializers.DateTimeField(required=False, allow_null=True)
     remaining_time = serializers.SerializerMethodField()
+    title_fa = serializers.SerializerMethodField()
+    title_en = serializers.SerializerMethodField()
+    body_fa = serializers.SerializerMethodField()
+    body_en = serializers.SerializerMethodField()
+    video_url = serializers.URLField(required=False, allow_null=True)
+    main_image = serializers.SerializerMethodField()
+    slideshow_images = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
-        fields = ['id', 'title', 'status', 'type', 'team', 'hits_count', 'likes_count', 'updated_date', 'created_date', 'scheduled_publish_at', 'remaining_time']
+        fields = ['id', 'title', 'title_fa', 'title_en', 'body_fa', 'body_en', 'status', 'type', 'team', 'team_id',
+                  'hits_count', 'likes_count', 'updated_date', 'created_date', 'scheduled_publish_at', 
+                  'remaining_time', 'video_url', 'main_image', 'slideshow_images']
     
     def get_title(self, obj):
         # Get the language from request query params or default to 'fa'
@@ -40,6 +50,18 @@ class BilingualArticleSerializer(serializers.ModelSerializer):
                 return obj.safe_translation_getter('title', language_code='fa', default="")
             return obj.safe_translation_getter('title', any_language=True)
     
+    def get_title_fa(self, obj):
+        return obj.get_title(language_code='fa')
+    
+    def get_title_en(self, obj):
+        return obj.get_title(language_code='en')
+    
+    def get_body_fa(self, obj):
+        return obj.get_body(language_code='fa')
+    
+    def get_body_en(self, obj):
+        return obj.get_body(language_code='en')
+    
     def get_team(self, obj):
         if not obj.team:
             return None
@@ -56,6 +78,9 @@ class BilingualArticleSerializer(serializers.ModelSerializer):
             if obj.team.has_translation('fa'):
                 return obj.team.safe_translation_getter('name', language_code='fa', default="")
             return obj.team.safe_translation_getter('name', any_language=True)
+    
+    def get_team_id(self, obj):
+        return obj.team.id if obj.team else None
     
     def get_hits_count(self, obj):
         return obj.hits.count()
@@ -92,6 +117,41 @@ class BilingualArticleSerializer(serializers.ModelSerializer):
             return f"{hours} ساعت و {minutes} دقیقه"
         else:
             return f"{minutes} دقیقه"
+    
+    def get_main_image(self, obj):
+        """Get the main image URL for the article"""
+        images = obj.article_images.all()
+        if images.exists():
+            return images.first().image.url
+        return None
+    
+    def get_slideshow_images(self, obj):
+        """Get all slideshow images URLs and IDs for the article"""
+        # Ensure 'request' is in context for `build_absolute_uri`
+        if 'request' not in self.context:
+            return [] # Or handle error appropriately
+
+        images = obj.article_images.all()
+        if images.count() > 0:
+            main_image_url = None
+            # Assuming the first image linked to the article is the main image
+            # This logic needs to be robust. If main image is explicitly stored, use that.
+            # Otherwise, assuming `article_images` first element is main_image.
+            first_linked_image = obj.article_images.first()
+            if first_linked_image:
+                main_image_url = self.context['request'].build_absolute_uri(first_linked_image.image.url)
+
+            slideshow_data = []
+            for img_obj in images:
+                img_url = self.context['request'].build_absolute_uri(img_obj.image.url)
+                # Ensure we don't include the main image in the slideshow images list if it's distinct
+                if img_url != main_image_url:
+                    slideshow_data.append({
+                        'id': img_obj.id,
+                        'url': img_url
+                    })
+            return slideshow_data
+        return []
 
 
 class CreateArticleSerializer(serializers.Serializer):
@@ -220,3 +280,186 @@ class CreateArticleSerializer(serializers.Serializer):
             )
         
         return article
+
+
+class ArticleUpdateSerializer(serializers.Serializer):
+    """
+    Serializer for updating an existing Article with bilingual support
+    """
+    title_fa = serializers.CharField(max_length=250, required=False)
+    title_en = serializers.CharField(max_length=250, required=False)
+    body_fa = serializers.CharField(required=False)
+    body_en = serializers.CharField(required=False)
+    team = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all(), required=False)
+    status = serializers.ChoiceField(choices=Article.Status.choices, required=False)
+    type = serializers.ChoiceField(choices=Article.Type.choices, required=False)
+    video_url = serializers.URLField(required=False, allow_blank=True)
+    main_image = serializers.ImageField(required=False)
+    slideshow_image_count = serializers.IntegerField(required=False, default=0)
+    deleted_image_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        allow_empty=True
+    )
+    
+    def validate(self, data):
+        """
+        Validate that both language titles are unique (except for this article)
+        and bodies are not empty if provided.
+        Also validate the scheduled_publish_at date if provided.
+        """
+        instance = self.context.get('article_instance')
+        
+        # Check if instance exists
+        if not instance:
+            raise serializers.ValidationError({"error": "مقاله مورد نظر یافت نشد."})
+        
+        # Check if Persian title exists in other articles
+        if 'title_fa' in data:
+            fa_title_exists = False
+            for article in Article.objects.exclude(id=instance.id):
+                if article.has_translation('fa') and article.safe_translation_getter('title', language_code='fa') == data['title_fa']:
+                    fa_title_exists = True
+                    break
+            
+            if fa_title_exists:
+                raise serializers.ValidationError({"title_fa": "مقاله‌ای با این عنوان فارسی در سیستم موجود است."})
+            
+            # Check if content is empty (strip HTML tags for comparison)
+            if not strip_tags(data['title_fa']).strip():
+                raise serializers.ValidationError({"title_fa": "عنوان مقاله فارسی نمی‌تواند خالی باشد."})
+        
+        # Check if English title exists in other articles
+        if 'title_en' in data:
+            en_title_exists = False
+            for article in Article.objects.exclude(id=instance.id):
+                if article.has_translation('en') and article.safe_translation_getter('title', language_code='en') == data['title_en']:
+                    en_title_exists = True
+                    break
+            
+            if en_title_exists:
+                raise serializers.ValidationError({"title_en": "مقاله‌ای با این عنوان انگلیسی در سیستم موجود است."})
+            
+            # Check if content is empty (strip HTML tags for comparison)
+            if not strip_tags(data['title_en']).strip():
+                raise serializers.ValidationError({"title_en": "عنوان مقاله انگلیسی نمی‌تواند خالی باشد."})
+        
+        # Check if body content is empty if provided
+        if 'body_fa' in data and not strip_tags(data['body_fa']).strip():
+            raise serializers.ValidationError({"body_fa": "متن مقاله فارسی نمی‌تواند خالی باشد."})
+            
+        if 'body_en' in data and not strip_tags(data['body_en']).strip():
+            raise serializers.ValidationError({"body_en": "متن مقاله انگلیسی نمی‌تواند خالی باشد."})
+        
+        # Validate slideshow images for slideshow type articles
+        article_type = data.get('type', self.context.get('article_instance').type)
+        if article_type == Article.Type.SLIDE_SHOW:
+            # Get existing slideshow images that are not marked for deletion
+            existing_slideshow_images_kept = self.context.get('article_instance').article_images.exclude(
+                id__in=data.get('deleted_image_ids', [])
+            )
+            # Filter out the main image from `existing_slideshow_images_kept` if it's there
+            # Assuming main image is the first one.
+            main_image_obj = self.context.get('article_instance').article_images.first()
+            if main_image_obj:
+                existing_slideshow_images_kept = existing_slideshow_images_kept.exclude(id=main_image_obj.id)
+                
+            new_slideshow_image_count = data.get('slideshow_image_count', 0)
+            
+            if new_slideshow_image_count == 0 and existing_slideshow_images_kept.count() == 0:
+                raise serializers.ValidationError({"slideshow_images": "لطفا حداقل یک تصویر برای اسلایدشو انتخاب کنید."})
+        
+        # Validate scheduled_publish_at if provided
+        if data.get('scheduled_publish_at') and (data.get('status', instance.status) == Article.Status.DRAFT):
+            # Ensure the scheduled date is in the future
+            if data['scheduled_publish_at'] <= timezone.now():
+                raise serializers.ValidationError({"scheduled_publish_at": "زمان انتشار باید در آینده باشد."})
+            
+        return data
+    
+    def update(self, instance, validated_data):
+        """
+        Update an existing article with translations
+        """
+        # Update basic fields if provided
+        if 'team' in validated_data:
+            instance.team = validated_data.get('team')
+        
+        if 'status' in validated_data:
+            instance.status = validated_data.get('status')
+        
+        if 'type' in validated_data:
+            instance.type = validated_data.get('type')
+        
+        if 'video_url' in validated_data:
+            instance.video_url = validated_data.get('video_url', '')
+        
+        if 'scheduled_publish_at' in validated_data:
+            scheduled_publish_at = validated_data.get('scheduled_publish_at')
+            instance.scheduled_publish_at = scheduled_publish_at
+            
+            # Schedule publication if needed
+            if scheduled_publish_at and instance.status == Article.Status.DRAFT:
+                from blog.tasks import publish_scheduled_article
+                # Use apply_async with the eta parameter to schedule the task
+                publish_scheduled_article.apply_async(
+                    args=[instance.id],
+                    eta=scheduled_publish_at
+                )
+        
+        # Update translations if provided
+        if 'title_fa' in validated_data or 'body_fa' in validated_data:
+            instance.set_current_language('fa')
+            if 'title_fa' in validated_data:
+                instance.title = validated_data.get('title_fa')
+            if 'body_fa' in validated_data:
+                instance.body = validated_data.get('body_fa')
+            instance.save()
+        
+        if 'title_en' in validated_data or 'body_en' in validated_data:
+            instance.set_current_language('en')
+            if 'title_en' in validated_data:
+                instance.title = validated_data.get('title_en')
+            if 'body_en' in validated_data:
+                instance.body = validated_data.get('body_en')
+            instance.save()
+        
+        # Update main image if provided
+        if 'main_image' in validated_data:
+            main_image = validated_data.get('main_image')
+            # Get the first image (main image) or create a new one
+            main_image_obj = instance.article_images.first()
+            if main_image_obj:
+                # Update existing main image
+                main_image_obj.image = main_image
+                main_image_obj.save()
+            else:
+                # Create new main image
+                main_image_obj = Image.objects.create(image=main_image)
+                main_image_obj.article.add(instance)
+        
+        # Handle deleted slideshow images
+        deleted_image_ids = validated_data.pop('deleted_image_ids', [])
+        for img_id in deleted_image_ids:
+            try:
+                image_obj = Image.objects.get(id=img_id)
+                instance.article_images.remove(image_obj) # Remove the ManyToMany relationship
+                # Optionally, delete the Image object itself if it's no longer linked to any article
+                if image_obj.article.count() == 0:
+                    image_obj.delete() # This deletes the file from storage
+            except Image.DoesNotExist:
+                pass # Image already deleted or never existed
+
+        # Add new slideshow images (files sent via request.FILES)
+        new_slideshow_image_count = validated_data.get('slideshow_image_count', 0)
+        for i in range(new_slideshow_image_count):
+            file_key = f'slideshow_image_{i}'
+            if file_key in self.context['request'].FILES:
+                slideshow_image_file = self.context['request'].FILES[file_key]
+                slideshow_image_obj = Image.objects.create(image=slideshow_image_file)
+                slideshow_image_obj.article.add(instance)
+        
+        # Save the instance
+        instance.save()
+        
+        return instance

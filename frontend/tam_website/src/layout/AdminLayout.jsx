@@ -34,7 +34,7 @@ const AdminLayout = () => {
         // Users route: only superuser can access
         setHasRouteAccess(userData.is_superuser === true);
       } 
-      else if (currentPath.includes('/admin/news')) {
+      else if (currentPath.includes('/admin/news') || currentPath.includes('/admin/news/edit')) {
         // News route: superuser OR author can access
         setHasRouteAccess(userData.is_superuser === true || userData.is_author === true);
       }

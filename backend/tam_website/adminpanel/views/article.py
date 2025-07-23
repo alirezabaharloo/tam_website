@@ -1,6 +1,6 @@
 from rest_framework.generics import *
 from rest_framework.response import Response
-from ..serializers.article import BilingualArticleSerializer, CreateArticleSerializer
+from ..serializers.article import BilingualArticleSerializer, CreateArticleSerializer, ArticleUpdateSerializer
 from permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
 from ..filters import ArticleFilter
@@ -55,7 +55,10 @@ class CreateArticleView(CreateAPIView):
         if serializer.is_valid():
             article = serializer.save()
             return Response(
-                {"message": "مقاله جدید با موفقیت ایجاد شد."},
+                {
+                    "message": "مقاله جدید با موفقیت ایجاد شد.",
+                    "id": article.id
+                },
                 status=status.HTTP_201_CREATED
             )
         else:
@@ -73,6 +76,56 @@ class ArticleDetailView(RetrieveAPIView):
     serializer_class = BilingualArticleSerializer
     permission_classes = [IsSuperUser, IsAuthor]
     lookup_url_kwarg = 'article_id'
+
+
+class UpdateArticleView(UpdateAPIView):
+    """
+    View for updating an existing article
+    """
+    queryset = Article.objects.all()
+    serializer_class = ArticleUpdateSerializer
+    permission_classes = [IsSuperUser, IsAuthor]
+    lookup_url_kwarg = 'article_id'
+    
+    def get_serializer_context(self):
+        """
+        Add article instance to serializer context
+        """
+        context = super().get_serializer_context()
+        context['article_instance'] = self.get_object()
+        return context
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Update the article with bilingual support
+        """
+        partial = kwargs.pop('partial', True)  # Always use partial updates
+        instance = self.get_object()
+        
+        # Make sure instance is not None
+        if not instance:
+            return Response(
+                {"error": "مقاله مورد نظر یافت نشد."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Add instance to context
+        context = self.get_serializer_context()
+        context['article_instance'] = instance
+        
+        serializer = self.serializer_class(instance, data=request.data, partial=partial, context=context)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "مقاله با موفقیت بروزرسانی شد."},
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class ArticleFilterDataView(APIView):
@@ -180,11 +233,14 @@ def schedule_article_publication(request, article_id):
         # Convert to datetime object if it's a string
         if isinstance(scheduled_time, str):
             try:
-                scheduled_time = timezone.datetime.fromisoformat(scheduled_time.replace('Z', '+00:00'))
+                # Replace 'Z' with a proper UTC offset if needed, but fromisoformat should handle 'Z' in recent Python versions
+                # If still problematic, try: scheduled_time = scheduled_time.replace('Z', '+00:00') if scheduled_time.endswith('Z') else scheduled_time
+                scheduled_time = timezone.datetime.fromisoformat(scheduled_time) # Simplified, fromisoformat handles 'Z' since Python 3.7
                 scheduled_time = timezone.make_aware(scheduled_time)
-            except ValueError:
+            except ValueError as e:
+                print(f"DEBUG: ValueError during fromisoformat for: '{scheduled_time}' - Error: {e}") # New debug line
                 return Response(
-                    {"error": "فرمت زمان نامعتبر است."}, 
+                    {"error": "فرمت زمان نامعتبر است."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
         
@@ -224,6 +280,7 @@ def schedule_article_publication(request, article_id):
             status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
+        print(f"DEBUG: Exception in schedule_article_publication: {e}") # New debug line
         return Response(
             {"error": str(e)}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
