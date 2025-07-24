@@ -369,11 +369,7 @@ class ArticleUpdateSerializer(serializers.Serializer):
             if new_slideshow_image_count == 0 and existing_slideshow_images_kept.count() == 0:
                 raise serializers.ValidationError({"slideshow_images": "لطفا حداقل یک تصویر برای اسلایدشو انتخاب کنید."})
         
-        # Validate scheduled_publish_at if provided
-        if data.get('scheduled_publish_at') and (data.get('status', instance.status) == Article.Status.DRAFT):
-            # Ensure the scheduled date is in the future
-            if data['scheduled_publish_at'] <= timezone.now():
-                raise serializers.ValidationError({"scheduled_publish_at": "زمان انتشار باید در آینده باشد."})
+        # Removed scheduled_publish_at validation from here, it will be handled in update method
             
         return data
     
@@ -394,18 +390,25 @@ class ArticleUpdateSerializer(serializers.Serializer):
         if 'video_url' in validated_data:
             instance.video_url = validated_data.get('video_url', '')
         
+        # Handle scheduled_publish_at and schedule Celery task
         if 'scheduled_publish_at' in validated_data:
             scheduled_publish_at = validated_data.get('scheduled_publish_at')
-            instance.scheduled_publish_at = scheduled_publish_at
-            
-            # Schedule publication if needed
-            if scheduled_publish_at and instance.status == Article.Status.DRAFT:
+            # If scheduled_publish_at is provided, check if it's in the future and schedule the task
+            if scheduled_publish_at and (validated_data.get('status', instance.status) == Article.Status.DRAFT):
+                if scheduled_publish_at <= timezone.now():
+                    raise serializers.ValidationError({"scheduled_publish_at": "زمان انتشار باید در آینده باشد."})
+                instance.scheduled_publish_at = scheduled_publish_at
                 from blog.tasks import publish_scheduled_article
-                # Use apply_async with the eta parameter to schedule the task
                 publish_scheduled_article.apply_async(
                     args=[instance.id],
                     eta=scheduled_publish_at
                 )
+            else:
+                # If scheduled_publish_at is set to null or not provided and status is not DRAFT, clear it
+                instance.scheduled_publish_at = None
+        elif instance.scheduled_publish_at and (validated_data.get('status', instance.status) != Article.Status.DRAFT):
+            # If existing scheduled_publish_at is present but status changed from DRAFT, clear it
+            instance.scheduled_publish_at = None
         
         # Update translations if provided
         if 'title_fa' in validated_data or 'body_fa' in validated_data:

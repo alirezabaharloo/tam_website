@@ -22,6 +22,8 @@
     "react-quill": "^2.0.0",
     "react-router-dom": "^7.6.0",
     "react-toastify": "^11.0.5",
+    "jalaali-js": "^1.2.8",
+    "react-persian-calendar-date-picker": "^1.1.6",
     "tailwindcss": "^4.1.6"
   },
   "devDependencies": {

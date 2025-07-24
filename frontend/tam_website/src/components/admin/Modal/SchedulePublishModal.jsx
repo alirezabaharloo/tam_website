@@ -213,29 +213,12 @@ const SchedulePublishModal = ({ isOpen, onClose, articleId, onSuccess }) => {
       }
       
       // برای مقاله‌های جدید، فقط تاریخ را به کامپوننت والد برمی‌گردانیم
-      if (articleId === null) {
-        onSuccess && onSuccess(gregorianDate);
-        successNotif('زمان‌بندی انتشار مقاله با موفقیت تنظیم شد.');
-        onClose();
-        return;
-      }
+      onSuccess && onSuccess(gregorianDate);
+      successNotif('زمان‌بندی انتشار مقاله با موفقیت تنظیم شد.');
+      onClose();
       
-      // برای مقاله‌های موجود، درخواست API ارسال می‌کنیم
-      const response = await sendRequest(
-        `http://localhost:8000/api/admin/article-schedule/${articleId}/`,
-        'POST',
-        { scheduled_publish_at: gregorianDate.toISOString() }
-      );
-      
-      if (response?.isError) {
-        errorNotif(response?.errorContent?.error || 'خطا در زمان‌بندی انتشار مقاله');
-      } else {
-        successNotif('زمان‌بندی انتشار مقاله با موفقیت انجام شد.');
-        onSuccess && onSuccess(gregorianDate);
-        onClose();
-      }
     } catch (error) {
-      errorNotif('خطا در ارتباط با سرور');
+      errorNotif('خطا در ارتباط با سرور'); // This error won't be from API anymore, but from local date processing
       console.error('Error scheduling article:', error);
     }
   };

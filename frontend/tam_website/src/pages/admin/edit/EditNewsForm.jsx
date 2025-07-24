@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import SpinLoader from '../../../pages/UI/SpinLoader';
@@ -20,8 +20,6 @@ import { formatJalaliDateTime } from '../../../utils/dateUtils';
 const EditNewsForm = () => {
   const navigate = useNavigate();
   const { articleId } = useParams();
-  const location = useLocation();
-  const isNewArticle = location.state?.newArticle || false;
   const [activeTab, setActiveTab] = useState('persian');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -32,7 +30,6 @@ const EditNewsForm = () => {
   const [scheduledPublishDate, setScheduledPublishDate] = useState(null);
   const [originalData, setOriginalData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
-  const [showWelcomeMessage, setShowWelcomeMessage] = useState(isNewArticle);
   const [deletedImageIds, setDeletedImageIds] = useState([]); // New state to track deleted image IDs
   
   const [tabErrors, setTabErrors] = useState({
@@ -86,16 +83,7 @@ const EditNewsForm = () => {
         console.error("Exception fetching article details:", error);
         errorNotif('خطا در ارتباط با سرور');
       });
-    
-    // اگر مقاله جدید است، بعد از 5 ثانیه پیام خوش‌آمدگویی را حذف کن
-    if (showWelcomeMessage) {
-      const timer = setTimeout(() => {
-        setShowWelcomeMessage(false);
-      }, 5000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [articleId, showWelcomeMessage]);
+  }, [articleId]);
   
   // Initialize formData with the data from articleDetails
   useEffect(() => {
@@ -303,10 +291,11 @@ const EditNewsForm = () => {
     if (formData.main_image) {
       formDataToSend.append('main_image', formData.main_image);
     }
-    
     // Append IDs of images to be deleted
     if (deletedImageIds.length > 0) {
-      formDataToSend.append('deleted_image_ids', JSON.stringify(deletedImageIds));
+      deletedImageIds.forEach(id => {
+        formDataToSend.append('deleted_image_ids', id); // Append each ID separately
+      });
     }
 
     // Append newly uploaded slideshow image files
@@ -315,7 +304,7 @@ const EditNewsForm = () => {
       formDataToSend.append(`slideshow_image_${index}`, file);
     });
     formDataToSend.append('slideshow_image_count', newSlideshowFiles.length);
-
+    console.log(formDataToSend);
     try {
       console.log("Sending update request for article:", articleId);
       console.log("FormData entries:", [...formDataToSend.entries()].map(([key, value]) => `${key}: ${value instanceof File ? value.name : value}`));
@@ -329,6 +318,7 @@ const EditNewsForm = () => {
       } else {
         successNotif('مقاله با موفقیت ویرایش شد');
         fetchArticleDetails(); // Reload article details
+        setErrors({});
         setDeletedImageIds([]); // Clear deleted IDs after successful update
       }
     } catch (error) {
@@ -378,6 +368,8 @@ the persian text with format is between this >>> <<<:
   const handleSchedulePublication = (scheduledDate) => {
     setScheduledPublishDate(scheduledDate);
     setFormData(prev => ({ ...prev, scheduled_publish_at: scheduledDate.toISOString() }));
+    // Force re-evaluation of hasChanges
+    setHasChanges(true); // Manually set to true to enable "Save Changes" button
   };
 
   const tabs = [
@@ -404,6 +396,7 @@ the persian text with format is between this >>> <<<:
     return <SomethingWentWrong />;
   }
 
+
   return (
     <div className="min-h-screen bg-quinary-tint-600">
       <style>{flashingDotCSS}</style>
@@ -413,27 +406,6 @@ the persian text with format is between this >>> <<<:
           subtitle="در این صفحه می توانید مقاله را ویرایش کنید"
           onBack={handleBack}
         />
-        
-        {showWelcomeMessage && (
-          <motion.div 
-            className="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg shadow-md"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-          >
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-green-500 rounded-full p-2">
-                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div className="mr-3">
-                <p className="text-lg font-medium text-green-800">مقاله با موفقیت ایجاد شد!</p>
-                <p className="text-sm text-green-700">اکنون می‌توانید جزئیات بیشتری را ویرایش کنید یا مقاله را منتشر کنید.</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
         
         <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6">
           <motion.form
@@ -699,7 +671,7 @@ the persian text with format is between this >>> <<<:
               error={errors.main_image}
               label="تصویر اصلی مقاله"
             />
-                        {formData.type === 'SS' && (
+            {formData.type === 'SS' && (
               <SlideshowImages
                 images={slideshowImages}
                 onAddImage={handleSlideshowImageChange}

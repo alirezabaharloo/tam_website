@@ -197,12 +197,8 @@ const NewsForm = () => {
       } else {
         successNotif('مقاله جدید اضافه شد');
         setTimeout(() => {
-          navigate(`/admin/news/edit/${response.id}`, { 
-            state: { 
-              newArticle: true 
-            }
-          });
-        }, 2000);
+          navigate(`/admin/news/edit/${response.id}`);
+        }, 1500);
       }
     } catch (error) {
       errorNotif('خطا در ارتباط با سرور');

@@ -40,7 +40,6 @@ urlpatterns = [
     path('article-detail/<int:article_id>/', views.ArticleDetailView.as_view(), name='article-detail'),
     path('article-update/<int:article_id>/', views.UpdateArticleView.as_view(), name='article-update'),
     path('article-delete/<int:article_id>/', views.delete_article, name='article-delete'),
-    path('article-schedule/<int:article_id>/', views.schedule_article_publication, name='article-schedule'),
 ]
 
 urlpatterns += router.urls
