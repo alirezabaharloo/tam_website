@@ -6,46 +6,36 @@ from blog.models.partial import Player
 from blog.models.article import Team, Article
 
 class UserFilter(filters.FilterSet):
-    type = filters.CharFilter(method='filter_type')
+    user_type = filters.CharFilter(method='filter_user_type')
     search = filters.CharFilter(method='filter_search')
+    is_active = filters.BooleanFilter(field_name='is_active')
 
     class Meta:
         model = User
-        fields = ['type', 'search']
+        fields = ['user_type', 'search', 'is_active']
 
-    def filter_type(self, queryset, name, value):
-        if value == 'is_admin':
+    def filter_user_type(self, queryset, name, value):
+        if value == 'is_superuser':
             return queryset.filter(is_superuser=True)
         elif value == 'is_author':
             return queryset.filter(is_author=True)
         elif value == 'is_seller':
             return queryset.filter(is_seller=True)
+        elif value == 'normal': # New condition for normal users
+            return queryset.filter(is_superuser=False, is_author=False, is_seller=False)
         return queryset
 
     def filter_search(self, queryset, name, value):
-        if value:
-            try:
-                # Use 'simple' config for Persian/English fallback
-                config = 'simple'
-                # Create search vectors for all relevant fields
-                phone_vector = SearchVector('phone_number', weight='A', config=config)
-                first_name_vector = SearchVector('user_profile__first_name', weight='B', config=config)
-                last_name_vector = SearchVector('user_profile__last_name', weight='B', config=config)
-                search_vector = phone_vector + first_name_vector + last_name_vector
-                search_query = SearchQuery(value, config=config)
-                return queryset.annotate(
-                    rank=SearchRank(search_vector, search_query)
-                ).filter(
-                    rank__gt=0.3
-                ).order_by('-rank', '-created_date').distinct()
-            except Exception:
-                # Fallback to icontains search
-                return queryset.filter(
-                    Q(phone_number__icontains=value) |
-                    Q(user_profile__first_name__icontains=value) |
-                    Q(user_profile__last_name__icontains=value)
-                ).distinct()
-        return queryset
+        if not value:
+            return queryset
+        
+        search_words = value.split()
+        query = Q()
+        for word in search_words:
+            query &= (Q(phone_number__icontains=word) |
+                      Q(user_profile__first_name__icontains=word) |
+                      Q(user_profile__last_name__icontains=word))
+        return queryset.filter(query).distinct()
 
 
 class PlayerFilter(filters.FilterSet):

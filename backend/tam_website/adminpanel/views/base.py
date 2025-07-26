@@ -2,6 +2,7 @@ from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from ..serializers.user import AdminAccessUserSerializer # Import the new serializer
 from ..serializers import *
 from rest_framework.decorators import api_view, permission_classes
 from accounts.models import User
@@ -22,8 +23,9 @@ def check_admin_access(request):
     is_author = request.user.is_author
     is_seller = request.user.is_seller
     if is_admin or is_author or is_seller:
-        return Response("Access granted.", status=status.HTTP_200_OK)
-    return Response('Access denied.', status=status.HTTP_403_FORBIDDEN)
+        serializer = AdminAccessUserSerializer(request.user)
+        return Response({'detail': "Access granted.", 'user': serializer.data}, status=status.HTTP_200_OK)
+    return Response({'detail': 'Access denied.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 @api_view(['GET'])

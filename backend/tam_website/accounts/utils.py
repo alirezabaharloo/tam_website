@@ -4,11 +4,23 @@ from django.contrib.auth.password_validation import validate_password
 
 def permission_detector(**kwargs):
     user_permissions = []
-    for perm, perm_bool  in kwargs.items():
-        if perm_bool:
-            user_permissions.append(perm)
+    permissions_map = {
+        'admin': 'ادمین',
+        'author': 'نویسنده',
+        'seller': 'فروشنده',
+    }
 
-    return ','.join([perm for perm in user_permissions]) if user_permissions else 'normal'
+    # Check for superuser first as it's the highest privilege
+    if kwargs.get('admin', False):
+        user_permissions.append(permissions_map['admin'])
+    
+    if kwargs.get('author', False):
+        user_permissions.append(permissions_map['author'])
+    
+    if kwargs.get('seller', False):
+        user_permissions.append(permissions_map['seller'])
+
+    return user_permissions if user_permissions else ['کاربر عادی']
 
 
 

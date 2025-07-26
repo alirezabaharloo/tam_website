@@ -16,10 +16,10 @@ urlpatterns = [
     path('admin-dashboard-data/', views.dashboard_stats_view, name='dashboard-stats'),
     
     # User management
-    path('user-list/', views.user_list_view, name='user-list'),
-    path('user-detail/<int:id>/', views.user_detail_view, name='user-detail'),
-    path('user-permissions-list/', views.user_permissions_list_view, name='user-permissions-list'),
-    
+    path('users/', views.AdminUserListView.as_view(), name='admin-user-list'),
+    path('user-filter-data/', views.UserFilterDataView.as_view(), name='user-filter-data'),
+    path('user-deactivate/<int:id>/', views.UserDeactivateView.as_view(), name='user-deactivate'),
+
     # Player management
     path('player-positions/', views.PlayerPositionsView.as_view(), name='player-positions'),
     path('player-delete/<int:player_id>/', views.delete_player, name='player-delete'),

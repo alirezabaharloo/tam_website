@@ -30,7 +30,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     user_permissions_ = {
         "is_author": "نویسنده",
         "is_seller": "فروشنده",
-        "is_superuser": "ادمین"
+        "is_superuser": "ادمین",
+        "normal": "کاربر عادی"
     }
 
     # manager

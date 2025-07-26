@@ -2,7 +2,6 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
-import useAuthHttp from '../hooks/useAuthHttp';
 import SpinLoader from '../pages/UI/SpinLoader';
 import PageNotFound from '../pages/UI/PageNotFound';
 import { AdminIcons } from '../data/Icons';
@@ -11,40 +10,33 @@ import SomethingWentWrong from '../pages/UI/SomethingWentWrong';
 import AccessDenied from '../pages/UI/AccessDenied';
 
 const AdminLayout = () => {
-  const { isAdminPannelAccess, logout } = useAuth();
+  const { isAdminPannelAccess, logout, user } = useAuth(); // Get user from AuthContext
   const navigate = useNavigate();
   const location = useLocation();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [hasRouteAccess, setHasRouteAccess] = useState(true);
 
-  // گرفتن اطلاعات کاربر
-  const {
-    data: userData,
-    isLoading: userLoading,
-    isError: userError
-  } = useAuthHttp(`http://${domainUrl}:8000/api/auth/user/`);
-
   // بررسی دسترسی کاربر به مسیر فعلی
   useEffect(() => {
-    if (userData) {
+    if (user) {
       const currentPath = location.pathname;
       
       // تعریف قوانین دسترسی برای هر مسیر
       if (currentPath.includes('/admin/users')) {
         // Users route: only superuser can access
-        setHasRouteAccess(userData.is_superuser === true);
+        setHasRouteAccess(user.is_superuser === true);
       } 
       else if (currentPath.includes('/admin/news') || currentPath.includes('/admin/news/edit')) {
         // News route: superuser OR author can access
-        setHasRouteAccess(userData.is_superuser === true || userData.is_author === true);
+        setHasRouteAccess(user.is_superuser === true || user.is_author === true);
       }
       else if (currentPath.includes('/admin/shop')) {
         // Shop route: superuser OR seller can access
-        setHasRouteAccess(userData.is_superuser === true || userData.is_seller === true);
+        setHasRouteAccess(user.is_superuser === true || user.is_seller === true);
       }
       else if (currentPath.includes('/admin/players')) {
         // Players route: superuser OR author can access
-        setHasRouteAccess(userData.is_superuser === true || userData.is_author === true);
+        setHasRouteAccess(user.is_superuser === true || user.is_author === true);
       }
       else if (currentPath === '/admin' || currentPath === '/admin/') {
         // Dashboard route: anyone with admin panel access can access
@@ -55,11 +47,11 @@ const AdminLayout = () => {
         setHasRouteAccess(true);
       }
     }
-  }, [location.pathname, userData]);
+  }, [location.pathname, user]); // Depend on user instead of userData
 
   // تعیین تب‌ها بر اساس سطح دسترسی
   const getTabs = () => {
-    if (!userData) return [];
+    if (!user) return [];
     
     const tabs = [];
     
@@ -67,26 +59,26 @@ const AdminLayout = () => {
     tabs.push({ id: 'dashboard', label: 'داشبورد', icon: AdminIcons.Dashboard, path: '/admin' });
     
     // Users tab - only for superusers
-    if (userData.is_superuser === true) {
+    if (user.is_superuser === true) {
       tabs.push({ id: 'users', label: 'کاربران', icon: AdminIcons.Users, path: '/admin/users' });
     }
     
     // News tab - for superusers OR authors
-    if (userData.is_superuser === true || userData.is_author === true) {
+    if (user.is_superuser === true || user.is_author === true) {
       tabs.push({ id: 'news', label: 'اخبار', icon: AdminIcons.News, path: '/admin/news' });
     }
     
     // Shop tab - for superusers OR sellers
-    if (userData.is_superuser === true || userData.is_seller === true) {
+    if (user.is_superuser === true || user.is_seller === true) {
       tabs.push({ id: 'shop', label: 'فروشگاه', icon: AdminIcons.Shop, path: '/admin/shop' });
     }
     
     // Players tab - for superusers OR authors
-    if (userData.is_superuser === true || userData.is_author === true) {
+    if (user.is_superuser === true || user.is_author === true) {
       tabs.push({ id: 'players', label: 'بازیکن‌ها', icon: AdminIcons.Teams, path: '/admin/players' });
     }
     // Teams tab - for superusers OR authors
-    if (userData.is_superuser === true || userData.is_author === true) {
+    if (user.is_superuser === true || user.is_author === true) {
       tabs.push({ id: 'teams', label: 'تیم‌ها', icon: AdminIcons.Teams, path: '/admin/teams' });
     }
     
@@ -116,7 +108,7 @@ const AdminLayout = () => {
   };
 
   
-  if (isAdminPannelAccess === null || userLoading) {
+  if (isAdminPannelAccess === null || user === null) { // Change userLoading to user === null
     return <SpinLoader />;
   }
 
@@ -124,9 +116,9 @@ const AdminLayout = () => {
     return <PageNotFound />;
   }
 
-  if (userError) {
-    return <SomethingWentWrong />
-  }
+  // if (userError) { // userError is not needed anymore as we are not using useAuthHttp
+  //   return <SomethingWentWrong />
+  // }
 
   return (
     <div className="flex h-screen bg-quinary-tint-600">
@@ -167,22 +159,22 @@ const AdminLayout = () => {
             <div className="flex-1 text-right">
               <p className="text-sm font-medium text-secondary">خوش آمدید،</p>
               <p className="text-lg font-semibold text-primary">
-                {(userData?.first_name && userData?.last_name) 
-                  ? `${userData.first_name} ${userData.last_name}` 
-                  : userData?.phone_number}
+                {(user?.first_name && user?.last_name) 
+                  ? `${user.first_name} ${user.last_name}` 
+                  : user?.phone_number}
               </p>
               <div className="flex gap-2 mt-2">
-                {userData?.is_superuser && (
+                {user?.is_superuser && (
                   <span className="px-2 py-1 rounded-full bg-quaternary text-quinary-tint-800 text-xs font-semibold">
                     ادمین
                   </span>
                 )}
-                {userData?.is_author && (
+                {user?.is_author && (
                   <span className="px-2 py-1 rounded-full bg-quaternary text-quinary-tint-800 text-xs font-semibold">
                     نویسنده
                   </span>
                 )}
-                {userData?.is_seller && (
+                {user?.is_seller && (
                   <span className="px-2 py-1 rounded-full bg-quaternary text-quinary-tint-800 text-xs font-semibold">
                     فروشنده
                   </span>

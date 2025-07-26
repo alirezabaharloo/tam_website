@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [ isAdminPannelAccess, setIsAdminPannelAccess ] = useState(null);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
 
@@ -48,6 +49,8 @@ export const AuthProvider = ({ children }) => {
         const storedTokens = localStorage.getItem('tokens');
         if (!storedTokens || !isAuthenticated) {
           if (isMounted) setIsAdmin(false);
+          if (isMounted) setIsAdminPannelAccess(false);
+          if (isMounted) setUser(null);
           return;
         }
 
@@ -64,14 +67,20 @@ export const AuthProvider = ({ children }) => {
 
         if (response.status === 403) {
           setIsAdminPannelAccess(false);
+          setUser(null);
         } else if (response.ok) {
+          const data = await response.json();
           setIsAdminPannelAccess(true);
+          setUser(data.user);
         } else {
           setIsAdminPannelAccess(false);
+          setUser(null);
         }
       } catch (error) {
         console.error('Error checking admin access:', error);
         if (isMounted) setIsAdmin(false);
+        if (isMounted) setIsAdminPannelAccess(false);
+        if (isMounted) setUser(null);
       }
     };
 
@@ -143,6 +152,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('tokens');
     setIsAuthenticated(false);
     setIsAdmin(false);
+    setUser(null);
     navigate('/login');
   };
 
@@ -192,6 +202,7 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated,
       isAdminPannelAccess,
       isAdmin,
+      user,
     }}>
       {children}
     </AuthContext.Provider>
