@@ -3,13 +3,13 @@ import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import PlayerNotFound from '../../../pages/UI/PlayerNotFound';
-import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
+import PlayerNotFound from '../../UI/PlayerNotFound';
+import SomethingWentWrong from '../../UI/SomethingWentWrong';
 import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
 import FormActions from '../../../components/UI/FormActions';
 
-const PlayerEditForm = () => {
+const EditPlayerForm = () => {
   const navigate = useNavigate();
   const { playerId } = useParams();
   const [activeTab, setActiveTab] = useState('persian');
@@ -388,4 +388,4 @@ const PlayerEditForm = () => {
   );
 };
 
-export default PlayerEditForm; 
+export default EditPlayerForm; 

@@ -20,7 +20,8 @@ import AdminNews from './pages/admin/page/News';
 import AdminShop from './pages/admin/page/Shop';
 import Players from './pages/admin/page/Players';
 import PlayerForm from './pages/admin/add/PlayerForm';
-import PlayerEditForm from './pages/admin/edit/PlayerEditForm';
+import EditPlayerForm from './pages/admin/edit/EditPlayerForm';
+import EditUserForm from './pages/admin/edit/EditUserForm'; // New import
 // import UserForm from './pages/admin/UserForm';
 import PreRegister from './pages/blog/PreRegister';
 import Teams from './pages/admin/page/Teams';
@@ -116,9 +117,10 @@ const WebsiteRoutes = () => {
           <Route path="news" element={<AdminNews />} />
           <Route path="shop" element={<AdminShop />} />
           <Route path="players" element={<Players />} />
-          <Route path="teams" element={<Teams />} />
           <Route path="players/add" element={<PlayerForm />} />
-          <Route path="players/edit/:playerId" element={<PlayerEditForm />} />
+          <Route path="players/edit/:playerId" element={<EditPlayerForm />} />
+          <Route path="users/edit/:userId" element={<EditUserForm />} />
+          <Route path="teams" element={<Teams />} />
           <Route path="teams/add" element={<TeamForm />} />
           <Route path="teams/edit/:teamId" element={<EditTeamForm />} />
           <Route path="news/add" element={<NewsForm />} />

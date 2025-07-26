@@ -2,7 +2,7 @@ from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from ..serializers.user import UserListSerializer, UserDeactivateSerializer
+from ..serializers.user import UserListSerializer, UserDeactivateSerializer, UserDetailSerializer, UserUpdateSerializer, UserChangePasswordSerializer
 from rest_framework.views import APIView
 from accounts.models import User
 from permissions import IsSuperUser
@@ -26,6 +26,34 @@ class UserFilterDataView(APIView):
     def get(self, request):
         user_permissions = User.get_user_permissions_dict()
         return Response({'user_permissions': user_permissions}, status=status.HTTP_200_OK)
+
+
+class AdminUserDetailView(RetrieveAPIView):
+    serializer_class = UserDetailSerializer
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    queryset = User.objects.all()
+    lookup_field = 'id'
+
+
+class AdminUserUpdateView(UpdateAPIView):
+    serializer_class = UserUpdateSerializer
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    queryset = User.objects.all()
+    lookup_field = 'id'
+
+
+class AdminUserChangePasswordView(UpdateAPIView):
+    serializer_class = UserChangePasswordSerializer
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    queryset = User.objects.all()
+    lookup_field = 'id'
+
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=user)
+        return Response({'detail': 'گذرواژه با موفقیت تغییر کرد.'}, status=status.HTTP_200_OK)
 
 
 class UserDeactivateView(UpdateAPIView):

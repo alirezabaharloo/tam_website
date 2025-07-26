@@ -59,6 +59,22 @@ export const formatJalaliDateTime = (date) => {
 };
 
 /**
+ * Format a Gregorian date and time as a string (YYYY/MM/DD - HH:MM) with English numbers
+ * @param {Date} date - JavaScript Date object
+ * @returns {string} - Formatted Gregorian date and time string (e.g., "2023/10/27 - 14:30")
+ */
+export const formatGregorianDateTime = (date) => {
+  if (!date) return '-';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  return `${year}/${month}/${day} - ${hours}:${minutes}`;
+};
+
+/**
  * Calculate the remaining time until a future date
  * @param {Date} futureDate - Future JavaScript Date object
  * @returns {string} - Formatted remaining time in Persian (e.g., "3 روز و 5 ساعت و 20 دقیقه")
