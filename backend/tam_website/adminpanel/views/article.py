@@ -1,7 +1,6 @@
 from rest_framework.generics import *
 from rest_framework.response import Response
 from ..serializers.article import BilingualArticleSerializer, CreateArticleSerializer, ArticleUpdateSerializer
-from permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
 from ..filters import ArticleFilter
 from rest_framework.views import APIView
@@ -12,7 +11,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from django.utils import timezone
 from blog.tasks import publish_scheduled_article
-
+from permissions import *
 
 class AdminArticleListView(viewsets.ReadOnlyModelViewSet):
     """
@@ -22,7 +21,7 @@ class AdminArticleListView(viewsets.ReadOnlyModelViewSet):
     serializer_class = BilingualArticleSerializer
     filterset_class = ArticleFilter
     filter_backends = [DjangoFilterBackend]
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     pagination_class = BasePagination
     
     def get_serializer_context(self):
@@ -38,7 +37,7 @@ class CreateArticleView(CreateAPIView):
     View for creating a new article
     """
     serializer_class = CreateArticleSerializer
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     
     def create(self, request, *args, **kwargs):
         """
@@ -74,7 +73,7 @@ class ArticleDetailView(RetrieveAPIView):
     """
     queryset = Article.objects.all()
     serializer_class = BilingualArticleSerializer
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     lookup_url_kwarg = 'article_id'
 
 
@@ -84,7 +83,7 @@ class UpdateArticleView(UpdateAPIView):
     """
     queryset = Article.objects.all()
     serializer_class = ArticleUpdateSerializer
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     lookup_url_kwarg = 'article_id'
     
     def get_serializer_context(self):
@@ -132,7 +131,7 @@ class ArticleFilterDataView(APIView):
     """
     View to return all article filter options.
     """
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
 
     def get(self, request, format=None):
         """
@@ -187,7 +186,7 @@ class ArticleFilterDataView(APIView):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsSuperUser, IsAuthor])
+@permission_classes([IsAuthorAndSuperuser])
 def delete_article(request, article_id):
     """
     Delete an article by ID.

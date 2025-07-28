@@ -11,7 +11,7 @@ from blog.models.article import Team
 from .base import BasePagination
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
-
+from permissions import *
 
 
 class PlayerListView(viewsets.ReadOnlyModelViewSet):
@@ -22,7 +22,7 @@ class PlayerListView(viewsets.ReadOnlyModelViewSet):
     serializer_class = BilingualPlayerSerializer
     filterset_class = PlayerFilter
     filter_backends = [DjangoFilterBackend]
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     pagination_class = BasePagination
     
     def get_serializer_context(self):
@@ -37,7 +37,7 @@ class PlayerPositionsView(APIView):
     """
     View to return all player positions for filtering.
     """
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
 
     def get(self, request, format=None):
         """
@@ -54,7 +54,7 @@ class PlayerPositionsView(APIView):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsSuperUser, IsAuthor])
+@permission_classes([IsAuthorAndSuperuser])
 def delete_player(request, player_id):
     """
     Delete a player by ID.
@@ -84,7 +84,7 @@ class CreatePlayerView(CreateAPIView):
     View for creating a new player
     """
     serializer_class = PlayerCreateSerializer
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     
     def create(self, request, *args, **kwargs):
         """
@@ -95,7 +95,7 @@ class CreatePlayerView(CreateAPIView):
         if serializer.is_valid():
             player = serializer.save()
             return Response(
-                {"message": "بازیکن جدید با موفقیت ایجاد شد."},
+                {"message": "بازیکن جدید با موفقیت ایجاد شد.", "id": player.id},
                 status=status.HTTP_201_CREATED
             )
         else:
@@ -111,7 +111,7 @@ class PlayerDetailView(RetrieveAPIView):
     """
     queryset = Player.objects.all()
     serializer_class = PlayerDetailSerializer
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     lookup_url_kwarg = 'player_id'
 
 
@@ -121,7 +121,7 @@ class UpdatePlayerView(UpdateAPIView):
     """
     queryset = Player.objects.all()
     serializer_class = PlayerUpdateSerializer
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     lookup_url_kwarg = 'player_id'
     
     def get_serializer_context(self):
@@ -158,14 +158,14 @@ class TeamListView(ListAPIView):
     serializer_class = BilingualTeamSerializer
     filterset_class = TeamFilter
     filter_backends = [DjangoFilterBackend]
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     pagination_class = BasePagination
     def get_serializer_context(self):
         context = super().get_serializer_context()
         return context
 
 @api_view(['DELETE'])
-@permission_classes([IsSuperUser, IsAuthor])
+@permission_classes([IsAuthorAndSuperuser])
 def delete_team(request, team_id):
     try:
         team = Team.objects.get(id=team_id)
@@ -180,12 +180,12 @@ def delete_team(request, team_id):
 
 class CreateTeamView(CreateAPIView):
     serializer_class = TeamCreateSerializer
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "تیم جدید با موفقیت ایجاد شد."}, status=status.HTTP_201_CREATED)
+            team = serializer.save()
+            return Response({"message": "تیم جدید با موفقیت ایجاد شد.", "id": team.id}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -193,7 +193,7 @@ class CreateTeamView(CreateAPIView):
 class TeamDetailView(RetrieveAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamDetailSerializer
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     lookup_url_kwarg = 'team_id'
 
 
@@ -203,7 +203,7 @@ class UpdateTeamView(UpdateAPIView):
     """ 
     queryset = Team.objects.all()
     serializer_class = TeamUpdateSerializer
-    permission_classes = [IsSuperUser, IsAuthor]
+    permission_classes = [IsAuthorAndSuperuser]
     lookup_url_kwarg = 'team_id'
 
     def get_serializer_context(self):

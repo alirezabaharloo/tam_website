@@ -7,15 +7,11 @@ const Shop = () => {
   const navigate = useNavigate();
 
   return (
-    <div
-      className="space-y-6"
-    >
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-primary">مدیریت فروشگاه</h1>
-      </div>
-      
-      <AdminShopTab navigate={navigate} />
+    <div className="min-h-screen overflow-hidden bg-quinary-tint-600 flex items-center justify-center">
+    <div className="bg-quaternary text-white p-6 rounded-lg shadow-lg">
+        <h2 className="text-xl font-bold mb-2">منتظر بمانید...</h2>
     </div>
+  </div>
   );
 };
 

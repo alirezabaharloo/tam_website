@@ -57,7 +57,7 @@ def dashboard_stats_view(request):
         # Calculate total views (unique IP addresses that viewed articles)
         total_views = MiddleArticleIpAddress.objects.values('ipaddress').distinct().count()
         
-
+        
         # Article status distribution
         published_articles = Article.objects.filter(status='PB').count()
         draft_articles = Article.objects.filter(status='DR').count()

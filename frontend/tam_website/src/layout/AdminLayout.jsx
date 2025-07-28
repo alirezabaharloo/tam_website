@@ -108,7 +108,7 @@ const AdminLayout = () => {
   };
 
   
-  if (isAdminPannelAccess === null || user === null) { // Change userLoading to user === null
+  if (isAdminPannelAccess === null) { // Change userLoading to user === null
     return <SpinLoader />;
   }
 
@@ -116,9 +116,10 @@ const AdminLayout = () => {
     return <PageNotFound />;
   }
 
-  // if (userError) { // userError is not needed anymore as we are not using useAuthHttp
-  //   return <SomethingWentWrong />
-  // }
+  if (isAdminPannelAccess && !hasRouteAccess) {
+    return <h1>Access Denied!</h1>
+  }
+
 
   return (
     <div className="flex h-screen bg-quinary-tint-600">

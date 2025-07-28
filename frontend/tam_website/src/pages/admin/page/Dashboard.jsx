@@ -227,6 +227,7 @@ const Dashboard = () => {
         </div>
         <div
           className="p-3 bg-blue-500 bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-blue-500 hover:bg-opacity-30"
+          onClick={()=>{navigate('/admin/teams')}}
         >
           <AdminIcons.Teams />
         </div>
