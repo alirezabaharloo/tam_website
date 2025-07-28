@@ -10,6 +10,7 @@ import SomethingWentWrong from '../../pages/UI/SomethingWentWrong'
 import NoArticlesFound from '../../pages/UI/NoArticlesFound'
 import useHttp from '../../hooks/useHttp'
 import domainUrl from '../../utils/api'
+import FilterSummary from '../../components/FilterSummary'
 
 
 const containerVariants = {
@@ -159,7 +160,7 @@ export default function News() {
   
   return (
     <div className="w-full max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
-      <div className="flex flex-col gap-6 sm:gap-8 md:gap-10">
+      <div className="flex flex-col gap-1 sm:gap-2 md:gap-4">
         {searchParam && (
           <div className="flex items-center justify-between bg-quaternary mt-[-3rem] backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-quinary-tint-800/20">
             <div className="flex items-center gap-2 sm:gap-3">
@@ -214,6 +215,13 @@ export default function News() {
         <NewsFilter 
           activeFilter={activeFilter} 
           onFilterChange={handleFilterChange} 
+        />
+        
+        {/* Filter Summary */}
+        <FilterSummary 
+          contentType={activeFilter} 
+          team={teamParam} 
+          search={searchParam} 
         />
         {
           (((isLoading || allArticles.length == 0) && response?.detail !== 'no articles found!' && (!requestUrl.includes("page") || (requestUrl.includes("page") && requestUrl.includes("fetch-all"))))) ?  <SpinLoader /> :(
