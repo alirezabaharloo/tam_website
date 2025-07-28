@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const FilterSummary = ({ contentType, team, search }) => {
+const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
 
@@ -172,10 +172,23 @@ const FilterSummary = ({ contentType, team, search }) => {
 
   return (
     <div className="mt-0 mb-6 px-4 py-3 bg-gray-100 rounded-lg border border-gray-200">
-      <p 
-        className={`text-gray-600 text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}
-        dangerouslySetInnerHTML={{ __html: renderHighlightedMessage() }}
-      />
+      <div className="flex items-center justify-between">
+        <p 
+          className={`text-gray-600 text-sm font-medium flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
+          dangerouslySetInnerHTML={{ __html: renderHighlightedMessage() }}
+        />
+        {onClearAllFilters && (hasSearch || hasContentType || hasTeam) && (
+          <button
+            onClick={onClearAllFilters}
+            className={`ml-3 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg transition-colors duration-200 flex items-center gap-1 ${isRTL ? 'mr-3' : 'ml-3'}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            {isRTL ? 'حذف فیلترها' : 'Clear Filters'}
+          </button>
+        )}
+      </div>
     </div>
   );
   
