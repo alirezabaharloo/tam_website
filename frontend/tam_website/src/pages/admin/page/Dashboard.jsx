@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import SpinLoader from '../../../pages/UI/SpinLoader';
@@ -7,9 +7,11 @@ import { useNavigate } from 'react-router-dom';
 import { AdminIcons } from '../../../data/Icons';
 import domainUrl from '../../../utils/api';
 import { FaEye, FaHeart } from 'react-icons/fa';
+import { AuthContext } from '../../../context/AuthContext';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext); // Get user from AuthContext
   
   // Helper function to truncate text
   const truncateText = (text, maxLength) => {
@@ -144,8 +146,166 @@ const Dashboard = () => {
         damping: 15,
         duration: 0.2
       }    
-    }  
+    }
   };
+
+  const isSuperuser = user?.is_superuser;
+  const isAuthor = user?.is_author && !isSuperuser; // Only author if not superuser
+
+  const dashboardCards = [];
+
+  if (isSuperuser) {
+    dashboardCards.push(
+      // کل کاربران
+      <motion.div
+        key="users"
+        initial={{ opacity: 0, y: -200, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 200, scale: 0.96 }}
+        whileHover="hover"
+        variants={itemVariants}
+        className="bg-quinary-tint-800 p-6 rounded-lg shadow-[0_0_16px_rgba(0,0,0,0.25)] transition-shadow duration-300 hover:shadow-xl transform-gpu"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-secondary">کل کاربران</p>
+            <p className="text-2xl font-semibold text-primary">{dashboardData?.users || 0}</p>
+          </div>
+          <div
+            className="p-3 bg-primary bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-primary hover:bg-opacity-30"
+            onClick={() => navigate('/admin/users')}
+          >
+            <AdminIcons.Users />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  dashboardCards.push(
+    // مقالات
+    <motion.div
+      key="articles"
+      initial={{ opacity: 0, y: -200, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 200, scale: 0.96 }}
+      whileHover="hover"
+      variants={itemVariants}
+      className={`bg-quinary-tint-800 p-6 rounded-lg shadow-[0_0_16px_rgba(0,0,0,0.25)] transition-shadow duration-300 hover:shadow-xl transform-gpu ${
+        isSuperuser ? 'col-span-1' : ''
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-secondary">مقالات</p>
+          <p className="text-2xl font-semibold text-primary">{dashboardData?.articles || 0}</p>
+        </div>
+        <div
+          className="p-3 bg-green-500 bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-green-500 hover:bg-opacity-30"
+          onClick={() => navigate('/admin/news')}
+        >
+          <AdminIcons.News />
+        </div>
+      </div>
+    </motion.div>,
+    // تیم‌ها
+    <motion.div
+      key="teams"
+      initial={{ opacity: 0, y: -200, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 200, scale: 0.96 }}
+      whileHover="hover"
+      variants={itemVariants}
+      className={`bg-quinary-tint-800 p-6 rounded-lg shadow-[0_0_16px_rgba(0,0,0,0.25)] transition-shadow duration-300 hover:shadow-xl transform-gpu ${
+        isSuperuser ? 'col-span-1' : ''
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-secondary">تیم‌ها</p>
+          <p className="text-2xl font-semibold text-primary">{dashboardData?.teams || 0}</p>
+        </div>
+        <div
+          className="p-3 bg-blue-500 bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-blue-500 hover:bg-opacity-30"
+        >
+          <AdminIcons.Teams />
+        </div>
+      </div>
+    </motion.div>,
+    // بازیکن‌ها
+    <motion.div
+      key="players"
+      initial={{ opacity: 0, y: -200, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 200, scale: 0.96 }}
+      whileHover="hover"
+      variants={itemVariants}
+      className={`bg-quinary-tint-800 p-6 rounded-lg shadow-[0_0_16px_rgba(0,0,0,0.25)] transition-shadow duration-300 hover:shadow-xl transform-gpu ${
+        isSuperuser ? 'col-span-1' : ''
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-secondary">بازیکن‌ها</p>
+          <p className="text-2xl font-semibold text-primary">{dashboardData?.players || 0}</p>
+        </div>
+        <div
+          className="p-3 bg-yellow-500 bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-yellow-500 hover:bg-opacity-30"
+          onClick={() => navigate('/admin/players')}
+        >
+          <AdminIcons.Players />
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  dashboardCards.push(
+    // بازدید کلی
+    <motion.div
+      key="total_views"
+      initial={{ opacity: 0, y: -200, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 200, scale: 0.96 }}
+      whileHover="hover"
+      variants={itemVariants}
+      className={`bg-quinary-tint-800 p-6 rounded-lg shadow-[0_0_16px_rgba(0,0,0,0.25)] transition-shadow duration-300 hover:shadow-xl transform-gpu ${
+        isSuperuser ? 'col-span-1 text-center flex-col items-center justify-center p-2' : ''
+      }`}
+    >
+      <div className={`flex items-center justify-between ${isSuperuser ? 'flex-col' : ''}`}>
+        <div>
+          <p className={`text-sm font-medium text-secondary ${isSuperuser ? 'text-center' : ''}`}>بازدید کلی</p>
+          <p className={`text-2xl font-semibold text-primary ${isSuperuser ? 'text-center' : ''}`}>{dashboardData?.total_views || 0}</p>
+        </div>
+        {!isSuperuser && (
+          <div
+            className="p-3 bg-purple-500 bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-purple-500 hover:bg-opacity-30"
+          >
+            <AdminIcons.TotalViews />
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+
+  // Reorder for superuser as per request: کل کاربران, مقالات, تیم‌ها, بازیکن‌ها, بازدید کلی
+  const orderedSuperuserCards = [
+    dashboardCards.find(card => card.key === 'users'),
+    dashboardCards.find(card => card.key === 'articles'),
+    dashboardCards.find(card => card.key === 'teams'),
+    dashboardCards.find(card => card.key === 'players'),
+    dashboardCards.find(card => card.key === 'total_views'),
+  ].filter(Boolean);
+
+  // Author cards: مقالات, تیم‌ها, بازیکن‌ها, بازدید کلی
+  const orderedAuthorCards = [
+    dashboardCards.find(card => card.key === 'articles'),
+    dashboardCards.find(card => card.key === 'teams'),
+    dashboardCards.find(card => card.key === 'players'),
+    dashboardCards.find(card => card.key === 'total_views'),
+  ].filter(Boolean);
+
+  const cardsToRender = isSuperuser ? orderedSuperuserCards : (isAuthor ? orderedAuthorCards : []);
 
   return (
     <motion.div
@@ -169,7 +329,7 @@ const Dashboard = () => {
       
       {/* کارت‌های آمار */}
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        className={`grid gap-6 ${isSuperuser ? 'grid-cols-5' : 'grid-cols-4'}`}
         initial="hidden"
         animate="visible"
         variants={{
@@ -179,92 +339,7 @@ const Dashboard = () => {
           }
         }}
       >
-        {/* کل کاربران */}
-        <motion.div
-          initial={{ opacity: 0, y: -200, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 200, scale: 0.96 }}
-          whileHover="hover"
-          variants={itemVariants}
-          className="bg-quinary-tint-800 p-6 rounded-lg shadow-[0_0_16px_rgba(0,0,0,0.25)] transition-shadow duration-300 hover:shadow-xl transform-gpu"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-secondary">کل کاربران</p>
-              <p className="text-2xl font-semibold text-primary">{dashboardData?.users || 0}</p>
-            </div>
-            <div
-              className="p-3 bg-primary bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-primary hover:bg-opacity-30"
-              onClick={() => navigate('/admin/users')}
-            >
-              <AdminIcons.Users />
-            </div>
-          </div>
-        </motion.div>
-        {/* مقالات */}
-        <motion.div
-          initial={{ opacity: 0, y: -200, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 200, scale: 0.96 }}
-          whileHover="hover"
-          variants={itemVariants}
-          className="bg-quinary-tint-800 p-6 rounded-lg shadow-[0_0_16px_rgba(0,0,0,0.25)] transition-shadow duration-300 hover:shadow-xl transform-gpu"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-secondary">مقالات</p>
-              <p className="text-2xl font-semibold text-primary">{dashboardData?.articles || 0}</p>
-            </div>
-            <div
-              className="p-3 bg-green-500 bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-green-500 hover:bg-opacity-30"
-              onClick={() => navigate('/admin/news')}
-            >
-              <AdminIcons.News />
-            </div>
-          </div>
-        </motion.div>
-        {/* تیم‌ها */}
-        <motion.div
-          initial={{ opacity: 0, y: -200, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 200, scale: 0.96 }}
-          whileHover="hover"
-          variants={itemVariants}
-          className="bg-quinary-tint-800 p-6 rounded-lg shadow-[0_0_16px_rgba(0,0,0,0.25)] transition-shadow duration-300 hover:shadow-xl transform-gpu"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-secondary">تیم‌ها</p>
-              <p className="text-2xl font-semibold text-primary">{dashboardData?.teams || 0}</p>
-            </div>
-            <div
-              className="p-3 bg-blue-500 bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-blue-500 hover:bg-opacity-30"
-            >
-              <AdminIcons.Teams />
-            </div>
-          </div>
-        </motion.div>
-        {/* بازدید کلی */}
-        <motion.div
-          initial={{ opacity: 0, y: -200, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 200, scale: 0.96 }}
-          whileHover="hover"
-          variants={itemVariants}
-          className="bg-quinary-tint-800 p-6 rounded-lg shadow-[0_0_16px_rgba(0,0,0,0.25)] transition-shadow duration-300 hover:shadow-xl transform-gpu"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-secondary">بازدید کلی</p>
-              <p className="text-2xl font-semibold text-primary">{dashboardData?.total_views || 0}</p>
-            </div>
-            <div
-              className="p-3 bg-purple-500 bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-purple-500 hover:bg-opacity-30"
-            >
-              <AdminIcons.TotalViews />
-            </div>
-          </div>
-        </motion.div>
+        {cardsToRender}
       </motion.div>
 
       {/* بخش میانی - نمودارها و لیست‌ها */}

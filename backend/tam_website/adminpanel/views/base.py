@@ -11,6 +11,9 @@ from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q, Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
+from blog.models import Article, Team, MiddleArticleIpAddress, Player # Import Player model
+from django.utils import timezone
+from datetime import timedelta
 
 
 @api_view(['GET'])
@@ -36,6 +39,7 @@ def dashboard_stats_view(request):
     - Total users
     - Total articles (published and draft)
     - Total teams
+    - Total players # Added for player count
     - Total site views
     - Daily view statistics for the last 7 days
     - Recent articles
@@ -43,47 +47,21 @@ def dashboard_stats_view(request):
     - Top liked articles
     """
     try:
-        from blog.models import Article, Team, MiddleArticleIpAddress
-        from django.utils import timezone
-        from datetime import timedelta
         
         # Basic counts
         users_count = User.objects.count()
         articles_count = Article.objects.count()
         teams_count = Team.objects.count()
+        players_count = Player.objects.count() # Get players count
         
         # Calculate total views (unique IP addresses that viewed articles)
         total_views = MiddleArticleIpAddress.objects.values('ipaddress').distinct().count()
         
-        # Calculate daily views for the last 7 days
-        daily_views = []
-        for i in range(7):
-            date = timezone.now().date() - timedelta(days=i)
-            day_views = MiddleArticleIpAddress.objects.filter(
-                created_at__date=date
-            ).values('ipaddress').distinct().count()
-            daily_views.append({
-                'date': date.strftime('%Y-%m-%d'),
-                'views': day_views
-            })
-        
-        # Reverse to show oldest to newest
-        daily_views.reverse()
-        
+
         # Article status distribution
-        published_articles = Article.objects.filter(status='AC').count()
+        published_articles = Article.objects.filter(status='PB').count()
         draft_articles = Article.objects.filter(status='DR').count()
         
-        # Get recent articles (last 5)
-        recent_articles = []
-        for article in Article.objects.all()[:5]:
-            recent_articles.append({
-                'id': article.id,
-                'title': article.get_title('fa') or article.get_title('en'),
-                'status': article.status,
-                'updated_at': article.updated_date.togregorian().isoformat(),
-                'author_name': article.author.phone_number if article.author else None
-            })
         
         # Get top viewed articles (top 3 by view count)
         top_viewed_articles = []
@@ -117,11 +95,10 @@ def dashboard_stats_view(request):
             'users': users_count,
             'articles': articles_count,
             'teams': teams_count,
+            'players': players_count, # Include players count in response
             'total_views': total_views,
-            'daily_views': daily_views,
             'published_articles': published_articles,
             'draft_articles': draft_articles,
-            'recent_articles': recent_articles,
             'top_viewed_articles': top_viewed_articles,
             'top_liked_articles': top_liked_articles
         })
