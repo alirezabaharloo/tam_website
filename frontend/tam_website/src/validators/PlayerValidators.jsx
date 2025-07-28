@@ -29,37 +29,42 @@ export const validatePlayerForm = (formData) => {
   const errors = {};
   
   // Validate name fields
-  if (!formData.name_fa?.trim()) {
+  if (Object.keys(formData).includes('name_fa') && !formData.name_fa?.trim()) {
     errors.name_fa = 'لطفا نام بازیکن را به فارسی وارد کنید';
   }
   
-  if (!formData.name_en?.trim()) {
+  if (Object.keys(formData).includes('name_en') && !formData.name_en?.trim()) {
     errors.name_en = 'لطفا نام بازیکن را به انگلیسی وارد کنید';
   }
   
   // Validate number field
   const numberError = validatePlayerNumber(formData.number);
-  if (numberError) {
+  if (Object.keys(formData).includes('number') && numberError) {
     errors.number = numberError;
   }
   
   // Validate goals field
-  if (!formData.goals && formData.goals !== 0) {
+  if (Object.keys(formData).includes('goals') && !formData.goals && formData.goals !== 0) {
     errors.goals = 'لطفا تعداد گل را وارد کنید';
-  } else if (isNaN(parseInt(formData.goals)) || parseInt(formData.goals) < 0) {
+  } else if (Object.keys(formData).includes('goals') && isNaN(parseInt(formData.goals)) || parseInt(formData.goals) < 0) {
     errors.goals = 'تعداد گل باید عدد مثبت باشد';
   }
   
   // Validate games field
-  if (!formData.games && formData.games !== 0) {
+  if (Object.keys(formData).includes('games') && !formData.games && formData.games !== 0) {
     errors.games = 'لطفا تعداد بازی را وارد کنید';
-  } else if (isNaN(parseInt(formData.games)) || parseInt(formData.games) < 0) {
+  } else if (Object.keys(formData).includes('games') && isNaN(parseInt(formData.games)) || parseInt(formData.games) < 0) {
     errors.games = 'تعداد بازی باید عدد مثبت باشد';
   }
   
   // Validate position field
-  if (!formData.position) {
+  if (Object.keys(formData).includes('position') && !formData.position) {
     errors.position = 'لطفا پست بازیکن را انتخاب کنید';
+  }
+  
+  // Validate image field
+  if (Object.keys(formData).includes('image') && !formData.image && !formData.imagePreview) {
+    errors.image = 'لطفا تصویر بازیکن را انتخاب کنید';
   }
   
   return errors;

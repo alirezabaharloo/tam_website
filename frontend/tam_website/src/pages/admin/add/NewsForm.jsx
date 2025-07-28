@@ -5,7 +5,7 @@ import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import SpinLoader from '../../../pages/UI/SpinLoader';
 import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
-import { validateArticleForm, isFormValid } from '../../../validators/ArticleValidators';
+import { validateNewsForm } from '../../../validators/NewsValidators';
 import QuillEditor from '../../../components/admin/Editor/QuillEditor';
 import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
@@ -57,16 +57,13 @@ const NewsForm = () => {
     sendRequest
   } = useAdminHttp();
   
-  const [formIsComplete, setFormIsComplete] = useState(false);
-  
-  useEffect(() => {
-    setFormIsComplete(isFormValid(formData));
-  }, [formData]);
-  
+  // Remove the centralized useEffect for live validation.
+  // Validation will now be handled directly in change handlers and on submit.
+
   useEffect(() => {
     const newTabErrors = {
-      persian: errors.title_fa || errors.body_fa ? true : false,
-      english: errors.title_en || errors.body_en ? true : false
+      persian: !!errors.title_fa || !!errors.body_fa,
+      english: !!errors.title_en || !!errors.body_en
     };
     setTabErrors(newTabErrors);
   }, [errors]);
@@ -76,14 +73,31 @@ const NewsForm = () => {
   };
   
   const handleInputChange = (field, value) => {
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Validate only the changed field and update errors
+    const newErrorsForField = validateNewsForm({ [field]: value });
+    setErrors(prev => {
+      const updatedErrors = { ...prev };
+      delete updatedErrors[field];
+      if (newErrorsForField[field]) {
+        updatedErrors[field] = newErrorsForField[field];
+      }
+      // Special handling for video_url as its validation depends on type field
+      if (field === 'type') {
+        const newErrorsForVideoUrl = validateNewsForm({ type: value, video_url: formData.video_url });
+        delete updatedErrors.video_url;
+        if (newErrorsForVideoUrl.video_url) {
+          updatedErrors.video_url = newErrorsForVideoUrl.video_url;
+        }
+        // Also re-validate slideshow_images if type changes to SS
+        const newErrorsForSlideshow = validateNewsForm({ type: value, slideshow_images: slideshowImages });
+        delete updatedErrors.slideshow_images;
+        if (newErrorsForSlideshow.slideshow_images) {
+          updatedErrors.slideshow_images = newErrorsForSlideshow.slideshow_images;
+        }
+      }
+      return updatedErrors;
+    });
   };
   
   const handleMainImageChange = (e) => {
@@ -91,14 +105,17 @@ const NewsForm = () => {
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setMainImagePreview(previewUrl);
-      if (errors.main_image) {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.main_image;
-          return newErrors;
-        });
-      }
       setFormData(prev => ({ ...prev, main_image: file }));
+      // Validate main_image and update errors
+      const newErrorsForImage = validateNewsForm({ main_image: file });
+      setErrors(prev => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors.main_image;
+        if (newErrorsForImage.main_image) {
+          updatedErrors.main_image = newErrorsForImage.main_image;
+        }
+        return updatedErrors;
+      });
     }
   };
   
@@ -110,25 +127,44 @@ const NewsForm = () => {
     const file = e.target.files[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
-      const newImage = { file, preview: previewUrl };
-      setSlideshowImages(prev => [...prev, newImage]);
-      if (errors.slideshow_images) {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.slideshow_images;
-          return newErrors;
-        });
-      }
+      const newImage = { file, preview: previewUrl, isNew: true };
+      const updatedSlideshowImages = [...slideshowImages, newImage];
+
+      setSlideshowImages(updatedSlideshowImages);
       setFormData(prev => ({ ...prev, slideshow_images: [...prev.slideshow_images, file] }));
+      
+      // Validate slideshow_images and update errors
+      const newErrorsForSlideshow = validateNewsForm({ type: formData.type, slideshow_images: updatedSlideshowImages });
+      setErrors(prev => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors.slideshow_images;
+        if (newErrorsForSlideshow.slideshow_images) {
+          updatedErrors.slideshow_images = newErrorsForSlideshow.slideshow_images;
+        }
+        return updatedErrors;
+      });
     }
   };
 
   const handleRemoveSlideshowImage = (index) => {
-    setSlideshowImages(prev => prev.filter((_, i) => i !== index));
+    const imageToRemove = slideshowImages[index];
+    const updatedSlideshowImages = slideshowImages.filter((_, i) => i !== index);
+
+    setSlideshowImages(updatedSlideshowImages);
     setFormData(prev => {
-      const newSlideshowImages = [...prev.slideshow_images];
-      newSlideshowImages.splice(index, 1);
-      return { ...prev, slideshow_images: newSlideshowImages };
+      const newSlideshowFiles = prev.slideshow_images.filter((_, i) => i !== index);
+      return { ...prev, slideshow_images: newSlideshowFiles };
+    });
+
+    // Re-validate slideshow_images after removal
+    const newErrorsForSlideshow = validateNewsForm({ type: formData.type, slideshow_images: updatedSlideshowImages });
+    setErrors(prev => {
+      const updatedErrors = { ...prev };
+      delete updatedErrors.slideshow_images;
+      if (newErrorsForSlideshow.slideshow_images) {
+        updatedErrors.slideshow_images = newErrorsForSlideshow.slideshow_images;
+      }
+      return updatedErrors;
     });
   };
 
@@ -140,15 +176,24 @@ const NewsForm = () => {
       const file = e.target.files[0];
       if (file) {
         const previewUrl = URL.createObjectURL(file);
-        setSlideshowImages(prev => {
-          const newImages = [...prev];
-          newImages[index] = { file, preview: previewUrl };
-          return newImages;
-        });
-        setFormData(prev => {
-          const newSlideshowImages = [...prev.slideshow_images];
-          newSlideshowImages[index] = file;
-          return { ...prev, slideshow_images: newSlideshowImages };
+        const updatedSlideshowImages = [...slideshowImages];
+        updatedSlideshowImages[index] = { id: null, preview: previewUrl, file: file, isNew: true };
+        
+        setSlideshowImages(updatedSlideshowImages);
+        setFormData(prev => ({
+          ...prev,
+          slideshow_images: [...prev.slideshow_images.filter((_, i) => i !== index), file] // Replace old file with new one in formData
+        }));
+
+        // Re-validate slideshow_images after change
+        const newErrorsForSlideshow = validateNewsForm({ type: formData.type, slideshow_images: updatedSlideshowImages });
+        setErrors(prev => {
+          const updatedErrors = { ...prev };
+          delete updatedErrors.slideshow_images;
+          if (newErrorsForSlideshow.slideshow_images) {
+            updatedErrors.slideshow_images = newErrorsForSlideshow.slideshow_images;
+          }
+          return updatedErrors;
         });
       }
     };
@@ -157,18 +202,30 @@ const NewsForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateArticleForm(formData);
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      if ((validationErrors.title_fa || validationErrors.body_fa) && activeTab !== 'persian') {
-        setActiveTab('persian');
-      } else if ((validationErrors.title_en || validationErrors.body_en) && activeTab !== 'english') {
-        setActiveTab('english');
-      }
+    setIsLoading(true);
+
+    // Final validation before submission (pass full formData for complete validation)
+    const finalValidationErrors = validateNewsForm({
+        ...formData,
+        main_image: formData.main_image || mainImagePreview,
+        slideshow_images: slideshowImages.filter(img => img.file).map(img => img.file) // Only new files for validation
+    });
+    // Additionally validate existing slideshow images if type is 'SS' and no new files were added.
+    if (formData.type === 'SS' && (!formData.slideshow_images || formData.slideshow_images.length === 0)) {
+        const existingSlideshowCount = slideshowImages.filter(img => !img.isNew).length;
+        if (existingSlideshowCount < 1) {
+            finalValidationErrors.slideshow_images = 'لطفا حداقل یک تصویر برای اسلایدشو انتخاب کنید';
+        }
+    }
+
+    setErrors(finalValidationErrors);
+
+    if (Object.keys(finalValidationErrors).length > 0 || Object.keys(errors).length > 0) { // Check both newly generated errors and existing errors state
+      errorNotif('لطفاً خطاهای فرم را برطرف کنید');
+      setIsLoading(false);
       return;
     }
     
-    setIsLoading(true);
     const formDataToSend = new FormData();
     
     Object.entries(formData).forEach(([key, value]) => {
@@ -183,6 +240,7 @@ const NewsForm = () => {
       formDataToSend.append('main_image', formData.main_image);
     }
     
+    // Only append newly added slideshow files
     formData.slideshow_images.forEach((image, index) => {
       formDataToSend.append(`slideshow_image_${index}`, image);
     });
@@ -192,16 +250,27 @@ const NewsForm = () => {
     try {
       const response = await sendRequest('http://localhost:8000/api/admin/article-create/', 'POST', formDataToSend);
       if (response?.isError) {
-        setErrors(response?.errorContent || {});
+        // Set backend errors and merge with any existing ones
+        const backendErrors = response?.errorContent || {};
+        setErrors(prevErrors => ({ ...prevErrors, ...backendErrors }));
         errorNotif('خطا در ایجاد مقاله');
       } else {
         successNotif('مقاله جدید اضافه شد');
+        setErrors({}); // Clear frontend errors on successful submission
         setTimeout(() => {
           navigate(`/admin/news/edit/${response.id}`);
         }, 1500);
       }
     } catch (error) {
       errorNotif('خطا در ارتباط با سرور');
+      // Ensure we set errors in a consistent way, preferably from error.response.data if available
+      if (error && error.response && error.response.data) {
+        setErrors(error.response.data);
+      } else if (typeof error === 'object' && error !== null) {
+        setErrors(error);
+      } else {
+        setErrors({ general: 'خطایی رخ داد.' });
+      }
       console.error('Error submitting form:', error);
     } finally {
       setIsLoading(false);
@@ -218,19 +287,7 @@ const NewsForm = () => {
       return;
     }
 
-    const prompt = `=== Prompt Purpose ===Translate the provided Persian article content into natural English, ensuring that all HTML formatting is preserved exactly as presented.
-=== Output Format ===Return the result in .md (Markdown) format. Maintain all headings, bold text, italics, text alignments, links, and other formatting precisely as in the original HTML. Ensure that the formatting applied to specific text in Persian is identically applied to its English translation equivalent. For example, if a word or phrase in Persian is bold, italicized, or linked, the corresponding translated word or phrase in English must retain the same formatting in the same position.
-=== Examples ===Input (Persian with Formatting):
-<p style="text-align: justify;">سلام <a href="www.google.com" rel="noopener noreferrer" target="_blank">دنیا</a>، من یه متن ساختگی هستم که شامل فرمت های زیادی هستم به فارسی و باید به زبان انگلیسی دقیقا به همین فرمت ترجمه بشم، برای مثال اگه <a href="www.google.com" rel="noopener noreferrer" target="_blank">اینجا </a>یه لینک باشه باید توی متن انگلیسی همون قسمت لینک بخوره، یا اگه <strong>اینجا </strong>بولد باشه باید همونجا توی متن فارسی بولد بشه، یا اگه کلمه <em>برنامه نویسی</em> ایتالیک باشه باید توی زبان انگلیسی هم همونجا ایتالیک بشه.</p>
-
-Expected Output (English with Formatting):
-<p style="text-align: justify;">Hello <a href="www.google.com" rel="noopener noreferrer" target="_blank">world</a>, I am a dummy text that contains many formats in Persian and must be translated into English exactly with the same formatting. For example, if <a href="www.google.com" rel="noopener noreferrer" target="_blank">here</a> is a link, that part should remain linked in the English version as well. Or if <strong>here</strong> is bold, it should be bold in the English version too. Or if the word <em>programming</em> is italicized, it should also be italicized in the English version at the same spot.</p>
-
-=== Persian Article Body (Formatted) ===
-Provide only the prompt text as shown above, without any additional content.
-the persian text with format is between this >>> <<<:
->>> ${formData.body_fa} <<< 
-    `;
+    const prompt = `=== Prompt Purpose ===Translate the provided Persian article content into natural English, ensuring that all HTML formatting is preserved exactly as presented.\n=== Output Format ===Return the result in .md (Markdown) format. Maintain all headings, bold text, italics, text alignments, links, and other formatting precisely as in the original HTML. Ensure that the formatting applied to specific text in Persian is identically applied to its English translation equivalent. For example, if a word or phrase in Persian is bold, italicized, or linked, the corresponding translated word or phrase in English must retain the same formatting in the same position.\n=== Examples ===Input (Persian with Formatting):\n<p style="text-align: justify;">سلام <a href="www.google.com" rel="noopener noreferrer" target="_blank">دنیا</a>، من یه متن ساختگی هستم که شامل فرمت های زیادی هستم به فارسی و باید به زبان انگلیسی دقیقا به همین فرمت ترجمه بشم، برای مثال اگه <a href="www.google.com" rel="noopener noreferrer" target="_blank">اینجا </a>یه لینک باشه باید توی متن انگلیسی همون قسمت لینک بخوره، یا اگه <strong>اینجا </strong>بولد باشه باید همونجا توی متن فارسی بولد بشه، یا اگه کلمه <em>برنامه نویسی</em> ایتالیک باشه باید توی زبان انگلیسی هم همونجا ایتالیک بشه.</p>\n\nExpected Output (English with Formatting):\n<p style="text-align: justify;">Hello <a href="www.google.com" rel="noopener noreferrer" target="_blank">world</a>, I am a dummy text that contains many formats in Persian and must be translated into English exactly with the same formatting. For example, if a word or phrase in Persian is bold, italicized, or linked, the corresponding translated word or phrase in English must retain the same formatting in the same position.\n=== Persian Article Body (Formatted) ===\nProvide only the prompt text as shown above, without any additional content.\nthe persian text with format is between this >>> <<<:\n>>> ${formData.body_fa} <<< \n    `;
     navigator.clipboard.writeText(prompt).then(() => {
       successNotif('پرامپت ترجمه در کلیپ‌برد کپی شد.');
     }).catch(err => {
@@ -465,7 +522,7 @@ the persian text with format is between this >>> <<<:
                 </p>
                 )}
                 {errors.type && (
-                <p className="text-quaternary text-[14px] text-right mt-1">{errors.type}</p>
+                <p className="text-quaternary text-[14px] mt-1 text-right">{errors.type}</p>
                 )}
               </div>
               <div className="relative">
@@ -525,7 +582,7 @@ the persian text with format is between this >>> <<<:
                     value={formData.video_url}
                     onChange={(e) => handleInputChange('video_url', e.target.value)}
                     className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                        errors.video_url ? 'border-quaternary' : 'border-quinary-tint-500'
+                      errors.video_url ? 'border-quaternary' : 'border-quinary-tint-500'
                     } focus:border-primary outline-none transition-colors duration-300`}
                     placeholder="https://..."
                     dir="ltr"
@@ -554,8 +611,8 @@ the persian text with format is between this >>> <<<:
             <FormActions
               onCancel={handleBack}
               onSubmit={handleSubmit}
-              isSubmitting={submitLoading}
-              isSubmitDisabled={!formIsComplete}
+              isSubmitting={submitLoading || isLoading}
+              isSubmitDisabled={Object.keys(errors).length > 0 || submitLoading || isLoading || filterLoading}
               submitText="ایجاد مقاله"
             />
           </motion.form>

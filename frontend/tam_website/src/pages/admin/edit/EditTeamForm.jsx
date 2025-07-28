@@ -6,9 +6,9 @@ import { validateTeamForm } from '../../../validators/TeamValidators';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import SomethingWentWrong from '../../UI/SomethingWentWrong';
 import TeamNotFound from '../../UI/TeamNotFound';
-import FormHeader from '../../UI/FormHeader';
-import ImagePicker from '../../UI/ImagePicker';
-import FormActions from '../../UI/FormActions';
+import FormHeader from '../../../components/UI/FormHeader';
+import ImagePicker from '../../../components/UI/ImagePicker';
+import FormActions from '../../../components/UI/FormActions';
 
 const EditTeamForm = () => {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const EditTeamForm = () => {
 
   const {
     isLoading: submitLoading,
-    sendRequest: submitUpdate
+    sendRequest: submitUpdate,
   } = useAdminHttp();
 
   useEffect(() => {
@@ -50,6 +50,12 @@ const EditTeamForm = () => {
     }
   }, [teamDetails]);
 
+  // Live validation
+  useEffect(() => {
+    const newErrors = validateTeamForm({ ...formData, image: formData.image || imagePreview });
+    setErrors(newErrors);
+  }, [formData, imagePreview]);
+
   useEffect(() => {
     setTabErrors({
       persian: !!errors.name_fa,
@@ -60,13 +66,6 @@ const EditTeamForm = () => {
   const handleTabChange = (tabId) => setActiveTab(tabId);
 
   const handleInputChange = (field, value) => {
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -74,13 +73,6 @@ const EditTeamForm = () => {
     const file = e.target.files[0];
     if (file) {
       setImagePreview(URL.createObjectURL(file));
-      if (errors.image) {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.image;
-          return newErrors;
-        });
-      }
       setFormData(prev => ({ ...prev, image: file }));
     }
   };
@@ -101,27 +93,42 @@ const EditTeamForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateTeamForm({ ...formData, image: imagePreview || formData.image });
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      if (validationErrors.name_fa && activeTab !== 'persian') setActiveTab('persian');
-      else if (validationErrors.name_en && activeTab !== 'english') setActiveTab('english');
+
+    if (!hasChanges) {
+      errorNotif('لطفا حداقل یکی از فیلدها را تغییر دهید.');
       return;
     }
-    setErrors({});
+
+    // Check for validation errors from live validation
+    if (Object.keys(errors).length > 0) {
+      errorNotif('لطفاً خطاهای فرم را برطرف کنید');
+      return;
+    }
+
     const formDataToSend = new FormData();
-    if (formData.name_fa !== originalData.name_fa) formDataToSend.append('name_fa', formData.name_fa);
-    if (formData.name_en !== originalData.name_en) formDataToSend.append('name_en', formData.name_en);
-    if (formData.image) formDataToSend.append('image', formData.image);
+    // Only append changed fields (excluding image, handled separately)
+    Object.entries(formData).forEach(([key, value]) => {
+        if (key !== 'image' && originalData[key] !== value) {
+            formDataToSend.append(key, value);
+        }
+    });
+    // Handle image separately if changed
+    if (formData.image) {
+        formDataToSend.append('image', formData.image);
+    }
+
     try {
       const response = await submitUpdate(`http://localhost:8000/api/admin/team-update/${teamId}/`, 'PATCH', formDataToSend);
-      if (response?.isError || response?.name_fa || response?.name_en || response?.image) {
-        setErrors(response?.errorContent || response);
+      if (response?.isError) {
+        // Set backend errors and merge with any existing ones
+        const backendErrors = response?.errorContent || {};
+        setErrors(prevErrors => ({ ...prevErrors, ...backendErrors }));
         errorNotif('خطا در بروزرسانی تیم');
-        return;
+      } else {
+        successNotif('تیم با موفقیت بروزرسانی شد');
+        fetchTeamDetails();
+        setErrors({}); // Clear frontend errors on successful submission
       }
-      successNotif('تیم با موفقیت بروزرسانی شد');
-      fetchTeamDetails();
     } catch (err) {
       errorNotif('خطا در ارتباط با سرور');
       if (err && err.response && err.response.data) {
@@ -131,6 +138,7 @@ const EditTeamForm = () => {
       } else {
         setErrors({ general: 'خطایی رخ داد.' });
       }
+      console.error('Error submitting form:', err);
     }
   };
 
@@ -163,7 +171,7 @@ const EditTeamForm = () => {
           subtitle="در این صفحه می توانید اطلاعات تیم را ویرایش کنید"
           onBack={handleBack}
         />
-        <div className="bg-quinary-tint-800 rounded-2xl shadow p-6">
+        <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6">
           <motion.form
             onSubmit={handleSubmit}
             className="space-y-8"
@@ -201,10 +209,13 @@ const EditTeamForm = () => {
                     type="text"
                     value={formData.name_fa}
                     onChange={e => handleInputChange('name_fa', e.target.value)}
-                    className="w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300"
+                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
+                        errors.name_fa ? 'border-quaternary' : 'border-quinary-tint-500'
+                    } focus:border-primary outline-none transition-colors duration-300`}
+                    placeholder="نام تیم به فارسی"
                     dir="rtl"
                   />
-                  {errors.name_fa && <div className="text-red-500 text-sm mt-1">{errors.name_fa}</div>}
+                  {errors.name_fa && <p className="text-red-500 text-sm mt-1">{errors.name_fa}</p>}
                 </div>
               )}
               {activeTab === 'english' && (
@@ -214,10 +225,13 @@ const EditTeamForm = () => {
                     type="text"
                     value={formData.name_en}
                     onChange={e => handleInputChange('name_en', e.target.value)}
-                    className="w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300"
+                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
+                        errors.name_en ? 'border-quaternary' : 'border-quinary-tint-500'
+                    } focus:border-primary outline-none transition-colors duration-300`}
+                    placeholder="Team name in English"
                     dir="ltr"
                   />
-                  {errors.name_en && <div className="text-red-500 text-sm mt-1">{errors.name_en}</div>}
+                  {errors.name_en && <p className="text-red-500 text-sm mt-1">{errors.name_en}</p>}
                 </div>
               )}
             </div>
@@ -227,12 +241,12 @@ const EditTeamForm = () => {
               error={errors.image}
               label="تصویر تیم"
             />
-            {errors.general && <div className="text-red-500 text-sm mt-2">{errors.general}</div>}
+            {errors.general && <p className="text-red-500 text-sm mt-2">{errors.general}</p>}
             <FormActions
               onCancel={handleBack}
               onSubmit={handleSubmit}
-              isSubmitting={submitLoading}
-              isSubmitDisabled={!hasChanges}
+              isSubmitting={submitLoading || isFetching}
+              isSubmitDisabled={Object.keys(errors).length > 0 || submitLoading || isFetching}
               submitText="ذخیره تغییرات"
             />
           </motion.form>

@@ -2,7 +2,7 @@ from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from ..serializers.user import UserListSerializer, UserDeactivateSerializer, UserDetailSerializer, UserUpdateSerializer, UserChangePasswordSerializer
+from ..serializers.user import UserListSerializer, UserDeactivateSerializer, UserDetailSerializer, UserUpdateSerializer, UserChangePasswordSerializer, CreateUserSerializer
 from rest_framework.views import APIView
 from accounts.models import User
 from permissions import IsSuperUser
@@ -54,6 +54,18 @@ class AdminUserChangePasswordView(UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(user=user)
         return Response({'detail': 'گذرواژه با موفقیت تغییر کرد.'}, status=status.HTTP_200_OK)
+
+
+class CreateUserView(CreateAPIView):
+    serializer_class = CreateUserSerializer
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    queryset = User.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response({'detail': 'کاربر با موفقیت ایجاد شد.', 'id': user.id}, status=status.HTTP_201_CREATED)
 
 
 class UserDeactivateView(UpdateAPIView):

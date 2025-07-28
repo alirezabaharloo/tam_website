@@ -58,7 +58,7 @@ export const validateChangePassword = (newPassword, repeatPassword) => {
   if (newPassword) {
     const strongPasswordErrors = validateStrongPassword(newPassword);
     if (strongPasswordErrors.length > 0) {
-      errors.new_password = strongPasswordErrors.join(' '); // Join all errors into one string
+      errors.new_password = strongPasswordErrors; // Assign the array directly
     }
   }
   

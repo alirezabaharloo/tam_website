@@ -6,7 +6,7 @@ import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import SpinLoader from '../../../pages/UI/SpinLoader';
 import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
 import ArticleNotFound from '../../../pages/UI/ArticleNotFound';
-import { validateArticleForm } from '../../../validators/ArticleValidators';
+import { validateNewsForm } from '../../../validators/NewsValidators';
 import QuillEditor from '../../../components/admin/Editor/QuillEditor';
 import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
@@ -143,6 +143,9 @@ const EditNewsForm = () => {
     }
   }, [articleDetails]);
   
+  // Remove the centralized useEffect for live validation
+  // Validation will now be handled directly in change handlers and on submit.
+
   // Detectar cambios en el formulario
   useEffect(() => {
     if (originalData) {
@@ -164,8 +167,8 @@ const EditNewsForm = () => {
   
   useEffect(() => {
     const newTabErrors = {
-      persian: errors.title_fa || errors.body_fa ? true : false,
-      english: errors.title_en || errors.body_en ? true : false
+      persian: !!errors.title_fa || !!errors.body_fa,
+      english: !!errors.title_en || !!errors.body_en
     };
     setTabErrors(newTabErrors);
   }, [errors]);
@@ -175,14 +178,31 @@ const EditNewsForm = () => {
   };
   
   const handleInputChange = (field, value) => {
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Validate only the changed field and update errors
+    const newErrorsForField = validateNewsForm({ [field]: value });
+    setErrors(prev => {
+      const updatedErrors = { ...prev };
+      delete updatedErrors[field];
+      if (newErrorsForField[field]) {
+        updatedErrors[field] = newErrorsForField[field];
+      }
+      // Special handling for video_url as its validation depends on type field
+      if (field === 'type') {
+        const newErrorsForVideoUrl = validateNewsForm({ type: value, video_url: formData.video_url });
+        delete updatedErrors.video_url;
+        if (newErrorsForVideoUrl.video_url) {
+          updatedErrors.video_url = newErrorsForVideoUrl.video_url;
+        }
+        // Also re-validate slideshow_images if type changes to SS
+        const newErrorsForSlideshow = validateNewsForm({ type: value, slideshow_images: slideshowImages });
+        delete updatedErrors.slideshow_images;
+        if (newErrorsForSlideshow.slideshow_images) {
+          updatedErrors.slideshow_images = newErrorsForSlideshow.slideshow_images;
+        }
+      }
+      return updatedErrors;
+    });
   };
   
   const handleMainImageChange = (e) => {
@@ -190,14 +210,17 @@ const EditNewsForm = () => {
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setMainImagePreview(previewUrl);
-      if (errors.main_image) {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.main_image;
-          return newErrors;
-        });
-      }
       setFormData(prev => ({ ...prev, main_image: file }));
+      // Validate main_image and update errors
+      const newErrorsForImage = validateNewsForm({ main_image: file });
+      setErrors(prev => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors.main_image;
+        if (newErrorsForImage.main_image) {
+          updatedErrors.main_image = newErrorsForImage.main_image;
+        }
+        return updatedErrors;
+      });
     }
   };
   
@@ -209,26 +232,44 @@ const EditNewsForm = () => {
     const file = e.target.files[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
-      const newImage = { file, preview: previewUrl };
-      setSlideshowImages(prev => [...prev, newImage]);
-      if (errors.slideshow_images) {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.slideshow_images;
-          return newErrors;
-        });
-      }
+      const newImage = { file, preview: previewUrl, isNew: true };
+      const updatedSlideshowImages = [...slideshowImages, newImage];
+
+      setSlideshowImages(updatedSlideshowImages);
       setFormData(prev => ({ ...prev, slideshow_images: [...prev.slideshow_images, file] }));
+      
+      // Validate slideshow_images and update errors
+      const newErrorsForSlideshow = validateNewsForm({ type: formData.type, slideshow_images: updatedSlideshowImages });
+      setErrors(prev => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors.slideshow_images;
+        if (newErrorsForSlideshow.slideshow_images) {
+          updatedErrors.slideshow_images = newErrorsForSlideshow.slideshow_images;
+        }
+        return updatedErrors;
+      });
     }
   };
 
   const handleRemoveSlideshowImage = (index) => {
     const imageToRemove = slideshowImages[index];
+    const updatedSlideshowImages = slideshowImages.filter((_, i) => i !== index);
+
     if (imageToRemove.id) { // If it's an existing image with an ID
       setDeletedImageIds(prev => [...prev, imageToRemove.id]);
     }
-    setSlideshowImages(prev => prev.filter((_, i) => i !== index));
+    setSlideshowImages(updatedSlideshowImages);
     // No direct update to formData.slideshow_images here, as it only holds new files now.
+    // Re-validate slideshow_images after removal
+    const newErrorsForSlideshow = validateNewsForm({ type: formData.type, slideshow_images: updatedSlideshowImages });
+    setErrors(prev => {
+      const updatedErrors = { ...prev };
+      delete updatedErrors.slideshow_images;
+      if (newErrorsForSlideshow.slideshow_images) {
+        updatedErrors.slideshow_images = newErrorsForSlideshow.slideshow_images;
+      }
+      return updatedErrors;
+    });
   };
 
   const handleChangeSlideshowImage = (index) => {
@@ -239,17 +280,31 @@ const EditNewsForm = () => {
       const file = e.target.files[0];
       if (file) {
         const previewUrl = URL.createObjectURL(file);
-        const oldImage = slideshowImages[index];
+        const updatedSlideshowImages = [...slideshowImages];
+        const oldImage = updatedSlideshowImages[index];
+
         if (oldImage.id) { // If replacing an existing image
           setDeletedImageIds(prev => [...prev, oldImage.id]);
         }
-        setSlideshowImages(prev => {
-          const newImages = [...prev];
-          newImages[index] = { id: null, preview: previewUrl, file: file, isNew: true }; // Mark as new
-          return newImages;
+
+        updatedSlideshowImages[index] = { id: null, preview: previewUrl, file: file, isNew: true }; // Mark as new
+        
+        setSlideshowImages(updatedSlideshowImages);
+        setFormData(prev => ({
+          ...prev,
+          slideshow_images: [...prev.slideshow_images.filter((_, i) => i !== index && slideshowImages[i].isNew), file] // Filter out old new files, and add new one
+        }));
+
+        // Re-validate slideshow_images after change
+        const newErrorsForSlideshow = validateNewsForm({ type: formData.type, slideshow_images: updatedSlideshowImages });
+        setErrors(prev => {
+          const updatedErrors = { ...prev };
+          delete updatedErrors.slideshow_images;
+          if (newErrorsForSlideshow.slideshow_images) {
+            updatedErrors.slideshow_images = newErrorsForSlideshow.slideshow_images;
+          }
+          return updatedErrors;
         });
-        // Add the new file to formData.slideshow_images (which only tracks new files)
-        setFormData(prev => ({ ...prev, slideshow_images: [...prev.slideshow_images.filter(f => f !== oldImage.file), file] }));
       }
     };
     input.click();
@@ -257,32 +312,40 @@ const EditNewsForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateArticleForm({
-      ...formData,
-      main_image: formData.main_image || mainImagePreview, // Use new file or current preview URL for validation
-      slideshow_images: slideshowImages.filter(img => !img.file).map(img => img.preview).concat(formData.slideshow_images) // All current slideshow images for validation
+    setIsLoading(true);
+
+    if (!hasChanges) {
+      errorNotif('لطفا حداقل یکی از فیلدها را تغییر دهید.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Final validation before submission (pass full formData for complete validation)
+    const finalValidationErrors = validateNewsForm({
+        ...formData,
+        main_image: formData.main_image || mainImagePreview,
+        slideshow_images: slideshowImages.filter(img => img.file).map(img => img.file) // Only new files for validation
     });
-    
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      if ((validationErrors.title_fa || validationErrors.body_fa) && activeTab !== 'persian') {
-        setActiveTab('persian');
-      } else if ((validationErrors.title_en || validationErrors.body_en) && activeTab !== 'english') {
-        setActiveTab('english');
-      }
+    // Additionally validate existing slideshow images if type is 'SS' and no new files were added.
+    if (formData.type === 'SS' && slideshowImages.filter(img => img.file === null).length < 1 && formData.slideshow_images.length < 1) {
+        finalValidationErrors.slideshow_images = 'لطفا حداقل یک تصویر برای اسلایدشو انتخاب کنید';
+    }
+
+    setErrors(finalValidationErrors);
+
+    if (Object.keys(finalValidationErrors).length > 0) { // Check only newly generated errors
+      errorNotif('لطفاً خطاهای فرم را برطرف کنید');
+      setIsLoading(false);
       return;
     }
     
-    setIsLoading(true);
     const formDataToSend = new FormData();
     
     // Append fields that have changed (excluding images, handled separately)
     Object.entries(formData).forEach(([key, value]) => {
-      if (key !== 'main_image' && key !== 'slideshow_images') {
-        if (value !== originalData[key]) {
-          if (value !== null && value !== undefined) {
-            formDataToSend.append(key, value);
-          }
+      if (key !== 'main_image' && key !== 'slideshow_images' && originalData[key] !== value) {
+        if (value !== null && value !== undefined) {
+          formDataToSend.append(key, value);
         }
       }
     });
@@ -294,7 +357,7 @@ const EditNewsForm = () => {
     // Append IDs of images to be deleted
     if (deletedImageIds.length > 0) {
       deletedImageIds.forEach(id => {
-        formDataToSend.append('deleted_image_ids', id); // Append each ID separately
+        formDataToSend.append('deleted_image_ids', id);
       });
     }
 
@@ -304,26 +367,30 @@ const EditNewsForm = () => {
       formDataToSend.append(`slideshow_image_${index}`, file);
     });
     formDataToSend.append('slideshow_image_count', newSlideshowFiles.length);
-    console.log(formDataToSend);
+
     try {
-      console.log("Sending update request for article:", articleId);
-      console.log("FormData entries:", [...formDataToSend.entries()].map(([key, value]) => `${key}: ${value instanceof File ? value.name : value}`));
-      
       const response = await sendRequest(`http://localhost:8000/api/admin/article-update/${articleId}/`, 'PATCH', formDataToSend);
       
       if (response?.isError) {
-        console.error("Error response:", response.errorContent);
-        setErrors(response?.errorContent || {});
+        const backendErrors = response?.errorContent || {};
+        setErrors(prevErrors => ({ ...prevErrors, ...backendErrors }));
         errorNotif('خطا در ویرایش مقاله');
       } else {
         successNotif('مقاله با موفقیت ویرایش شد');
-        fetchArticleDetails(); // Reload article details
-        setErrors({});
+        setErrors({}); // Clear frontend errors on successful submission
+        fetchArticleDetails(); // Reload article details to update originalData
         setDeletedImageIds([]); // Clear deleted IDs after successful update
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
       errorNotif('خطا در ارتباط با سرور');
+      if (error && error.response && error.response.data) {
+        setErrors(error.response.data);
+      } else if (typeof error === 'object' && error !== null) {
+        setErrors(error);
+      } else {
+        setErrors({ general: 'خطایی رخ داد.' });
+      }
+      console.error('Error submitting form:', error);
     } finally {
       setIsLoading(false);
     }
@@ -339,19 +406,7 @@ const EditNewsForm = () => {
       return;
     }
 
-    const prompt = `=== Prompt Purpose ===Translate the provided Persian article content into natural English, ensuring that all HTML formatting is preserved exactly as presented.
-=== Output Format ===Return the result in .md (Markdown) format. Maintain all headings, bold text, italics, text alignments, links, and other formatting precisely as in the original HTML. Ensure that the formatting applied to specific text in Persian is identically applied to its English translation equivalent. For example, if a word or phrase in Persian is bold, italicized, or linked, the corresponding translated word or phrase in English must retain the same formatting in the same position.
-=== Examples ===Input (Persian with Formatting):
-<p style="text-align: justify;">سلام <a href="www.google.com" rel="noopener noreferrer" target="_blank">دنیا</a>، من یه متن ساختگی هستم که شامل فرمت های زیادی هستم به فارسی و باید به زبان انگلیسی دقیقا به همین فرمت ترجمه بشم، برای مثال اگه <a href="www.google.com" rel="noopener noreferrer" target="_blank">اینجا </a>یه لینک باشه باید توی متن انگلیسی همون قسمت لینک بخوره، یا اگه <strong>اینجا </strong>بولد باشه باید همونجا توی متن فارسی بولد بشه، یا اگه کلمه <em>برنامه نویسی</em> ایتالیک باشه باید توی زبان انگلیسی هم همونجا ایتالیک بشه.</p>
-
-Expected Output (English with Formatting):
-<p style="text-align: justify;">Hello <a href="www.google.com" rel="noopener noreferrer" target="_blank">world</a>, I am a dummy text that contains many formats in Persian and must be translated into English exactly with the same formatting. For example, if <a href="www.google.com" rel="noopener noreferrer" target="_blank">here</a> is a link, that part should remain linked in the English version as well. Or if <strong>here</strong> is bold, it should be bold in the English version too. Or if the word <em>programming</em> is italicized, it should also be italicized in the English version at the same spot.</p>
-
-=== Persian Article Body (Formatted) ===
-Provide only the prompt text as shown above, without any additional content.
-the persian text with format is between this >>> <<<:
->>> ${formData.body_fa} <<< 
-    `;
+    const prompt = `=== Prompt Purpose ===Translate the provided Persian article content into natural English, ensuring that all HTML formatting is preserved exactly as presented.\n=== Output Format ===Return the result in .md (Markdown) format. Maintain all headings, bold text, italics, text alignments, links, and other formatting precisely as in the original HTML. Ensure that the formatting applied to specific text in Persian is identically applied to its English translation equivalent. For example, if a word or phrase in Persian is bold, italicized, or linked, the corresponding translated word or phrase in English must retain the same formatting in the same position.\n=== Examples ===Input (Persian with Formatting):\n<p style="text-align: justify;">سلام <a href="www.google.com" rel="noopener noreferrer" target="_blank">دنیا</a>، من یه متن ساختگی هستم که شامل فرمت های زیادی هستم به فارسی و باید به زبان انگلیسی دقیقا به همین فرمت ترجمه بشم، برای مثال اگه <a href="www.google.com" rel="noopener noreferrer" target="_blank">اینجا </a>یه لینک باشه باید توی متن انگلیسی همون قسمت لینک بخوره، یا اگه <strong>اینجا </strong>بولد باشه باید همونجا توی متن فارسی بولد بشه، یا اگه کلمه <em>برنامه نویسی</em> ایتالیک باشه باید توی زبان انگلیسی هم همونجا ایتالیک بشه.</p>\n\nExpected Output (English with Formatting):\n<p style="text-align: justify;">Hello <a href="www.google.com" rel="noopener noreferrer" target="_blank">world</a>, I am a dummy text that contains many formats in Persian and must be translated into English exactly with the same formatting. For example, if a word or phrase in Persian is bold, italicized, or linked, the corresponding translated word or phrase in English must retain the same formatting in the same position.\n=== Persian Article Body (Formatted) ===\nProvide only the prompt text as shown above, without any additional content.\nthe persian text with format is between this >>> <<<:\n>>> ${formData.body_fa} <<< \n    `;
     navigator.clipboard.writeText(prompt).then(() => {
       successNotif('پرامپت ترجمه در کلیپ‌برد کپی شد.');
     }).catch(err => {
@@ -369,7 +424,7 @@ the persian text with format is between this >>> <<<:
     setScheduledPublishDate(scheduledDate);
     setFormData(prev => ({ ...prev, scheduled_publish_at: scheduledDate.toISOString() }));
     // Force re-evaluation of hasChanges
-    setHasChanges(true); // Manually set to true to enable "Save Changes" button
+    // setHasChanges(true); // Manually set to true to enable "Save Changes" button
   };
 
   const tabs = [
@@ -654,7 +709,7 @@ the persian text with format is between this >>> <<<:
                     value={formData.video_url}
                     onChange={(e) => handleInputChange('video_url', e.target.value)}
                     className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                        errors.video_url ? 'border-quaternary' : 'border-quinary-tint-500'
+                      errors.video_url ? 'border-quaternary' : 'border-quinary-tint-500'
                     } focus:border-primary outline-none transition-colors duration-300`}
                     placeholder="https://..."
                     dir="ltr"
@@ -683,8 +738,8 @@ the persian text with format is between this >>> <<<:
             <FormActions
               onCancel={handleBack}
               onSubmit={handleSubmit}
-              isSubmitting={submitLoading}
-              isSubmitDisabled={!hasChanges}
+              isSubmitting={submitLoading || isLoading}
+              isSubmitDisabled={Object.keys(errors).length > 0 || submitLoading || isLoading || articleDetailsLoading || filterLoading}
               submitText="ذخیره تغییرات"
             />
           </motion.form>

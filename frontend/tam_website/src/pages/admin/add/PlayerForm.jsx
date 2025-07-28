@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import { validatePlayerForm, isFormValid } from '../../../validators/PlayerValidators';
+import { validatePlayerForm } from '../../../validators/PlayerValidators'; // Removed isFormValid
 import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
 import FormActions from '../../../components/UI/FormActions';
@@ -49,11 +49,6 @@ const PlayerForm = () => {
     }
   }, [positions]);
   
-  const [formIsComplete, setFormIsComplete] = useState(false);
-  
-  useEffect(() => {
-    setFormIsComplete(isFormValid(formData));
-  }, [formData]);
   
   useEffect(() => {
     const newTabErrors = {
@@ -68,14 +63,13 @@ const PlayerForm = () => {
   };
   
   const handleInputChange = (field, value) => {
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
     setFormData(prev => ({ ...prev, [field]: value }));
+    const newErrors = validatePlayerForm({ [field]: value });
+    setErrors(prev => {
+      const oldErrors = { ...prev };
+      delete oldErrors[field];
+      return { ...oldErrors, ...newErrors };
+    });
   };
   
   const handleImageChange = (e) => {
@@ -83,33 +77,29 @@ const PlayerForm = () => {
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      
-      if (errors.image) {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.image;
-          return newErrors;
-        });
-      }
       setFormData(prev => ({ ...prev, image: file }));
+      const newErrors = validatePlayerForm({ image: file });
+      setErrors(prev => {
+        const oldErrors = { ...prev };
+        delete oldErrors.image;
+        return { ...oldErrors, ...newErrors };
+      });
     }
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validatePlayerForm(formData);
-    
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      if (validationErrors.name_fa && activeTab !== 'persian') {
-        setActiveTab('persian');
-      } else if (validationErrors.name_en && activeTab !== 'english') {
-        setActiveTab('english');
-      }
+    setIsLoading(true);
+
+    // Final validation before submission
+    const newErrors = validatePlayerForm({ ...formData, image: formData.image || imagePreview });
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0 || Object.keys(errors).length > 0) {
+      errorNotif('لطفاً خطاهای فرم را برطرف کنید');
+      setIsLoading(false);
       return;
     }
     
-    setIsLoading(true);
     const formDataToSend = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       formDataToSend.append(key, value);
@@ -118,7 +108,9 @@ const PlayerForm = () => {
     try {
       const response = await sendRequest('http://localhost:8000/api/admin/player-create/', 'POST', formDataToSend);
       if (response?.isError) {
-        setErrors(response?.errorContent || {});
+        // Set backend errors and merge with any existing ones
+        const backendErrors = response?.errorContent || {};
+        setErrors(prevErrors => ({ ...prevErrors, ...backendErrors }));
         errorNotif('خطا در ایجاد بازیکن');
       } else {
         successNotif('بازیکن جدید اضافه شد');
@@ -132,6 +124,14 @@ const PlayerForm = () => {
       }
     } catch (error) {
       errorNotif('خطا در ارتباط با سرور');
+      // Ensure we set errors in a consistent way, preferably from error.response.data if available
+      if (error && error.response && error.response.data) {
+        setErrors(error.response.data);
+      } else if (typeof error === 'object' && error !== null) {
+        setErrors(error);
+      } else {
+        setErrors({ general: 'خطایی رخ داد.' });
+      }
       console.error('Error submitting form:', error);
     } finally {
       setIsLoading(false);
@@ -153,6 +153,7 @@ const PlayerForm = () => {
       50% { opacity: 0.3; }
     }
   `;
+
 
   return (
     <div className="min-h-screen bg-quinary-tint-600">
@@ -349,8 +350,8 @@ const PlayerForm = () => {
             <FormActions
               onCancel={handleBack}
               onSubmit={handleSubmit}
-              isSubmitting={submitLoading}
-              isSubmitDisabled={!formIsComplete}
+              isSubmitting={submitLoading || isLoading}
+              isSubmitDisabled={Object.keys(errors).length > 0 || submitLoading || isLoading}
               submitText="ایجاد بازیکن"
             />
           </motion.form>

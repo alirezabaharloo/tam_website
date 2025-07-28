@@ -8,6 +8,7 @@ import SomethingWentWrong from '../../UI/SomethingWentWrong';
 import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
 import FormActions from '../../../components/UI/FormActions';
+import { validatePlayerForm } from '../../../validators/PlayerValidators';
 
 const EditPlayerForm = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const EditPlayerForm = () => {
     goals: '',
     games: '',
     position: '',
-    image: null
+    image: '',
   });
   
   const {
@@ -72,7 +73,10 @@ const EditPlayerForm = () => {
       setPositionOptions(filteredPositions);
     }
   }, [positions]);
-  
+
+  // Remove centralized useEffect for live validation
+  // Validation will now be handled directly in change handlers and on submit.
+
   useEffect(() => {
     if (originalData) {
       const hasFormChanges = Object.keys(formData).some(key => {
@@ -81,6 +85,7 @@ const EditPlayerForm = () => {
         }
         return formData[key] !== originalData[key];
       });
+      
       const hasImageChanges = 
         (imagePreview === null && playerDetails?.image) ||
         formData.image !== null;
@@ -105,14 +110,14 @@ const EditPlayerForm = () => {
   };
   
   const handleInputChange = (field, value) => {
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Validate only the changed field and update errors
+    const newErrors = validatePlayerForm({ [field]: value });
+    setErrors(prev => {
+      const oldErrors = { ...prev };
+      delete oldErrors[field];
+      return { ...oldErrors, ...newErrors };
+    });
   };
   
   const handleImageChange = (e) => {
@@ -120,37 +125,73 @@ const EditPlayerForm = () => {
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      if (errors.image) {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.image;
-          return newErrors;
-        });
-      }
       setFormData(prev => ({ ...prev, image: file }));
+      // Validate image and update errors
+      const newErrors = validatePlayerForm({ image: file });
+      setErrors(prev => {
+        const oldErrors = { ...prev };
+        delete oldErrors.image;
+        return { ...oldErrors, ...newErrors };
+      });
     }
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
+    // Final validation before submission
+    const finalValidationErrors = validatePlayerForm({ ...formData, image: formData.image || imagePreview });
+    setErrors(finalValidationErrors);
+    if (Object.keys(finalValidationErrors).length > 0) { // Only check newly generated errors
+      errorNotif('لطفاً خطاهای فرم را برطرف کنید');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!hasChanges) {
+      errorNotif('لطفا حداقل یکی از فیلدها را تغییر دهید.');
+      setIsLoading(false);
+      return;
+    }
+
     const formDataToSend = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      if (originalData[key] !== value) {
+      // Only append fields if they have changed from originalData
+      if (key !== 'image' && originalData[key] !== value) {
         formDataToSend.append(key, value);
       }
     });
+    // Handle image separately: only append if a new image file is selected
+    if (formData.image) {
+      formDataToSend.append('image', formData.image);
+    } else if (imagePreview === null && playerDetails?.image) {
+      // If image was removed
+      formDataToSend.append('image', ''); // Send empty string to clear image
+    }
+
     try {
       const response = await sendRequest(`http://localhost:8000/api/admin/player-update/${playerId}/`, 'PATCH', formDataToSend);
       if (response?.isError) {
-        setErrors(response?.errorContent || {});
+        // Set backend errors and merge with any existing ones
+        const backendErrors = response?.errorContent || {};
+        setErrors(prevErrors => ({ ...prevErrors, ...backendErrors }));
         errorNotif('خطا در بروزرسانی بازیکن');
       } else {
         successNotif('اطلاعات بازیکن با موفقیت بروزرسانی شد');
-        fetchPlayers();
+        setErrors({}); // Clear frontend errors on successful submission
+        fetchPlayers(); // Reload player details to update originalData
       }
     } catch (error) {
       errorNotif('خطا در ارتباط با سرور');
+      // Ensure we set errors in a consistent way, preferably from error.response.data if available
+      if (error && error.response && error.response.data) {
+        setErrors(error.response.data);
+      } else if (typeof error === 'object' && error !== null) {
+        setErrors(error);
+      } else {
+        setErrors({ general: 'خطایی رخ داد.' });
+      }
       console.error('Error submitting form:', error);
     } finally {
       setIsLoading(false);
@@ -373,12 +414,12 @@ const EditPlayerForm = () => {
               onImageChange={handleImageChange}
               error={errors.image}
               label="تصویر بازیکن"
-                      />
+            />
             <FormActions
               onCancel={handleBack}
               onSubmit={handleSubmit}
-              isSubmitting={submitLoading}
-              isSubmitDisabled={!hasChanges}
+              isSubmitting={submitLoading || isLoading}
+              isSubmitDisabled={Object.keys(errors).length > 0 || submitLoading || isLoading || playerDetailsLoading}
               submitText="ذخیره تغییرات"
             />
           </motion.form>

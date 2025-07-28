@@ -22,11 +22,11 @@ import Players from './pages/admin/page/Players';
 import PlayerForm from './pages/admin/add/PlayerForm';
 import EditPlayerForm from './pages/admin/edit/EditPlayerForm';
 import EditUserForm from './pages/admin/edit/EditUserForm'; // New import
-// import UserForm from './pages/admin/UserForm';
+import UserForm from './pages/admin/add/UserForm';
 import PreRegister from './pages/blog/PreRegister';
 import Teams from './pages/admin/page/Teams';
 import TeamForm from './pages/admin/add/TeamForm';
-import EditTeamForm from './pages/admin/edit/TeamEditForm';
+import EditTeamForm from './pages/admin/edit/EditTeamForm';
 import NewsForm from './pages/admin/add/NewsForm';
 import EditNewsForm from './pages/admin/edit/EditNewsForm';
 
@@ -113,13 +113,14 @@ const WebsiteRoutes = () => {
         {/* ADMIN routes - بدون PageTransition */}
         <Route path="/admin/*" element={<AdminLayout />} >
           <Route index element={<Dashboard />} />
-          <Route path="users" element={<Users />} />
           <Route path="news" element={<AdminNews />} />
           <Route path="shop" element={<AdminShop />} />
           <Route path="players" element={<Players />} />
           <Route path="players/add" element={<PlayerForm />} />
           <Route path="players/edit/:playerId" element={<EditPlayerForm />} />
+          <Route path="users" element={<Users />} />
           <Route path="users/edit/:userId" element={<EditUserForm />} />
+          <Route path="users/add" element={<UserForm />} />
           <Route path="teams" element={<Teams />} />
           <Route path="teams/add" element={<TeamForm />} />
           <Route path="teams/edit/:teamId" element={<EditTeamForm />} />

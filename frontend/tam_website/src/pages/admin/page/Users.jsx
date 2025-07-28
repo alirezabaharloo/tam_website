@@ -86,7 +86,7 @@ const Users = () => {
       <div className="flex justify-between items-center">   
         <h1 className="text-3xl font-bold text-primary">مدیریت کاربران</h1>
         <button 
-          onClick={() => navigate('/admin/user/add')}
+          onClick={() => navigate('/admin/users/add')}
           className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 font-bold flex items-center gap-2"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

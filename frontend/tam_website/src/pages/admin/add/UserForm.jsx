@@ -1,395 +1,286 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, useParams } from 'react-router-dom';
-import { fakeUsers } from '../data/fakeUsers';
-import { UserFormIcons } from '../../../data/Icons';
-
-// Icons
-const Icons = UserFormIcons;
+import { useNavigate } from 'react-router-dom';
+import useAdminHttp from '../../../hooks/useAdminHttp';
+import { successNotif, errorNotif } from '../../../utils/customNotifs';
+import FormHeader from '../../../components/UI/FormHeader';
+import FormActions from '../../../components/UI/FormActions';
+import { validateUserForm, validateStrongPassword } from '../../../validators/UserValidators';
+import { authIcons } from '../../../data/Icons';
 
 const UserForm = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const { userId } = useParams();
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
-    is_author: false,
-    is_superuser: false,
-    is_seller: false,
     phone_number: '',
+    password: '',
     first_name: '',
     last_name: '',
+    is_superuser: false,
+    is_author: false,
+    is_seller: false,
     is_active: true,
-    last_login: '',
-    created_date: ''
   });
-
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-
-  const isEditMode = !!userId;
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
-    }
-
-    if (isEditMode) {
-      // Find user data for editing
-      const userToEdit = fakeUsers.find(u => u.id === userId);
-      if (userToEdit) {
-        setFormData({
-          is_author: userToEdit.is_author || false,
-          is_superuser: userToEdit.is_superuser || false,
-          is_seller: userToEdit.is_seller || false,
-          phone_number: userToEdit.phone || '',
-          first_name: userToEdit.first_name || '',
-          last_name: userToEdit.last_name || '',
-          is_active: userToEdit.is_active !== false,
-          last_login: userToEdit.last_login || '',
-          created_date: userToEdit.created_date || ''
-        });
-      }
-    } else {
-      // Set default values for new user
-      setFormData({
-        is_author: false,
-        is_superuser: false,
-        is_seller: false,
-        phone_number: '',
-        first_name: '',
-        last_name: '',
-        is_active: true,
-        last_login: '',
-        created_date: new Date().toISOString().split('T')[0]
-      });
-    }
-  }, [userId, user, navigate, isEditMode]);
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.phone_number.trim()) {
-      newErrors.phone_number = 'فیلد اجباری است';
-    } else if (!/^09\d{9}$/.test(formData.phone_number)) {
-      newErrors.phone_number = 'شماره تلفن نامعتبر است';
-    }
-
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = 'فیلد اجباری است';
-    }
-
-    if (!formData.last_name.trim()) {
-      newErrors.last_name = 'فیلد اجباری است';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  
+  const { sendRequest, isLoading: submitLoading } = useAdminHttp();
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
+    // Special handling for password field for live validation
+    if (field === 'password') {
+      setFormData(prev => ({ ...prev, [field]: value }));
+      if (value.trim() === '') {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          password: ['گذرواژه الزامی است.'],
+        }));
+      } else {
+        const strongPasswordErrors = validateStrongPassword(value);
+        if (strongPasswordErrors.length > 0) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            password: strongPasswordErrors,
+          }));
+        } else {
+          setErrors(prevErrors => {
+            const newErrors = { ...prevErrors };
+            delete newErrors.password;
+            return newErrors;
+          });
+        }
+      }
+    } else {
+      // General handling for other fields
+      if (errors[field]) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+      setFormData(prev => ({
         ...prev,
-        [field]: ''
+        [field]: (typeof value === 'boolean' ? value : value)
       }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
+    setIsLoading(true);
+
+    const generalErrors = validateUserForm(formData);
+    let passwordStrengthErrors = [];
+    if (formData.password) {
+        passwordStrengthErrors = validateStrongPassword(formData.password);
+    } else {
+        passwordStrengthErrors.push('گذرواژه الزامی است.');
+    }
+
+    const combinedErrors = { ...generalErrors };
+    if (passwordStrengthErrors.length > 0) {
+        combinedErrors.password = passwordStrengthErrors;
+    } else if (combinedErrors.password) { // Clear password error if it was set by generalErrors but now resolved
+        delete combinedErrors.password;
+    }
+
+    setErrors(combinedErrors); // Always set combinedErrors after full validation
+
+    if (Object.keys(combinedErrors).length > 0) {
+      setIsLoading(false);
+      errorNotif('لطفاً خطاهای فرم را برطرف کنید');
       return;
     }
 
-    setIsLoading(true);
-
+    const dataToSend = {
+      phone_number: formData.phone_number,
+      password: formData.password,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      is_superuser: formData.is_superuser,
+      is_author: formData.is_author,
+      is_seller: formData.is_seller,
+      is_active: formData.is_active,
+    };
+    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Here you would make the actual API call
-      // const response = await fetch('/api/users', {
-      //   method: isEditMode ? 'PUT' : 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
+      console.log(dataToSend);
+      const response = await sendRequest('http://localhost:8000/api/admin/user-create/', 'POST', dataToSend);
 
-      setShowSuccess(true);
-      setTimeout(() => {
-        navigate('/admin');
-      }, 2000);
+      if (response?.isError) {
+        setErrors(response?.errorContent || {});
+        errorNotif('خطا در ایجاد کاربر');
+      } else {
+        successNotif('کاربر با موفقیت ایجاد شد');
+        navigate(`/admin/users/edit/${response?.data?.id}`);
+      }
     } catch (error) {
-      console.error('Error saving user:', error);
-      setErrors({ submit: 'خطا در ذخیره کاربر' });
+      errorNotif('خطا در ارتباط با سرور');
+      console.error('Error submitting form:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleBack = () => {
-    navigate('/admin');
+    navigate(-1);
   };
 
-  if (!user) {
-    return null;
-  }
+  console.log(errors);
+
+  // Check if all required fields are filled and no validation errors
+  const isFormComplete = 
+    formData.phone_number.trim() !== '' &&
+    formData.password.trim() !== '' &&
+    !errors.phone_number && // Ensure phone_number has no errors
+    !(errors.password && errors.password.length > 0); // Ensure password has no strong password errors
 
   return (
-    <div className="min-h-screen bg-quinary-tint-600 py-8">
-      <div className="max-w-[1000px] mx-auto px-4">
-        {/* Header */}
-        <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <button
-                onClick={handleBack}
-                className="p-2 text-secondary hover:text-primary transition-colors duration-300"
-              >
-                <Icons.Back isRTL={true} />
-              </button>
-              <div className={`${true ? 'mr-4 text-right' : 'ml-4 text-left'}`}>
-                <h1 className="text-[24px] sm:text-[32px] font-bold text-primary">
-                  {isEditMode ? 'ویرایش کاربر' : 'افزودن کاربر جدید'}
-                </h1>
-                <p className="text-[16px] sm:text-[18px] text-secondary">
-                  {true ? 'فرم ویرایش کاربر' : 'فرم افزودن کاربر جدید'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-quinary-tint-600">
+      <div className="max-w-[1200px] mx-auto px-4 mt-[1rem]">
+        <FormHeader
+          title="ایجاد کاربر جدید"
+          subtitle="در این صفحه می توانید کاربر جدیدی ایجاد کنید"
+          onBack={handleBack}
+        />
 
-        {/* Form */}
         <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6">
           <motion.form
+            onSubmit={handleSubmit}
+            className="space-y-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            onSubmit={handleSubmit}
-            className="space-y-6"
+            transition={{ duration: 0.5 }}
           >
-            {/* Changeable Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Phone Number */}
-              <div>
-                <label className={`block text-[16px] text-secondary mb-2 ${true ? 'text-right' : 'text-left'}`}>
-                  شماره تلفن *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Icons.Phone className="text-secondary" />
-                  </div>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[16px] text-secondary mb-2 text-right">شماره موبایل *</label>
                   <input
                     type="text"
                     value={formData.phone_number}
                     onChange={(e) => handleInputChange('phone_number', e.target.value)}
-                    className={`w-full pl-10 pr-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                      errors.phone_number ? 'border-quaternary' : 'border-quinary-tint-500'
-                    } focus:border-primary outline-none transition-colors duration-300`}
-                    placeholder="09123456789"
+                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${errors.phone_number ? 'border-quaternary' : 'border-quinary-tint-500'} focus:border-primary outline-none transition-colors duration-300`}
+                    placeholder="شماره موبایل"
                     dir="ltr"
                   />
+                  {errors.phone_number && <p className="text-quaternary text-[14px] mt-1 text-right">{errors.phone_number}</p>}
                 </div>
-                {errors.phone_number && (
-                  <p className="text-quaternary text-[14px] mt-1">{errors.phone_number}</p>
-                )}
-              </div>
-
-              {/* First Name */}
-              <div>
-                <label className={`block text-[16px] text-secondary mb-2 ${true ? 'text-right' : 'text-left'}`}>
-                  نام *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Icons.User className="text-secondary" />
+                
+                <div>
+                  <label className="block text-[16px] text-secondary mb-2 text-right">گذرواژه جدید *</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
+                      className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${errors.password ? 'border-quaternary' : 'border-quinary-tint-500'} focus:border-primary outline-none transition-colors duration-300 pr-10`}
+                      placeholder="گذرواژه جدید"
+                      dir="ltr"
+                    />
+                    <span
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                    >
+                      {showPassword ? authIcons.EyeSlash() : authIcons.Eye()}
+                    </span>
                   </div>
+                  {errors.password && Array.isArray(errors.password) && (
+                    <ul className="text-quaternary text-[14px] mt-1 text-right list-disc pr-5">
+                      {errors.password.map((error, index) => (
+                        <li key={index}>{error}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {errors.password && !Array.isArray(errors.password) && <p className="text-quaternary text-[14px] mt-1 text-right">{errors.password}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-[16px] text-secondary mb-2 text-right">نام</label>
                   <input
                     type="text"
                     value={formData.first_name}
                     onChange={(e) => handleInputChange('first_name', e.target.value)}
-                    className={`w-full pl-10 pr-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                      errors.first_name ? 'border-quaternary' : 'border-quinary-tint-500'
-                    } focus:border-primary outline-none transition-colors duration-300`}
-                    placeholder="نام"
+                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${errors.first_name ? 'border-quaternary' : 'border-quinary-tint-500'} focus:border-primary outline-none transition-colors duration-300`}
+                    placeholder="نام کاربر"
+                    dir="rtl"
                   />
+                  {errors.first_name && <p className="text-quaternary text-[14px] mt-1 text-right">{errors.first_name}</p>}
                 </div>
-                {errors.first_name && (
-                  <p className="text-quaternary text-[14px] mt-1">{errors.first_name}</p>
-                )}
-              </div>
 
-              {/* Last Name */}
-              <div>
-                <label className={`block text-[16px] text-secondary mb-2 ${true ? 'text-right' : 'text-left'}`}>
-                  نام خانوادگی *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Icons.User className="text-secondary" />
-                  </div>
+                <div>
+                  <label className="block text-[16px] text-secondary mb-2 text-right">نام خانوادگی</label>
                   <input
                     type="text"
                     value={formData.last_name}
                     onChange={(e) => handleInputChange('last_name', e.target.value)}
-                    className={`w-full pl-10 pr-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                      errors.last_name ? 'border-quaternary' : 'border-quinary-tint-500'
-                    } focus:border-primary outline-none transition-colors duration-300`}
-                    placeholder="نام خانوادگی"
+                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${errors.last_name ? 'border-quaternary' : 'border-quinary-tint-500'} focus:border-primary outline-none transition-colors duration-300`}
+                    placeholder="نام خانوادگی کاربر"
+                    dir="rtl"
                   />
+                  {errors.last_name && <p className="text-quaternary text-[14px] mt-1 text-right">{errors.last_name}</p>}
                 </div>
-                {errors.last_name && (
-                  <p className="text-quaternary text-[14px] mt-1">{errors.last_name}</p>
-                )}
               </div>
             </div>
 
-            {/* Boolean Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Is Author */}
-              <div className="flex items-center justify-between p-4 bg-quinary-tint-600 rounded-lg">
-                <span className="text-[16px] text-secondary">نویسنده</span>
-                <label className="relative inline-flex items-center cursor-pointer">
+            <div className="space-y-6">
+              <h3 className="text-xl font-bold text-primary">سطوح دسترسی و وضعیت</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
                   <input
                     type="checkbox"
-                    checked={formData.is_author}
-                    onChange={(e) => handleInputChange('is_author', e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className={`w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300`}></div>
-                </label>
-              </div>
-
-              {/* Is Superuser */}
-              <div className="flex items-center justify-between p-4 bg-quinary-tint-600 rounded-lg">
-                <span className="text-[16px] text-secondary">مدیر سیستم</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
+                    id="is_superuser"
                     checked={formData.is_superuser}
                     onChange={(e) => handleInputChange('is_superuser', e.target.checked)}
-                    className="sr-only peer"
+                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary-tint-100 border-quinary-tint-500 bg-quinary-tint-600"
                   />
-                  <div className={`w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300`}></div>
-                </label>
-              </div>
-
-              {/* Is Seller */}
-              <div className="flex items-center justify-between p-4 bg-quinary-tint-600 rounded-lg">
-                <span className="text-[16px] text-secondary">فروشنده</span>
-                <label className="relative inline-flex items-center cursor-pointer">
+                  <label htmlFor="is_superuser" className="text-[16px] text-secondary">ادمین</label>
+                </div>
+                
+                <div>
                   <input
                     type="checkbox"
+                    id="is_author"
+                    checked={formData.is_author}
+                    onChange={(e) => handleInputChange('is_author', e.target.checked)}
+                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary-tint-100 border-quinary-tint-500 bg-quinary-tint-600"
+                  />
+                  <label htmlFor="is_author" className="text-[16px] text-secondary">نویسنده</label>
+                </div>
+
+                <div>
+                  <input
+                    type="checkbox"
+                    id="is_seller"
                     checked={formData.is_seller}
                     onChange={(e) => handleInputChange('is_seller', e.target.checked)}
-                    className="sr-only peer"
+                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary-tint-100 border-quinary-tint-500 bg-quinary-tint-600"
                   />
-                  <div className={`w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300`}></div>
-                </label>
-              </div>
+                  <label htmlFor="is_seller" className="text-[16px] text-secondary">فروشنده</label>
+                </div>
 
-              {/* Is Active */}
-              <div className="flex items-center justify-between p-4 bg-quinary-tint-600 rounded-lg">
-                <span className="text-[16px] text-secondary">فعال</span>
-                <label className="relative inline-flex items-center cursor-pointer">
+                <div>
                   <input
                     type="checkbox"
+                    id="is_active"
                     checked={formData.is_active}
                     onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                    className="sr-only peer"
+                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary-tint-100 border-quinary-tint-500 bg-quinary-tint-600"
                   />
-                  <div className={`w-11 h-6 bg-quinary-tint-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border-2 border-quinary-tint-400 shadow-inner hover:border-quinary-tint-300`}></div>
-                </label>
-              </div>
-            </div>
-
-            {/* Read Only Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Last Login */}
-              <div>
-                <label className={`block text-[16px] text-secondary mb-2 ${true ? 'text-right' : 'text-left'}`}>
-                  آخرین ورود
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Icons.Calendar className="text-secondary" />
-                  </div>
-                  <input
-                    type="text"
-                    value={formData.last_login || 'Never'}
-                    disabled
-                    className="w-full pl-10 pr-4 py-3 bg-quinary-tint-500 text-secondary rounded-lg border-2 border-quinary-tint-500 cursor-not-allowed"
-                  />
-                </div>
-              </div>
-
-              {/* Created Date */}
-              <div>
-                <label className={`block text-[16px] text-secondary mb-2 ${true ? 'text-right' : 'text-left'}`}>
-                  تاریخ ایجاد
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Icons.Calendar className="text-secondary" />
-                  </div>
-                  <input
-                    type="text"
-                    value={formData.created_date || new Date().toLocaleDateString()}
-                    disabled
-                    className="w-full pl-10 pr-4 py-3 bg-quinary-tint-500 text-secondary rounded-lg border-2 border-quinary-tint-500 cursor-not-allowed"
-                  />
+                  <label htmlFor="is_active" className="text-[16px] text-secondary">فعال</label>
                 </div>
               </div>
             </div>
 
-            {/* Submit Error */}
-            {errors.submit && (
-              <div className="flex items-center p-4 bg-quaternary/10 border border-quaternary rounded-lg">
-                <Icons.XMark className="text-quaternary mr-2" />
-                <span className="text-quaternary">{errors.submit}</span>
-              </div>
-            )}
-
-            {/* Success Message */}
-            {showSuccess && (
-              <div className="flex items-center p-4 bg-primary/10 border border-primary rounded-lg">
-                <Icons.Check className="text-primary mr-2" />
-                <span className="text-primary">کاربر با موفقیت ذخیره شد</span>
-              </div>
-            )}
-
-            {/* Form Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 px-6 py-3 bg-primary text-quinary-tint-800 text-[16px] font-semibold rounded-lg hover:bg-primary-tint-200 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-quinary-tint-800"></div>
-                ) : (
-                  'ذخیره کاربر'
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={handleBack}
-                className="flex-1 px-6 py-3 border-2 border-primary text-primary text-[16px] font-semibold rounded-lg hover:bg-primary hover:text-quinary-tint-800 transition-colors duration-300"
-              >
-                {true ? 'انصراف' : 'انصراف'}
-              </button>
-            </div>
+            <FormActions
+              onCancel={handleBack}
+              onSubmit={handleSubmit}
+              isSubmitting={submitLoading || isLoading}
+              isSubmitDisabled={Object.keys(errors).length > 0 || submitLoading || isLoading}
+              submitText="ایجاد کاربر"
+            />
           </motion.form>
         </div>
       </div>

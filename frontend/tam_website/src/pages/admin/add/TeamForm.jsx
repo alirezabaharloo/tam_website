@@ -167,8 +167,11 @@ const TeamForm = () => {
                     type="text"
                     value={formData.name_fa}
                     onChange={e => handleInputChange('name_fa', e.target.value)}
-                    className="w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300"
+                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
+                        errors.name_fa ? 'border-quaternary' : 'border-quinary-tint-500'
+                    } focus:border-primary outline-none transition-colors duration-300`}
                     dir="rtl"
+                    placeholder="نام تیم به فارسی"
                   />
                   {errors.name_fa && <div className="text-red-500 text-sm mt-1">{errors.name_fa}</div>}
                 </div>
@@ -180,8 +183,11 @@ const TeamForm = () => {
                     type="text"
                     value={formData.name_en}
                     onChange={e => handleInputChange('name_en', e.target.value)}
-                    className="w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 border-quinary-tint-500 focus:border-primary outline-none transition-colors duration-300"
+                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
+                        errors.name_en ? 'border-quaternary' : 'border-quinary-tint-500'
+                    } focus:border-primary outline-none transition-colors duration-300`}
                     dir="ltr"
+                    placeholder="Team name in English"
                   />
                   {errors.name_en && <div className="text-red-500 text-sm mt-1">{errors.name_en}</div>}
                 </div>
@@ -198,7 +204,7 @@ const TeamForm = () => {
               onCancel={handleBack}
               onSubmit={handleSubmit}
               isSubmitting={isLoading}
-              isSubmitDisabled={!isFormValid(formData)}
+              isSubmitDisabled={Object.keys(errors).length > 0 || isLoading}
               submitText="ایجاد تیم"
             />
           </motion.form>
