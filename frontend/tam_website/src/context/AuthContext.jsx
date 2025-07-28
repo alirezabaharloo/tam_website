@@ -42,15 +42,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
 
     const checkAdminPannelAccess = async () => {
       try {
         const storedTokens = localStorage.getItem('tokens');
-        if (!storedTokens || !isAuthenticated) {
-          if (isMounted) setIsAdmin(false);
-          if (isMounted) setIsAdminPannelAccess(false);
-          if (isMounted) setUser(null);
+        if (!storedTokens) {
+          setIsAdmin(false);
+          setIsAdminPannelAccess(false);
           return;
         }
 
@@ -63,32 +61,24 @@ export const AuthProvider = ({ children }) => {
           }
         });
 
-        if (!isMounted) return;
-
-        if (response.status === 403) {
-          setIsAdminPannelAccess(false);
-          setUser(null);
-        } else if (response.ok) {
+        if (response.ok) {
           const data = await response.json();
           setIsAdminPannelAccess(true);
           setUser(data.user);
-        } else {
+        } else if (response.status === 403 || response.status === 401) {
           setIsAdminPannelAccess(false);
-          setUser(null);
+          setIsAdmin(false);
+        } else {
+          setIsAdminPannelAccess({isError:true})
         }
+
       } catch (error) {
-        console.error('Error checking admin access:', error);
-        if (isMounted) setIsAdmin(false);
-        if (isMounted) setIsAdminPannelAccess(false);
-        if (isMounted) setUser(null);
+        setIsAdminPannelAccess({isError:true})
       }
     };
 
     checkAdminPannelAccess();
 
-    return () => {
-      isMounted = false;
-    };
   }, [isAuthenticated]);
 
 

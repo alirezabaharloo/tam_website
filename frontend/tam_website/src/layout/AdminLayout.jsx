@@ -112,12 +112,16 @@ const AdminLayout = () => {
     return <SpinLoader />;
   }
 
+  if (isAdminPannelAccess?.isError) {
+    <SomethingWentWrong />
+  }
+
   if (!isAdminPannelAccess) {
     return <PageNotFound />;
   }
 
   if (isAdminPannelAccess && !hasRouteAccess) {
-    return <h1>Access Denied!</h1>
+    return <AccessDenied />
   }
 
 
