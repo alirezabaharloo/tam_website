@@ -10,6 +10,7 @@ import SomethingWentWrong from '../../pages/UI/SomethingWentWrong'
 import NoArticlesFound from '../../pages/UI/NoArticlesFound'
 import useHttp from '../../hooks/useHttp'
 import domainUrl from '../../utils/api'
+import FilterSummary from '../../components/FilterSummary'
 
 
 const containerVariants = {
@@ -122,6 +123,12 @@ export default function News() {
     setAllArticles([]);
   };
 
+  const handleClearAllFilters = () => {
+    navigate('/news');
+    window.location.reload();
+    setAllArticles([]);
+  };
+
   const handleFilterChange = (filterId) => {
     const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articless`);
     const searchParam = new URLSearchParams(window.location.search).get('search');
@@ -159,28 +166,7 @@ export default function News() {
   
   return (
     <div className="w-full max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
-      <div className="flex flex-col gap-6 sm:gap-8 md:gap-10">
-        {searchParam && (
-          <div className="flex items-center justify-between bg-quaternary mt-[-3rem] backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-quinary-tint-800/20">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span className="text-secondary text-sm sm:text-base md:text-lg">
-                {t('searchResultsFor')}:
-              </span>
-              <span className="text-quaternary font-medium text-sm sm:text-base md:text-lg text-white">
-                {searchParam}
-              </span>
-            </div>
-            <button
-              onClick={handleClearSearch}
-              className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-quinary-tint-800 hover:bg-quinary-tint-700 rounded-lg text-secondary hover:text-quaternary transition-colors duration-300"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm sm:text-base">{t('clearSearch')}</span>
-            </button>
-          </div>
-        )}
+      <div className="flex flex-col gap-1 sm:gap-2 md:gap-4">
         
         {teamParam && (
           <div className="flex items-center justify-between bg-quaternary  backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-quinary-tint-800/20">
@@ -214,6 +200,14 @@ export default function News() {
         <NewsFilter 
           activeFilter={activeFilter} 
           onFilterChange={handleFilterChange} 
+        />
+        
+        {/* Filter Summary */}
+        <FilterSummary 
+          contentType={activeFilter} 
+          team={teamParam} 
+          search={searchParam} 
+          onClearAllFilters={handleClearAllFilters}
         />
         {
           (((isLoading || allArticles.length == 0) && response?.detail !== 'no articles found!' && (!requestUrl.includes("page") || (requestUrl.includes("page") && requestUrl.includes("fetch-all"))))) ?  <SpinLoader /> :(
