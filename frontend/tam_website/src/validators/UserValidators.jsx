@@ -4,7 +4,7 @@ export const validateUserForm = (formData) => {
   // Validate phone_number
   if (!formData.phone_number) {
     errors.phone_number = 'شماره موبایل الزامی است.';
-  } else if (!/^\d+$/.test(formData.phone_number)){
+  } else if (!/^\b$/.test(formData.phone_number)){
     errors.phone_number = 'شماره تلفن همراه نامعتبر است!';
   } else if (!/^[0-9]{11}$/.test(formData.phone_number)) {
     errors.phone_number = 'شماره موبایل باید دقیقاً ۱۱ رقم باشد.';
