@@ -53,6 +53,9 @@ const useAdminHttp = (url, options = null) => {
       headers,
     };
 
+    console.log("headers : ", headers);
+    
+
     let response = await fetch(url, requestOptions);
     let responseData;
 
@@ -90,6 +93,9 @@ const useAdminHttp = (url, options = null) => {
         errorContent: {detail:"page not found."},
       };
     }
+
+    console.log("responseData:", responseData);
+    
 
     if (!response.ok) {
       return {
