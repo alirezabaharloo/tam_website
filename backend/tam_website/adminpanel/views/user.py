@@ -63,10 +63,16 @@ class CreateUserView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        return Response({'detail': 'کاربر با موفقیت ایجاد شد.', 'id': user.id}, status=status.HTTP_201_CREATED)
-
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                'detail': "کاربر با موفقیت ساخته شد!",
+                'id': user.id
+            }, status=status.HTTP_200_OK)
+        return Response({
+                'detail': "کاربر با موفقیت ساخته شد!",
+                'id': user.id
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class UserDeactivateView(UpdateAPIView):
     serializer_class = UserDeactivateSerializer

@@ -81,27 +81,16 @@ const TeamForm = () => {
       } else {
         successNotif('تیم جدید اضافه شد');
         setTimeout(() => {
-          navigate('/admin/teams', {
-            state: {
-              preserveFilters: true
-            }
-          });
-        }, 2000);
+          navigate(`/admin/teams/edit/${response.id}`);
+        }, 1500);
       }
     } catch (err) {
       errorNotif('خطا در ارتباط با سرور');
-      if (err && err.response && err.response.data) {
-        setErrors(err.response.data);
-      } else if (typeof err === 'object' && err !== null) {
-        setErrors(err);
-      } else {
-        setErrors({ general: 'خطایی رخ داد.' });
-      }
     }
   };
 
   const handleBack = () => {
-    window.history.back();
+    navigate("/admin/teams")
   };
   
   const tabs = [

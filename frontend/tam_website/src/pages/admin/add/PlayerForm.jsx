@@ -115,31 +115,18 @@ const PlayerForm = () => {
       } else {
         successNotif('بازیکن جدید اضافه شد');
         setTimeout(() => {
-          navigate('/admin/players', { 
-            state: { 
-              preserveFilters: true 
-            }
-          });
-        }, 2000);
+          navigate(`/admin/players/edit/${response.id}`);
+        }, 1500);
       }
     } catch (error) {
       errorNotif('خطا در ارتباط با سرور');
-      // Ensure we set errors in a consistent way, preferably from error.response.data if available
-      if (error && error.response && error.response.data) {
-        setErrors(error.response.data);
-      } else if (typeof error === 'object' && error !== null) {
-        setErrors(error);
-      } else {
-        setErrors({ general: 'خطایی رخ داد.' });
-      }
-      console.error('Error submitting form:', error);
     } finally {
       setIsLoading(false);
     }
   };
   
   const handleBack = () => {
-    window.history.back();
+    navigate("/admin/players")
   };
 
   const tabs = [

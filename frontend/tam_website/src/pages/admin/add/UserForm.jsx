@@ -68,6 +68,8 @@ const UserForm = () => {
   };
 
   const handleSubmit = async (e) => {
+    console.log('yes');
+    
     e.preventDefault();
     setIsLoading(true);
 
@@ -105,16 +107,19 @@ const UserForm = () => {
       is_active: formData.is_active,
     };
     
+    console.log(dataToSend);
     try {
-      console.log(dataToSend);
       const response = await sendRequest('http://localhost:8000/api/admin/user-create/', 'POST', dataToSend);
-
+      console.log(response);
+      
       if (response?.isError) {
-        setErrors(response?.errorContent || {});
+        // setErrors(response?.errorContent || {});
         errorNotif('خطا در ایجاد کاربر');
       } else {
         successNotif('کاربر با موفقیت ایجاد شد');
-        navigate(`/admin/users/edit/${response?.data?.id}`);
+        setTimeout(() => {
+          navigate(`/admin/users/edit/${response.id}`);
+        }, 1500);
       }
     } catch (error) {
       errorNotif('خطا در ارتباط با سرور');
@@ -125,10 +130,9 @@ const UserForm = () => {
   };
 
   const handleBack = () => {
-    navigate(-1);
+    navigate("/admin/users");
   };
 
-  console.log(errors);
 
   // Check if all required fields are filled and no validation errors
   const isFormComplete = 

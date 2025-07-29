@@ -72,8 +72,8 @@ export const errorNotif = (message, options = {}) => {
       <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
       {/* Text content */}
       <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
-        <div className="font-bold text-lg mb-1 truncate">{i18n.t('error', { ns: 'common' })}</div>
-        <div className="text-base leading-snug break-words truncate" title={message}>{message}</div>
+        <div className="font-bold text-lg mb-1">{i18n.t('error', { ns: 'common' })}</div>
+        <div className="text-base leading-snug break-words" title={message}>{message}</div>
       </div>
       {/* Vertical Divider */}
       <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
@@ -118,8 +118,8 @@ export const infoNotif = (message, options = {}) => {
       <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
       {/* Text content */}
       <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
-        <div className="font-bold text-lg mb-1 truncate">{i18n.t('info', { ns: 'common' })}</div>
-        <div className="text-base leading-snug break-words truncate" title={message}>{message}</div>
+        <div className="font-bold text-lg mb-1">{i18n.t('info', { ns: 'common' })}</div>
+        <div className="text-base leading-snug break-words" title={message}>{message}</div>
       </div>
       {/* Vertical Divider */}
       <div className="w-px bg-quaternary-200 mx-0.5 my-2" />

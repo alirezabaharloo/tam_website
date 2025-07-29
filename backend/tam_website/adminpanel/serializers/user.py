@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from accounts.models import User
-from accounts.models.profiles import Profile
+from accounts.models import Profile
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 from django.db import transaction
@@ -144,11 +144,9 @@ class CreateUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         phone_number = validated_data.pop("phone_number", '')
         password = validated_data.pop('password')
-        first_name = validated_data.pop('first_name', '')
-        last_name = validated_data.pop('last_name', '')
+
 
         with transaction.atomic():
             user = User.objects.create_user(phone_number=phone_number, password=password, **validated_data)
-            profile = Profile.objects.create(user=user, first_name=first_name, last_name=last_name)
 
         return user
