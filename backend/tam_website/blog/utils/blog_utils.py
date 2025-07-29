@@ -54,8 +54,15 @@ def filter_vocabulary(text: str, length: int) -> str:
 
 def get_time_ago(date_obj):
     """Returns a human readable time difference in Persian"""
-    if not hasattr(date_obj, 'created_date'):
-        raise ValueError("date_obj must have a created_date attribute")
+    gregorian_date = None
+
+    if (date:=getattr(date_obj, 'scheduled_publish_at')):
+        gregorian_date = date
+
+    else :
+        gregorian_date = date_obj.created_date.togregorian()
+    
+    
 
     lang = get_language()
     
@@ -63,7 +70,7 @@ def get_time_ago(date_obj):
     now = timezone.now()
     
     # Convert jalali to gregorian and set the timezone
-    gregorian_date = date_obj.created_date.togregorian()
+    
     diff = now - gregorian_date
     return naturaltime(diff) if lang == 'en' else time_ago_persian_format(naturaltime(diff))
 

@@ -368,6 +368,9 @@ const EditNewsForm = () => {
     });
     formDataToSend.append('slideshow_image_count', newSlideshowFiles.length);
 
+    console.log("formData:", formData);
+    
+
     try {
       const response = await sendRequest(`http://localhost:8000/api/admin/article-update/${articleId}/`, 'PATCH', formDataToSend);
       

@@ -113,7 +113,14 @@ const NewsTable = ({ navigate, articles, getArticles, currentPage, totalItems, o
                 articles.map((article, index) => (
                   <tr key={article.id || index} className="hover:bg-quinary-tint-500 transition-colors duration-200">
                     <td className="px-4 py-3 text-[14px] text-secondary text-right">{truncateTitle(article.title)}</td>
-                    <td className="px-4 py-3 text-[14px] text-secondary text-right">{renderStatus(article.status)}</td>
+                    <td className="px-4 py-3 text-[14px] text-secondary text-right relative">
+                      {renderStatus(article.status)}
+                      {
+                        article.scheduled_publish_at && article.status === 'DR' ? (
+                          <button type="button" class=" bg-quaternary text-white rounded-lg hover:bg-quaternary/90 transition-colors duration-300 absolute top-[1.2rem] left-[1.5rem]" title="مقاله زمان&zwnj;بندی شده"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></button>
+                        ) : undefined
+                      }
+                      </td>
                     <td className="px-4 py-3 text-[14px] text-secondary text-right">{renderType(article.type)}</td>
                     <td className="px-4 py-3 text-[14px] text-secondary text-right">{article.team || '---'}</td>
                     <td className="px-4 py-3 text-[14px] text-secondary text-right">{article.hits_count || '0'}</td>

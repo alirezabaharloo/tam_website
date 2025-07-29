@@ -95,12 +95,14 @@ class UpdateArticleView(UpdateAPIView):
         return context
     
     def update(self, request, *args, **kwargs):
+        print(request.data)
         """
         Update the article with bilingual support
         """
         partial = kwargs.pop('partial', True)  # Always use partial updates
         instance = self.get_object()
         
+
         # Make sure instance is not None
         if not instance:
             return Response(
@@ -112,7 +114,7 @@ class UpdateArticleView(UpdateAPIView):
         context = self.get_serializer_context()
         context['article_instance'] = instance
         
-        serializer = self.serializer_class(instance, data=request.data, partial=partial, context=context)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial, context=context)
         
         if serializer.is_valid():
             serializer.save()
@@ -142,6 +144,8 @@ class ArticleFilterDataView(APIView):
             '': 'همه وضعیت‌ها',  # Empty string for "All"
         }
         for choice_key, choice_value in Article.Status.choices:
+            if request.query_params.get("filter_page", False):
+                status_options["ST"] = 'زمان بندی شده'
             if choice_key == 'DR':
                 status_options[choice_key] = 'پیش نویس'
             elif choice_key == 'PB':

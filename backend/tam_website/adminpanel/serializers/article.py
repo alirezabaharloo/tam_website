@@ -5,6 +5,7 @@ from accounts.models import Profile
 from django.utils.html import strip_tags
 from django.utils import timezone
 from datetime import datetime
+from celery import current_app
 
 
 class BilingualArticleSerializer(serializers.ModelSerializer):
@@ -273,11 +274,12 @@ class CreateArticleSerializer(serializers.Serializer):
         # Schedule publication if needed
         if scheduled_publish_at and article.status == Article.Status.DRAFT:
             from blog.tasks import publish_scheduled_article
-            # Use apply_async with the eta parameter to schedule the task
-            publish_scheduled_article.apply_async(
+            result = publish_scheduled_article.apply_async(
                 args=[article.id],
                 eta=scheduled_publish_at
             )
+            article.scheduled_task_id = result.id
+            article.save()
         
         return article
 
@@ -301,6 +303,7 @@ class ArticleUpdateSerializer(serializers.Serializer):
         required=False,
         allow_empty=True
     )
+    scheduled_publish_at = serializers.DateTimeField(required=False, allow_null=True)
     
     def validate(self, data):
         """
@@ -374,6 +377,9 @@ class ArticleUpdateSerializer(serializers.Serializer):
         return data
     
     def update(self, instance, validated_data):
+        print("*" * 20)
+        print("validated_data: {}".format(validated_data))
+        print("*" * 20)
         """
         Update an existing article with translations
         """
@@ -391,23 +397,45 @@ class ArticleUpdateSerializer(serializers.Serializer):
             instance.video_url = validated_data.get('video_url', '')
         
         # Handle scheduled_publish_at and schedule Celery task
+        scheduled_publish_at_changed = False
         if 'scheduled_publish_at' in validated_data:
             scheduled_publish_at = validated_data.get('scheduled_publish_at')
             # If scheduled_publish_at is provided, check if it's in the future and schedule the task
             if scheduled_publish_at and (validated_data.get('status', instance.status) == Article.Status.DRAFT):
                 if scheduled_publish_at <= timezone.now():
                     raise serializers.ValidationError({"scheduled_publish_at": "زمان انتشار باید در آینده باشد."})
+                # If scheduled_publish_at changed or was not set before, revoke previous task
+                if instance.scheduled_task_id:
+                    try:
+                        current_app.control.revoke(instance.scheduled_task_id, terminate=True)
+                    except Exception:
+                        pass
                 instance.scheduled_publish_at = scheduled_publish_at
+                # Schedule new task
                 from blog.tasks import publish_scheduled_article
-                publish_scheduled_article.apply_async(
+                result = publish_scheduled_article.apply_async(
                     args=[instance.id],
                     eta=scheduled_publish_at
                 )
+                instance.scheduled_task_id = result.id
+                scheduled_publish_at_changed = True
             else:
-                # If scheduled_publish_at is set to null or not provided and status is not DRAFT, clear it
+                # If scheduled_publish_at is removed or status changed, revoke previous task
+                if instance.scheduled_task_id:
+                    try:
+                        current_app.control.revoke(instance.scheduled_task_id, terminate=True)
+                    except Exception:
+                        pass
+                    instance.scheduled_task_id = None
                 instance.scheduled_publish_at = None
         elif instance.scheduled_publish_at and (validated_data.get('status', instance.status) != Article.Status.DRAFT):
-            # If existing scheduled_publish_at is present but status changed from DRAFT, clear it
+            # If existing scheduled_publish_at is present but status changed from DRAFT, clear it and revoke
+            if instance.scheduled_task_id:
+                try:
+                    current_app.control.revoke(instance.scheduled_task_id, terminate=True)
+                except Exception:
+                    pass
+                instance.scheduled_task_id = None
             instance.scheduled_publish_at = None
         
         # Update translations if provided

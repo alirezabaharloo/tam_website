@@ -55,7 +55,7 @@ def dashboard_stats_view(request):
         players_count = Player.objects.count() # Get players count
         
         # Calculate total views (unique IP addresses that viewed articles)
-        total_views = MiddleArticleIpAddress.objects.values('ipaddress').distinct().count()
+        total_views = MiddleArticleIpAddress.objects.values('ipaddress').count()
         
         
         # Article status distribution

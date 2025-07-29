@@ -1,3 +1,4 @@
+from csv import DictReader
 from django_filters import rest_framework as filters
 from accounts.models import User
 from django.db.models import Q
@@ -97,7 +98,7 @@ class TeamFilter(filters.FilterSet):
 
 
 class ArticleFilter(filters.FilterSet):
-    status = filters.CharFilter(field_name='status')
+    status = filters.CharFilter(method='filter_status')
     type = filters.CharFilter(field_name='type')
     team = filters.CharFilter(field_name='team')
     search = filters.CharFilter(method='filter_search')
@@ -150,6 +151,18 @@ class ArticleFilter(filters.FilterSet):
                     Q(translations__title__icontains=value) & Q(translations__language_code='fa')
                 ).distinct()
         
+    def filter_status(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        if value == "ST":  # زمان‌بندی شده = پیش‌نویس + scheduled_publish_at پر
+            return queryset.filter(
+                status=Article.Status.DRAFT,
+                scheduled_publish_at__isnull=False,
+            )
+
+        return queryset.filter(status=value)
+
     def filter_search_language(self, queryset, name, value):
         # This is just a parameter holder for the serializer
         # The actual filtering is done in filter_search

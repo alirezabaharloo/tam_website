@@ -59,6 +59,7 @@ class Article(TranslatableModel):
 
     # Scheduled publishing date and time
     scheduled_publish_at = models.DateTimeField(null=True, blank=True, help_text="Date and time when the article should be published automatically")
+    scheduled_task_id = models.CharField(max_length=255, null=True, blank=True, help_text="Celery task ID for scheduled publication")
 
     # Timestamps
     created_date = jmodels.jDateTimeField(

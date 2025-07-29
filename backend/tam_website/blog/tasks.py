@@ -23,15 +23,11 @@ def publish_scheduled_article(article_id):
             article.status = Article.Status.PUBLISHED
             article.save()
             
-            logger.info(f"Article {article_id} has been published automatically at {timezone.now()}")
             return f"Published article: {article.get_title()}"
         else:
-            logger.info(f"Article {article_id} was already published, no action taken")
             return f"Article was already published: {article.get_title()}"
             
     except Article.DoesNotExist:
-        logger.error(f"Failed to publish article {article_id}: Article not found")
-        return f"Failed to publish article {article_id}: Article not found"
+        pass
     except Exception as e:
-        logger.error(f"Error publishing article {article_id}: {str(e)}")
-        return f"Error publishing article {article_id}: {str(e)}" 
+        pass
