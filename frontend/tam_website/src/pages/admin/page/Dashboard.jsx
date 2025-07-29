@@ -273,18 +273,16 @@ const Dashboard = () => {
         isSuperuser ? 'col-span-1 text-center flex-col items-center justify-center p-2' : ''
       }`}
     >
-      <div className={`flex items-center justify-between ${isSuperuser ? 'flex-col' : ''}`}>
+      <div className={`flex items-center justify-between`}>
         <div>
-          <p className={`text-sm font-medium text-secondary ${isSuperuser ? 'text-center' : ''}`}>بازدید کلی</p>
-          <p className={`text-2xl font-semibold text-primary ${isSuperuser ? 'text-center' : ''}`}>{dashboardData?.total_views || 0}</p>
+          <p className={`text-sm font-medium text-secondary `}>بازدید کلی</p>
+          <p className={`text-2xl font-semibold text-primary `} >{dashboardData?.total_views || 0}</p>
         </div>
-        {!isSuperuser && (
           <div
             className="p-3 bg-purple-500 bg-opacity-20 rounded-full cursor-pointer transition-colors duration-300 hover:bg-purple-500 hover:bg-opacity-30"
           >
             <AdminIcons.TotalViews />
           </div>
-        )}
       </div>
     </motion.div>
   );
