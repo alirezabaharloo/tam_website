@@ -208,7 +208,7 @@ export default function Header() {
                   </form>
                 </div>
               </div>
-              <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
+              <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-30"></div>
               {/* Account Button */}
               <button onClick={handleAccountClick} className="flex items-center group h-8 sm:h-10 md:h-12 focus:outline-none">
                 {isAuthenticated ? (
@@ -216,6 +216,15 @@ export default function Header() {
                 ) : (
                   <img src="/images/icons/UserLogo.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
                 )}
+              </button>
+              <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
+              {/* Pre Register Button */}
+              <button
+                onClick={() => navigate('/pre-register')}
+                className={`hidden lg:inline-flex items-center px-4 py-2 rounded-lg border-2 border-quinary-tint-800 text-quinary-tint-800 font-semibold text-sm md:text-base shadow hover:border-tertiary hover:text-tertiary transition-all duration-300 ease-in-out ${isRTL ? 'mr-2' : 'ml-2'}`}
+                style={{ minHeight: '40px' }}
+              >
+                {i18n.language === 'fa' ? 'پیش ثبت نام' : 'Pre Register'}
               </button>
               <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
             </div>
@@ -367,6 +376,16 @@ export default function Header() {
                   style={{minHeight: '40px'}}
                 >
                   {isAuthenticated ? t('hamburgerProfile', { ns: 'blog' }) : t('hamburgerLoginRegister', { ns: 'blog' })}
+                </button>
+                <button
+                  onClick={() => {
+                    navigate('/pre-register');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full mt-2 py-2 rounded-lg border-2 border-quinary-tint-800 text-quinary-tint-800 font-semibold text-base shadow hover:border-tertiary hover:text-tertiary transition-all duration-300 ease-in-out focus:outline-none"
+                  style={{minHeight: '40px'}}
+                >
+                  {i18n.language === 'fa' ? 'پیش ثبت نام' : 'Pre Register'}
                 </button>
               </div>
             </div>
