@@ -81,8 +81,8 @@ const ContactBoxes = () => {
                 {item.icon}
               </div>
               <div className={`${isRTL ? 'mr-3 lg:mr-0' : 'ml-3 lg:ml-0'} lg:mt-2 flex-grow`}>
-                <span className="text-[12px] sm:text-[13px] md:text-[14px] lg:text-[18px] font-medium text-quinary-tint-800 block leading-none truncate">{item.title}</span>
-                <span className="text-[8px] sm:text-[9px] md:text-[10px] lg:text-[12px] font-medium text-tertiary leading-none block mt-1 truncate sm:hidden md:block">{item.subtitle}</span>
+                <span className="text-[12px] md:text-[14px] lg:text-[16px] font-medium text-quinary-tint-800 block">{item.title}</span>
+                <span className="text-[8px] sm:text-[9px] md:text-[10px] lg:text-[12px] font-medium text-tertiary block mt-1 sm:hidden md:block">{item.subtitle}</span>
               </div>
             </div>
           </div>
