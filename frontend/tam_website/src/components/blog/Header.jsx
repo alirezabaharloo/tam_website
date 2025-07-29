@@ -172,11 +172,18 @@ export default function Header() {
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
                   className={`focus:outline-none transition-all duration-300 ${isSearchOpen ? 'opacity-0' : 'opacity-100'}`}
                 >
-                  <img 
-                    src="/images/icons/SearchLogo.svg" 
-                    alt="Search" 
-                    className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-secondary transition-colors duration-300"
-                  />
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-tertiary transition-colors duration-300">
+                    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                      <path
+                        d="M27 27L19.4935 19.4935M19.4935 19.4935C21.5252 17.4619 22.6665 14.7064 22.6665 11.8333C22.6665 8.96011 21.5252 6.20462 19.4935 4.17299C17.4619 2.14136 14.7064 1 11.8333 1C8.96011 1 6.20462 2.14136 4.17299 4.17299C2.14136 6.20462 1 8.96011 1 11.8333C1 14.7064 2.14136 17.4619 4.17299 19.4935C6.20462 21.5252 8.96011 22.6665 11.8333 22.6665C14.7064 22.6665 17.4619 21.5252 19.4935 19.4935Z"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+
                 </button>
                 <div 
                   ref={searchBarRef}
@@ -211,12 +218,35 @@ export default function Header() {
               <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-30"></div>
               {/* Account Button */}
               <button onClick={handleAccountClick} className="flex items-center group h-8 sm:h-10 md:h-12 focus:outline-none">
-                {isAuthenticated ? (
-                  <img src="/images/icons/UserLogo2.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
-                ) : (
-                  <img src="/images/icons/UserLogo.svg" alt="User" className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-colors duration-200 group-hover:text-quinary-tint-600 text-quinary-tint-800" />
-                )}
+                  {isAuthenticated ? (
+                    // UserLogo2 (fill)
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-tertiary transition-colors duration-300">
+                      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M11.2506 9C11.2506 7.20979 11.9618 5.4929 13.2277 4.22703C14.4935 2.96116 16.2104 2.25 18.0006 2.25C19.7908 2.25 21.5077 2.96116 22.7736 4.22703C24.0395 5.4929 24.7506 7.20979 24.7506 9C24.7506 10.7902 24.0395 12.5071 22.7736 13.773C21.5077 15.0388 19.7908 15.75 18.0006 15.75C16.2104 15.75 14.4935 15.0388 13.2277 13.773C11.9618 12.5071 11.2506 10.7902 11.2506 9ZM5.62713 30.1575C5.67771 26.9092 7.00359 23.8111 9.31857 21.5319C11.6336 19.2527 14.7519 17.9752 18.0006 17.9752C21.2493 17.9752 24.3677 19.2527 26.6827 21.5319C28.9977 23.8111 30.3236 26.9092 30.3741 30.1575C30.378 30.3762 30.3181 30.5913 30.2017 30.7764C30.0853 30.9616 29.9174 31.1088 29.7186 31.2C26.0424 32.8856 22.0449 33.7555 18.0006 33.75C13.8216 33.75 9.85113 32.838 6.28263 31.2C6.08386 31.1088 5.916 30.9616 5.79958 30.7764C5.68316 30.5913 5.62323 30.3762 5.62713 30.1575Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </div>
+                    
+                  ) : (
+                    // UserLogo (stroke)
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-tertiary transition-colors duration-300">
+                      <svg viewBox="0 0 25 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                        <path
+                          d="M18.2508 6.76923C18.2508 8.29932 17.6449 9.76674 16.5664 10.8487C15.4879 11.9306 14.0252 12.5385 12.5 12.5385C10.9748 12.5385 9.51207 11.9306 8.43359 10.8487C7.35512 9.76674 6.74923 8.29932 6.74923 6.76923C6.74923 5.23913 7.35512 3.77171 8.43359 2.68977C9.51207 1.60783 10.9748 1 12.5 1C14.0252 1 15.4879 1.60783 16.5664 2.68977C17.6449 3.77171 18.2508 5.23913 18.2508 6.76923ZM1 28.4892C1.04928 25.4621 2.28256 22.5756 4.43386 20.4524C6.58517 18.3291 9.48213 17.1392 12.5 17.1392C15.5179 17.1392 18.4148 18.3291 20.5661 20.4524C22.7174 22.5756 23.9507 25.4621 24 28.4892C20.3922 30.1488 16.469 31.0054 12.5 31C8.39625 31 4.50107 30.1015 1 28.4892Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  )}
               </button>
+
               <div className="h-8 sm:h-10 md:h-12 w-px bg-[#F2FAFF] opacity-50"></div>
               {/* Pre Register Button */}
               <button
@@ -234,11 +264,24 @@ export default function Header() {
                 onClick={() => setIsLangOpen(!isLangOpen)}
                 className="focus:outline-none"
               >
-                <img 
-                  src="/images/icons/LangLogo.svg" 
-                  alt="lang" 
-                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-secondary transition-colors duration-300"
-                />
+                <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-quinary-tint-800 hover:text-tertiary transition-colors duration-300">
+                  <svg
+                    width="100%"
+                    height="100%"
+                    viewBox="0 0 32 32"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16 31C19.325 30.9998 22.5558 29.8953 25.1851 27.86C27.8143 25.8247 29.6932 22.9738 30.5267 19.755M16 31C12.675 30.9998 9.44424 29.8953 6.81496 27.86C4.18568 25.8247 2.3068 22.9738 1.47334 19.755M16 31C20.1417 31 23.5 24.2833 23.5 16C23.5 7.71667 20.1417 1 16 1M16 31C11.8583 31 8.50001 24.2833 8.50001 16C8.50001 7.71667 11.8583 1 16 1M30.5267 19.755C30.835 18.555 31 17.2967 31 16C31.0041 13.4202 30.3398 10.8833 29.0717 8.63667M30.5267 19.755C26.082 22.219 21.082 23.508 16 23.5C10.73 23.5 5.77834 22.1417 1.47334 19.755M1.47334 19.755C1.15792 18.5283 0.998879 17.2666 1.00001 16C1.00001 13.325 1.70001 10.8117 2.92834 8.63667M16 1C18.6604 0.998891 21.2732 1.7056 23.5703 3.04761C25.8674 4.38962 27.7662 6.31861 29.0717 8.63667M16 1C13.3396 0.998891 10.7268 1.7056 8.42969 3.04761C6.13257 4.38962 4.23385 6.31861 2.92834 8.63667M29.0717 8.63667C25.4428 11.7799 20.8009 13.5069 16 13.5C11.0033 13.5 6.43334 11.6667 2.92834 8.63667"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+
               </button>
               <div 
                 ref={langRef}
