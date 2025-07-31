@@ -20,8 +20,7 @@ class LocalizationMixin:
     using initial method to handle localization errors and contents for each request
     """
     
-    def initial(self, request, *args, **kwargs): 
-        print(request.headers.get('Accept-Language')[:2])   
+    def initial(self, request, *args, **kwargs):  
         set_language(request.headers.get('Accept-Language'))
         return super().initial(request, *args, **kwargs)
      

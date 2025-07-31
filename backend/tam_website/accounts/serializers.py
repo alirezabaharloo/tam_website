@@ -8,6 +8,7 @@ from .utils import send_opt_code
 from .session import UserInfoSession
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password as make_otp_code, check_password as check_otp_code
+from .utils import PasswordValidation
 
 
 class SendOtpCodeSerializer(serializers.ModelSerializer):
@@ -144,13 +145,18 @@ class RegisterSerializer(PasswordSerializerMixin, serializers.ModelSerializer):
     
 class ChangePasswordSerializer(PasswordSerializerMixin, serializers.Serializer):
     old_password = serializers.CharField()
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+    
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = self.context.get('request').user
 
     def validate(self, attrs):
-        
+        # password validation
+        pass_validate = PasswordValidation(attrs['new_password'], attrs['confirm_password'])
+        pass_validate.same_password_validation()
         user = self.user
         if not user.check_password(attrs['old_password']):
             raise serializers.ValidationError({'old_password': _('Your password is wrong!')})
