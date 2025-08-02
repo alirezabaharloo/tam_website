@@ -16,6 +16,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def check_admin_access(request):
@@ -32,7 +33,7 @@ def check_admin_access(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsSuperUser])
+@permission_classes([IsAuthorAndSuperuser])
 def dashboard_stats_view(request):
     """
     Returns comprehensive dashboard data including:
