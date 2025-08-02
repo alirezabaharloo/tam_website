@@ -189,10 +189,17 @@ class UserInfoSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
     first_name = serializers.SerializerMethodField()
     last_name = serializers.SerializerMethodField()
+    created_date = serializers.DateTimeField(source='created_date', read_only=True)
+    updated_date = serializers.DateTimeField(source='updated_date', read_only=True)
+    last_login = serializers.DateTimeField(source='last_login', read_only=True)
 
     class Meta:
         model = User
-        fields = ['phone_number', 'first_name', 'last_name', 'permissions', 'is_superuser', 'is_author', 'is_seller']
+        fields = [
+            'phone_number', 'first_name', 'last_name', 'permissions',
+            'is_superuser', 'is_author', 'is_seller',
+            'created_date', 'updated_date', 'last_login'
+        ]
 
     def get_permissions(self, obj):
         perms = []

@@ -9,6 +9,11 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import translation
 from .mixins import LocalizationMixin
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import RetrieveUpdateAPIView
+from django.contrib.auth import get_user_model
+from rest_framework.generics import UpdateAPIView
+
+User = get_user_model()
 
 class OtpCodeView(LocalizationMixin, GenericAPIView):
     permission_classes = [IsNotAuthenticated]
@@ -51,15 +56,15 @@ class ChangePasswordView(LocalizationMixin, GenericAPIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def patch(self, request):
         srz_data = self.get_serializer(data=request.data)
-        if srz_data.is_valid():
-            message = srz_data.save()
+        if srz_data.is_valid(raise_exception=True):
+            message = srz_data.update(request.user, srz_data.validated_data)
 
             return Response(message, status=status.HTTP_200_OK)
         
-        return Response(srz_data.errors, status=status.HTTP_400_BAD_REQUEST) 
-        
+        return Response(srz_data.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ResetPasswordView(LocalizationMixin, GenericAPIView):
     serializer_class = ResetPasswordSerializer
@@ -78,11 +83,18 @@ class ResetPasswordView(LocalizationMixin, GenericAPIView):
         
         return Response(srz_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class UserInfoView(GenericAPIView):
+class UserInfoView(LocalizationMixin, GenericAPIView):
     serializer_class = UserInfoSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
-    
+
+class UserProfileUpdateView(UpdateAPIView):
+    serializer_class = UserInfoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user 
+        
