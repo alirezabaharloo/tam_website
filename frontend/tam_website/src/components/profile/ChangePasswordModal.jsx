@@ -1,86 +1,104 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProfileModal from './ProfileModal';
+import { validateProfileChangePasswordIntl } from '../../validators/UserValidators';
+import useAdminHttp from '../../hooks/useAdminHttp';
+import { successNotif, errorNotif } from '../../utils/customNotifs';
 
-export default function ChangePasswordModal({ isOpen, onClose, phone }) {
-  const { t } = useTranslation('profile');
-  const [code, setCode] = useState(['', '', '', '', '']);
-  const [newPass, setNewPass] = useState('');
-  const [confirmPass, setConfirmPass] = useState('');
-  const [error, setError] = useState('');
-  const inputRefs = useRef([]);
+export default function ChangePasswordModal({ isOpen, onClose }) {
+  const { t } = useTranslation(['profile', 'validation']);
+  const [fields, setFields] = useState({
+    old_password: '',
+    new_password: '',
+    confirm_password: '',
+  });
+  const [errors, setErrors] = useState({});
+  const [backendError, setBackendError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleCodeChange = (idx, val) => {
-    if (!/^[0-9]?$/.test(val)) return;
-    const newCode = [...code];
-    newCode[idx] = val;
-    setCode(newCode);
-    if (val && idx < 4) inputRefs.current[idx + 1].focus();
-    if (!val && idx > 0) inputRefs.current[idx - 1].focus();
+  const handleChange = e => {
+    setFields({ ...fields, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: undefined });
+    setBackendError('');
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    if (code.join('') !== '12345') {
-      setError(t('profileInvalidCode'));
-      return;
+    const validationErrors = validateProfileChangePasswordIntl(fields, t);
+    setErrors(validationErrors);
+    setBackendError('');
+    if (Object.keys(validationErrors).length > 0) return;
+    setLoading(true);
+    try {
+      const { sendRequest } = useAdminHttp();
+      const res = await sendRequest(
+        'http://localhost:8000/api/auth/change_password/',
+        'PATCH',
+        {
+          old_password: fields.old_password,
+          new_password: fields.new_password,
+          confirm_password: fields.confirm_password,
+        }
+      );
+      if (res && !res.isError) {
+        successNotif(t('profileModalChangePasswordSuccess'));
+        onClose();
+      } else {
+        errorNotif(t('somethingWentWrong', { ns: 'blog' }));
+        setBackendError(res?.errorContent?.detail || t('somethingWentWrong', { ns: 'blog' }));
+      }
+    } catch (err) {
+      setBackendError(err.message);
+      errorNotif(t('somethingWentWrong', { ns: 'blog' }));
+    } finally {
+      setLoading(false);
     }
-    if (!newPass || newPass.length < 6) {
-      setError(t('profilePasswordTooShort'));
-      return;
-    }
-    if (newPass !== confirmPass) {
-      setError(t('profilePasswordsNoMatch'));
-      return;
-    }
-    setError('');
-    onClose();
-    // Show success notification here if desired
   };
 
   return (
     <ProfileModal isOpen={isOpen} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="text-lg font-semibold text-primary mb-2">{t('profileChangePassword')}</div>
-        <div className="text-secondary mb-4">{t('profilePasswordCodeMsg', { phone })}</div>
-        <div className="flex gap-2 justify-center mb-4">
-          {code.map((digit, idx) => (
-            <input
-              key={idx}
-              ref={el => inputRefs.current[idx] = el}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={e => handleCodeChange(idx, e.target.value)}
-              className="w-10 h-12 text-center text-xl border text-primary border-quaternary-200 rounded-lg focus:border-primary outline-none transition"
-            />
-          ))}
+        <div>
+          <label className="block text-primary font-medium mb-1">{t('profilePassword', { ns: 'profile' })}</label>
+          <input
+            name="old_password"
+            type="password"
+            value={fields.old_password}
+            onChange={handleChange}
+            className={`w-full px-4 py-2 rounded-lg border text-primary border-quaternary-200 focus:border-primary outline-none transition ${errors.old_password ? 'border-red-500' : ''}`}
+          />
+          {errors.old_password && <div className="text-red-600 text-xs mt-1">{errors.old_password}</div>}
         </div>
         <div>
           <label className="block text-primary font-medium mb-1">{t('profileNewPassword', { ns: 'validation' })}</label>
           <input
+            name="new_password"
             type="password"
-            value={newPass}
-            onChange={e => setNewPass(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border text-primary border-quaternary-200 focus:border-primary outline-none transition"
+            value={fields.new_password}
+            onChange={handleChange}
+            className={`w-full px-4 py-2 rounded-lg border text-primary border-quaternary-200 focus:border-primary outline-none transition ${errors.new_password ? 'border-red-500' : ''}`}
           />
+          {errors.new_password && <div className="text-red-600 text-xs mt-1">{errors.new_password}</div>}
         </div>
         <div>
           <label className="block text-primary font-medium mb-1">{t('profileConfirmNewPassword', { ns: 'validation' })}</label>
           <input
+            name="confirm_password"
             type="password"
-            value={confirmPass}
-            onChange={e => setConfirmPass(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border text-primary border-quaternary-200 focus:border-primary outline-none transition"
+            value={fields.confirm_password}
+            onChange={handleChange}
+            className={`w-full px-4 py-2 rounded-lg border text-primary border-quaternary-200 focus:border-primary outline-none transition ${errors.confirm_password ? 'border-red-500' : ''}`}
           />
+          {errors.confirm_password && <div className="text-red-600 text-xs mt-1">{errors.confirm_password}</div>}
         </div>
-        {error && <div className="text-red-600 text-sm">{error}</div>}
+        {backendError && <div className="text-red-600 text-sm mt-2">{backendError}</div>}
         <button
           type="submit"
-          className="w-full py-3 rounded-lg bg-primary text-quinary-tint-800 font-bold shadow hover:bg-primary-tint-100 transition"
+          disabled={loading}
+          className="w-full py-3 rounded-lg bg-primary text-quinary-tint-800 font-bold shadow hover:bg-primary-tint-100 transition disabled:opacity-60"
         >
-          {t('profileSubmit')}
+          {loading ? t('loading', { ns: 'blog' }) : t('profileSubmit')}
         </button>
       </form>
     </ProfileModal>

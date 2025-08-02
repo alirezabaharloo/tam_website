@@ -4,9 +4,6 @@ import { useTranslation } from 'react-i18next';
 const TABS = [
   { id: 'info', label: 'profileTabInfo' },
   { id: 'history', label: 'profileTabHistory' },
-  { id: 'security', label: 'profileTabSecurity' },
-  { id: 'notifications', label: 'profileTabNotifications' },
-  { id: 'support', label: 'profileTabSupport', disabled: true },
 ];
 
 export default function ProfileTabs({ activeTab, setActiveTab }) {

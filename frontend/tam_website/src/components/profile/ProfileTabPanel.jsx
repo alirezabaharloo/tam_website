@@ -5,18 +5,12 @@ import ProfileSecurity from './ProfileSecurity';
 import ProfileNotifications from './ProfileNotifications';
 import ProfileSupport from './ProfileSupport';
 
-export default function ProfileTabPanel({ activeTab, user, onUserUpdate, notif, setNotif }) {
+export default function ProfileTabPanel({ activeTab, user, onUserUpdate, notif, setNotif, onOpenChangePassword }) {
   switch (activeTab) {
     case 'info':
-      return <ProfileInfoForm user={user} onUserUpdate={onUserUpdate} />;
+      return <ProfileInfoForm user={user} onUserUpdate={onUserUpdate} onOpenChangePassword={onOpenChangePassword} />;
     case 'history':
       return <ProfileHistoryTable user={user} />;
-    case 'security':
-      return <ProfileSecurity user={user} />;
-    case 'notifications':
-      return <ProfileNotifications notif={notif} setNotif={setNotif} />;
-    case 'support':
-      return <ProfileSupport />;
     default:
       return null;
   }

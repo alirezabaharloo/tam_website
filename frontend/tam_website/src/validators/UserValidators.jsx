@@ -1,3 +1,5 @@
+import i18n from '../i18n';
+
 export const validateUserForm = (formData) => {
   const errors = {};
 
@@ -64,5 +66,38 @@ export const validateChangePassword = (newPassword, repeatPassword) => {
     }
   }
   
+  return errors;
+}; 
+
+export const validateProfileFormIntl = (formData, t) => {
+  const errors = {};
+  // Validate first_name
+  if (formData.first_name && formData.first_name.length > 100) {
+    errors.first_name = t('profileFirstName') + ' ' + t('validation:profileFirstNameMax', { max: 100 });
+  }
+  // Validate last_name
+  if (formData.last_name && formData.last_name.length > 100) {
+    errors.last_name = t('profileLastName') + ' ' + t('validation:profileLastNameMax', { max: 100 });
+  }
+  return errors;
+};
+
+export const validateProfileChangePasswordIntl = (fields, t) => {
+  const errors = {};
+  if (!fields.old_password) {
+    errors.old_password = t('profilePasswordRequired', { ns: 'validation' });
+  }
+  if (!fields.new_password) {
+    errors.new_password = t('profileNewPassword', { ns: 'validation' }) + ' ' + t('profilePasswordRequired', { ns: 'validation' });
+  }
+  if (!fields.confirm_password) {
+    errors.confirm_password = t('profileConfirmNewPassword', { ns: 'validation' }) + ' ' + t('profilePasswordRequired', { ns: 'validation' });
+  }
+  if (fields.new_password && fields.confirm_password && fields.new_password !== fields.confirm_password) {
+    errors.confirm_password = t('profilePasswordsNoMatch', { ns: 'profile' });
+  }
+  if (fields.new_password && fields.new_password.length < 8) {
+    errors.new_password = t('profilePasswordTooShort', { ns: 'profile' });
+  }
   return errors;
 }; 
