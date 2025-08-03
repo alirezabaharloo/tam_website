@@ -51,7 +51,14 @@ export default function News() {
     const typeParam = params.get('type');
     const categoryParam = params.get('category');
     const pageParam = params.get('page');
-    const teamParam = params.get('team');
+    let teamParam = params.get('team'); // Use let as we might modify it
+
+    // Validate teamParam: ensure it's either empty or a string representation of a number
+    if (teamParam && isNaN(parseInt(teamParam))) {
+      teamParam = ''; // Treat invalid team param as empty
+      params.delete('team'); // Also remove it from params for the URL in the address bar
+      window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }
 
     const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
     if (searchParam) {
@@ -63,7 +70,7 @@ export default function News() {
     if (categoryParam) {
       searchUrl.searchParams.set('category', categoryParam);
     }
-    if (teamParam) {
+    if (teamParam) { // This will now only be true if teamParam is a valid number string or non-empty
       searchUrl.searchParams.set('team', teamParam);
     }
     if (pageParam) {
@@ -74,6 +81,11 @@ export default function News() {
     return searchUrl.toString();
   });
   const [allArticles, setAllArticles] = useState([]);
+  const [selectedTeam, setSelectedTeam] = useState(() => {
+    const teamFromUrl = new URLSearchParams(window.location.search).get('team');
+    // Also validate selectedTeam initial state
+    return (teamFromUrl && !isNaN(parseInt(teamFromUrl))) ? teamFromUrl : '';
+  });
 
 
   const activeFilter = new URLSearchParams(window.location.search).get("type");
@@ -90,9 +102,64 @@ export default function News() {
     sendRequest
   } = useHttp(requestUrl, false);
 
+  const handleFilterChange = (filterId, filterType) => {
+    const params = new URLSearchParams(window.location.search);
+
+    // Clear search and category when type or team filter changes
+    if (filterType === 'type' || filterType === 'team') {
+      params.delete('search');
+      params.delete('category');
+      // Update searchQuery in context if needed
+      // setSearchQuery('');
+    }
+
+    if (filterId !== 'all' && filterId !== '') { // Also handle empty string for team filter
+      params.set(filterType, filterId);
+    } else {
+      params.delete(filterType);
+    }
+    params.delete('page'); // Reset page when changing filter
+
+    navigate(`${window.location.pathname}?${params.toString()}`);
+    setAllArticles([]); // Clear articles to show new filtered results
+  };
+
+  // Effect to update articles when URL changes (after navigation)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const searchParam = params.get('search');
+    const typeParam = params.get('type');
+    const categoryParam = params.get('category');
+    const pageParam = params.get('page');
+    const teamParam = params.get('team');
+
+    const newSearchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
+    if (searchParam) {
+      newSearchUrl.searchParams.set('search', searchParam);
+    }
+    if (typeParam) {
+      newSearchUrl.searchParams.set('type', typeParam);
+    }
+    if (categoryParam) {
+      newSearchUrl.searchParams.set('category', categoryParam);
+    }
+    if (teamParam) {
+      newSearchUrl.searchParams.set('team', teamParam);
+    }
+    if (pageParam) {
+      newSearchUrl.searchParams.set('page', pageParam);
+      newSearchUrl.searchParams.set('fetch-all', 'true');
+    }
+    setRequestUrl(newSearchUrl.toString());
+  }, [window.location.search]); // Depend on window.location.search
+
+  // This useEffect handles setting allArticles when response changes and clears articles
+  // when response is null (e.g. on new filter apply)
   useEffect(() => {
     if (response?.articles) {
       setAllArticles(prev => [...prev, ...response.articles]);
+    } else if (response?.detail === 'no articles found!') {
+      setAllArticles([]); // Clear articles if no articles found for the filter
     }
   }, [response]);
 
@@ -129,35 +196,12 @@ export default function News() {
     setAllArticles([]);
   };
 
-  const handleFilterChange = (filterId) => {
-    const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articless`);
-    const searchParam = new URLSearchParams(window.location.search).get('search');
-    const teamParam = new URLSearchParams(window.location.search).get('team');
-    
-    if (searchParam) {
-      searchUrl.searchParams.set('search', searchParam);
-    }
-    if (teamParam) {
-      searchUrl.searchParams.set('team', teamParam);
-    }
-    if (filterId !== 'all') {
-      searchUrl.searchParams.set('type', filterId);
-    }
-    
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("type") === filterId) {
-      return;
-    }
-    if (filterId !== 'all') {
-      params.set('type', filterId);
-    } else {
-      params.delete('type');
-    }
-    params.delete('page'); // Reset page when changing filter
-    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
-    
-    setRequestUrl(searchUrl.toString());
-    setAllArticles([]);
+  const handleTeamChange = (teamId) => {
+    setSelectedTeam(teamId);
+  };
+
+  const handleApplyTeamFilter = () => {
+    handleFilterChange(selectedTeam, 'team');
   };
 
   if (isError) {
@@ -166,40 +210,14 @@ export default function News() {
   
   return (
     <div className="w-full max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
-      <div className="flex flex-col gap-1 sm:gap-2 md:gap-4">
-        
-        {teamParam && (
-          <div className="flex items-center justify-between bg-quaternary  backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-quinary-tint-800/20">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span className="text-secondary text-sm sm:text-base md:text-lg text-">
-                {t('categoryFilter') || 'Category'}:
-              </span>
-              <span className="text-quaternary font-medium text-sm sm:text-base md:text-lg text-white">
-                {teamParam}
-              </span>
-            </div>
-            <button
-              onClick={() => {
-                const params = new URLSearchParams(window.location.search);
-                params.delete('team');
-                params.delete('page');
-                navigate(`/news?${params.toString()}`);
-                window.location.reload();
-                setAllArticles([]);
-              }}
-              className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-quinary-tint-800 hover:bg-quinary-tint-700 rounded-lg text-secondary hover:text-quaternary transition-colors duration-300"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm sm:text-base">{t('clearFilter') || 'Clear Filter'}</span>
-            </button>
-          </div>
-        )}
+      <div className="flex flex-col gap-1 sm:gap-2 md:gap-4"> 
         
         <NewsFilter 
           activeFilter={activeFilter} 
           onFilterChange={handleFilterChange} 
+          selectedTeam={selectedTeam}
+          onTeamChange={handleTeamChange}
+          onApplyTeamFilter={handleApplyTeamFilter}
         />
         
         {/* Filter Summary */}

@@ -1,28 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import useHttp from '../hooks/useHttp';
+import domainUrl from '../utils/api';
+
 
 const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
 
-  const getContentTypeLabel = (type) => {
-    const typeLabels = {
-      'TX': t('newsArticles'),
-      'VD': t('newsVideos'), 
-      'SS': t('newsSlideshows')
+  const [articleTypeOptions, setArticleTypeOptions] = useState([]);
+  const [teamOptions, setTeamOptions] = useState([]);
+
+  const { sendRequest: fetchFilterData, isLoading: isLoadingFilterData, isError: isErrorFilterData } = useHttp(
+    `http://${domainUrl}:8000/api/admin/article-filter-data`,
+    true, // Send immediately on mount
+    'GET'
+  );
+
+  useEffect(() => {
+    const loadFilterData = async () => {
+      try {
+        const data = await fetchFilterData();
+        if (data) {
+          // Backend now sends article types under the 'status' key
+          const formattedArticleTypes = Object.entries(data.status).map(([key, value]) => ({
+            id: key,
+            label: value,
+          }));
+          setArticleTypeOptions(formattedArticleTypes);
+
+          const formattedTeams = Object.entries(data.teams).map(([key, value]) => ({
+            id: key,
+            label: value,
+          }));
+          setTeamOptions(formattedTeams);
+
+          console.log("FilterSummary - Fetched filter data:", data);
+          console.log("FilterSummary - Formatted Article Type Options:", formattedArticleTypes);
+          console.log("FilterSummary - Formatted Team Options:", formattedTeams);
+        }
+      } catch (error) {
+        console.error("Failed to fetch filter data:", error);
+      }
     };
-    return typeLabels[type] || '';
+
+    loadFilterData();
+  }, [fetchFilterData]);
+
+  const getContentTypeLabel = (typeId) => {
+    const option = articleTypeOptions.find(option => option.id === typeId);
+    return option ? option.label : '';
   };
 
-  const getTeamLabel = (teamName) => {
-    const teamLabels = {
-      'football': t('football'),
-      'basketball': t('basketball'),
-      'volleyball': t('volleyball'),
-      'tennis': t('tennis'),
-      'swimming': t('swimming')
-    };
-    return teamLabels[teamName] || teamName;
+  const getTeamLabel = (teamId) => {
+    const option = teamOptions.find(option => option.id === teamId);
+    return option ? option.label : '';
   };
 
   const hasSearch = search && search.trim();
@@ -53,9 +85,7 @@ const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
       } else if (filters.length > 0) {
         return `فیلتر شده بر اساس ${filters.join(' و ')}`;
       } else {
-        // Default demo message
-        // TODO: برای عدم نمایش پیام پیش‌فرض، این قسمت را کاملاً حذف کنید
-        return `نمایش نمونه: فیلتر شده بر اساس نوع مقاله ویدیو و تیم والیبال، جستجو شده بر اساس بازیکن جدید`;
+        return ""; // Return empty if no filters are active
       }
     } else {
       const filters = [];
@@ -77,9 +107,7 @@ const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
       } else if (filters.length > 0) {
         return `Filtered by ${filters.join(' and ')}`;
       } else {
-        // Default demo message
-        // TODO: برای عدم نمایش پیام پیش‌فرض، این قسمت را کاملاً حذف کنید
-        return `Demo: Filtered by content type: video and team: volleyball, searched for: new player`;
+        return ""; // Return empty if no filters are active
       }
     }
   };
@@ -87,6 +115,8 @@ const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
   const renderHighlightedMessage = () => {
     const message = generateMessage();
     
+    if (!message) return null; // Don't render if no message
+
     if (isRTL) {
       // Persian highlighting
       let highlightedMessage = message;
@@ -117,14 +147,6 @@ const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
         );
       }
       
-      // Highlight demo values
-      // TODO: برای عدم نمایش highlight کلمات demo، این قسمت را کاملاً حذف کنید
-      if (!hasContentType && !hasTeam && !hasSearch) {
-        highlightedMessage = highlightedMessage
-          .replace(/ویدیو/g, '<span class="text-quaternary font-semibold">ویدیو</span>')
-          .replace(/والیبال/g, '<span class="text-quaternary font-semibold">والیبال</span>')
-          .replace(/بازیکن جدید/g, '<span class="text-quaternary font-semibold">بازیکن جدید</span>');
-      }
       
       return highlightedMessage;
     } else {
@@ -157,25 +179,23 @@ const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
         );
       }
       
-      // Highlight demo values
-      // TODO: برای عدم نمایش highlight کلمات demo، این قسمت را کاملاً حذف کنید
-      if (!hasContentType && !hasTeam && !hasSearch) {
-        highlightedMessage = highlightedMessage
-          .replace(/video/g, '<span class="text-quaternary font-semibold">video</span>')
-          .replace(/volleyball/g, '<span class="text-quaternary font-semibold">volleyball</span>')
-          .replace(/new player/g, '<span class="text-quaternary font-semibold">new player</span>');
-      }
       
       return highlightedMessage;
     }
   };
+
+  const message = renderHighlightedMessage();
+
+  if (!message || isLoadingFilterData) {
+    return null;
+  }
 
   return (
     <div className="mt-0 mb-6 px-4 py-3 bg-gray-100 rounded-lg border border-gray-200">
       <div className="flex items-center justify-between">
         <p 
           className={`text-gray-600 text-sm font-medium flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
-          dangerouslySetInnerHTML={{ __html: renderHighlightedMessage() }}
+          dangerouslySetInnerHTML={{ __html: message }}
         />
         {onClearAllFilters && (hasSearch || hasContentType || hasTeam) && (
           <button
@@ -191,23 +211,6 @@ const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
       </div>
     </div>
   );
-  
-  // TODO: برای عدم نمایش کامپوننت وقتی هیچ فیلتری فعال نیست، کد بالا را با این کد جایگزین کنید:
-  /*
-  const message = renderHighlightedMessage();
-  if (!message || (!hasSearch && !hasContentType && !hasTeam)) {
-    return null;
-  }
-
-  return (
-    <div className="mt-0 mb-6 px-4 py-3 bg-gray-100 rounded-lg border border-gray-200">
-      <p 
-        className={`text-gray-600 text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}
-        dangerouslySetInnerHTML={{ __html: message }}
-      />
-    </div>
-  );
-  */
 };
 
 export default FilterSummary; 

@@ -95,8 +95,8 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def get_team(self, obj):
         return {
+            'id': obj.team.id,
             'name': obj.team.name,
-            'slug': obj.team.slug
         }
 
     def to_representation(self, instance: Article):

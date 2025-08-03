@@ -30,10 +30,9 @@ const NewsBox = ({
 
   const handleTeamClick = (e) => {
     e.stopPropagation();
-    const params = new URLSearchParams(window.location.search);
-    if (team?.slug && (!params.get("team") || params.get("team") !== team.slug)) {
-      navigate(`/news?team=${team.slug}`);
-      window.location.reload(); 
+    if (team?.id) {
+      navigate(`/news?team=${team.id}`);
+      document.location.reload();
     }
   };
 
@@ -107,7 +106,7 @@ const NewsBox = ({
           <div className="flex items-center">
             <span className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-secondary-tint-200">{time_ago}</span>
             <div className="h-3 w-[1px] bg-secondary mx-2"></div>
-            {team?.slug ? (
+            {team?.id ? (
               <button
                 onClick={(e) => {handleTeamClick(e)}}
                 className="text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary hover:text-secondary transition-colors duration-200"

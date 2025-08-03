@@ -56,7 +56,7 @@ class ArticleFilter(filters.FilterSet):
 
     def filter_team(self, queryset, name, value):
         if value:
-            return queryset.filter(team__slug=value)
+            return queryset.filter(team__id=value)
         return queryset
 
     def filter_most_viewed(self, queryset, name, value):
@@ -315,11 +315,11 @@ class HomeDataView(LocalizationMixin, APIView):
     def get(self, request):
         try:
             # Get latest 5 articles
-            articles = Article.objects.filter(Q(status='AC') & Q(type="TX")).order_by('-created_date')[:5]
+            articles = Article.objects.filter(Q(status='PB') & Q(type="TX")).order_by('-created_date')[:5]
             articles_data = ArticleSerializer(articles, many=True, context={'request': request, "list": True}).data
 
             # Get latest videos
-            videos = Article.objects.filter(status='AC', type='VD').order_by('-created_date')[:5]
+            videos = Article.objects.filter(status='PB', type='VD').order_by('-created_date')[:5]
             videos_data = ArticleSerializer(videos, many=True, context={'request': request, "list": True}).data
 
             # Get all teams

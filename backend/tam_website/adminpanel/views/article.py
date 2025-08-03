@@ -12,6 +12,8 @@ from rest_framework import status
 from django.utils import timezone
 from blog.tasks import publish_scheduled_article
 from permissions import *
+from django.utils.translation import get_language, gettext_lazy as _
+
 
 class AdminArticleListView(viewsets.ReadOnlyModelViewSet):
     """
@@ -133,58 +135,80 @@ class ArticleFilterDataView(APIView):
     """
     View to return all article filter options.
     """
-    permission_classes = [IsAuthorAndSuperuser]
+
+    # Define explicit mappings for translations
+    ARTICLE_TYPE_TRANSLATIONS = {
+        'en': {
+            '': 'All Types',
+            'TX': 'Text',
+            'SS': 'Slide Show',
+            'VD': 'Video',
+        },
+        'fa': {
+            'TX': 'عادی',
+            'SS': 'اسلایدشو',
+            'VD': 'ویدیو',
+            '': 'همه نوع‌ها',
+        },
+    }
+
+    ARTICLE_STATUS_TRANSLATIONS = {
+        'en': {
+            '': 'All Statuses',
+            'ST': 'Scheduled',
+            'DR': 'Draft',
+            'PB': 'Published',
+        },
+        'fa': {
+            '': 'همه وضعیت‌ها',
+            'ST': 'زمان بندی شده',
+            'DR': 'پیش نویس',
+            'PB': 'منتشر شده',
+        },
+    }
 
     def get(self, request, format=None):
         """
-        Return filter options for status, type, and teams.
+        Return filter options for type, status, and teams.
         """
-        # Status options
-        status_options = {
-            '': 'همه وضعیت‌ها',  # Empty string for "All"
-        }
-        for choice_key, choice_value in Article.Status.choices:
-            if request.query_params.get("filter_page", False):
-                status_options["ST"] = 'زمان بندی شده'
-            if choice_key == 'DR':
-                status_options[choice_key] = 'پیش نویس'
-            elif choice_key == 'PB':
-                status_options[choice_key] = 'منتشر شده'
-            else:
-                status_options[choice_key] = choice_value
-        
-        # Type options
-        type_options = {
-            '': 'همه نوع‌ها',  # Empty string for "All"
-        }
+        current_language = get_language()
+
+        # Article Type options (sent as 'status' in response for frontend compatibility)
+        article_type_options = {}
+        translated_article_types = self.ARTICLE_TYPE_TRANSLATIONS.get(current_language, self.ARTICLE_TYPE_TRANSLATIONS['en'])
         for choice_key, choice_value in Article.Type.choices:
-            if choice_key == 'TX':
-                type_options[choice_key] = 'عادی'
-            elif choice_key == 'SS':
-                type_options[choice_key] = 'اسلایدشو'
-            elif choice_key == 'VD':
-                type_options[choice_key] = 'ویدیو'
+            article_type_options[choice_key] = translated_article_types.get(choice_key, self.ARTICLE_TYPE_TRANSLATIONS['en'].get(choice_key, choice_value))
+        
+        if '' not in article_type_options:
+            article_type_options[''] = translated_article_types.get('', self.ARTICLE_TYPE_TRANSLATIONS['en'][''])
+
+        # Article Status options (sent as 'type' in response for frontend compatibility)
+        article_status_options = {}
+        translated_article_statuses = self.ARTICLE_STATUS_TRANSLATIONS.get(current_language, self.ARTICLE_STATUS_TRANSLATIONS['en'])
+        for choice_key, choice_value in Article.Status.choices:
+            if request.query_params.get("filter_page", False) and choice_key == 'ST':
+                article_status_options["ST"] = translated_article_statuses.get('ST', self.ARTICLE_STATUS_TRANSLATIONS['en']['ST'])
             else:
-                type_options[choice_key] = choice_value
+                article_status_options[choice_key] = translated_article_statuses.get(choice_key, self.ARTICLE_STATUS_TRANSLATIONS['en'].get(choice_key, choice_value))
+        
+        if '' not in article_status_options:
+            article_status_options[''] = translated_article_statuses.get('', self.ARTICLE_STATUS_TRANSLATIONS['en'][''])
         
         # Team options
         teams_data = {}
-        teams_data[''] = 'همه تیم‌ها'  # Empty string for "All"
+        teams_data[''] = _('All Teams')  # Still using gettext_lazy for consistency with other parts for 'All Teams'
         
         # Get all teams and add to options
         teams = Team.objects.all()
         for team in teams:
-            # Get Persian name for display
-            if team.has_translation('fa'):
-                team_name = team.safe_translation_getter('name', language_code='fa', default="")
-            else:
-                team_name = team.safe_translation_getter('name', any_language=True)
+            # Get translated team name based on current language
+            team_name = team.safe_translation_getter('name', language_code=current_language, default=team.safe_translation_getter('name', any_language=True))
             
             teams_data[str(team.id)] = team_name
         
         return Response({
-            'status': status_options,
-            'type': type_options,
+            'status': article_type_options, # Frontend expects 'status' key for article types
+            'type': article_status_options, # Frontend expects 'type' key for article statuses
             'teams': teams_data
         })
 
