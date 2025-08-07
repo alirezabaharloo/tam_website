@@ -6,9 +6,9 @@ import useAuth from '../../hooks/useAuth';
 export default function ProfileHeader({ user }) {
   const { t, i18n } = useTranslation('profile');
   const isRTL = i18n.language === 'fa';
-  const fullName = (user.firstName && user.lastName)
-    ? `${user.firstName} ${user.lastName}`
-    : (isRTL ? 'کاربر میهمان' : 'Guest User');
+  const fullName = (user.first_name && user.last_name)
+    ? `${user.first_name} ${user.last_name}`
+    : (isRTL ? t('profileGuestUser', { ns: 'profile' }) : t('profileGuestUser', { ns: 'profile' }));
   const { logout, isAdminPannelAccess } = useAuth();
 
   return (
@@ -20,7 +20,7 @@ export default function ProfileHeader({ user }) {
         </div>
         <div className="min-w-0">
           <div className="text-2xl font-bold text-primary truncate">{fullName}</div>
-          <div className="text-secondary text-base truncate">{user.email}</div>
+          <div className="text-secondary text-base truncate">{user.phone_number}</div>
         </div>
       </div>
       <div className="flex gap-3 mt-4 sm:mt-0">

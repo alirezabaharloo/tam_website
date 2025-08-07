@@ -9,16 +9,17 @@ from .session import UserInfoSession
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password as make_otp_code, check_password as check_otp_code
 from .utils import PasswordValidation
+from django.db import transaction
 
 
 class SendOtpCodeSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = OtpCode
         fields = ('phone_number',)
 
-    def validate(self, attrs):   
-        # validate based on reset_password query parameter     
+    def validate(self, attrs):
+        # validate based on reset_password query parameter
         if self.context.get('reset_password'):
             # if user wants to reset his password, then he must to have a account
             if not User.objects.filter(phone_number=attrs['phone_number']).exists():
@@ -44,7 +45,7 @@ class SendOtpCodeSerializer(serializers.ModelSerializer):
             }
         )
 
-        
+
         if created:
             # send otp code for the first time (create otp code obj) if it's didn't created before
             res_data = {
@@ -66,7 +67,7 @@ class SendOtpCodeSerializer(serializers.ModelSerializer):
             }
 
         return res_data
-        
+
 class CheckOtpCodeSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -86,7 +87,7 @@ class CheckOtpCodeSerializer(serializers.ModelSerializer):
                 'errors': _("OTP code has expired!")
             })
 
-        elif not check_otp_code(attrs['code'], otp_code.code):  
+        elif not check_otp_code(attrs['code'], otp_code.code): 
             raise serializers.ValidationError({
                 'errors': _("Invalid OTP code!")
             })
@@ -98,7 +99,7 @@ class CheckOtpCodeSerializer(serializers.ModelSerializer):
             return {
                 'message': _("OTP code was correct!")
             }
-        
+
         user_session = UserInfoSession(self.context['request'])
         User.objects.create(**user_session.get_user_info)
 
@@ -142,12 +143,12 @@ class RegisterSerializer(PasswordSerializerMixin, serializers.ModelSerializer):
         return {
             'phone_number': validated_data['phone_number']
         }
-    
+
 class ChangePasswordSerializer(PasswordSerializerMixin, serializers.Serializer):
     old_password = serializers.CharField()
     new_password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
-    
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -160,13 +161,13 @@ class ChangePasswordSerializer(PasswordSerializerMixin, serializers.Serializer):
         user = self.user
         if not user.check_password(attrs['old_password']):
             raise serializers.ValidationError({'old_password': _('Your password is wrong!')})
-        
-        
-        return super().validate(attrs) 
 
-    def create(self, validated_data):
+
+        return attrs
+
+    def update(self, instance, validated_data):
         user = self.user
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data['new_password'])
         user.save()
 
         return {
@@ -186,12 +187,12 @@ class ResetPasswordSerializer(PasswordSerializerMixin, serializers.Serializer):
         user.save()
 
 class UserInfoSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source='user_profile.first_name', read_only=True)
+    last_name = serializers.CharField(source='user_profile.last_name', read_only=True)
     permissions = serializers.SerializerMethodField()
-    first_name = serializers.SerializerMethodField()
-    last_name = serializers.SerializerMethodField()
-    created_date = serializers.DateTimeField(source='created_date', read_only=True)
-    updated_date = serializers.DateTimeField(source='updated_date', read_only=True)
-    last_login = serializers.DateTimeField(source='last_login', read_only=True)
+    created_date = serializers.DateTimeField(read_only=True)
+    updated_date = serializers.DateTimeField(read_only=True)
+    last_login = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = User
@@ -204,19 +205,11 @@ class UserInfoSerializer(serializers.ModelSerializer):
     def get_permissions(self, obj):
         perms = []
         if obj.is_superuser:
-            perms.append('ادمین')
+            perms.append(_('Admin'))
         if obj.is_author:
-            perms.append('نویسنده')
+            perms.append(_('Author'))
         if obj.is_seller:
-            perms.append('فروشنده')
-        return perms
-
-    def get_first_name(self, obj):
-        profile = getattr(obj, 'user_profile', None)
-        return profile.first_name if profile else None
-
-    def get_last_name(self, obj):
-        profile = getattr(obj, 'user_profile', None)
-        return profile.last_name if profile else None
+            perms.append(_('Seller'))
+        return perms if perms else [_('Normal User')]
 
 

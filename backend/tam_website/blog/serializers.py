@@ -6,6 +6,10 @@ from .models import Article
 from .utils import get_time_ago
 from .models import Team, Player
 from .utils.blog_utils import persian_digits
+from django.contrib.auth import authenticate
+from django.utils.translation import gettext_lazy as _
+from accounts.models import User, Profile
+from django.db import transaction
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -48,7 +52,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_author_name(self, obj):
         """Get formatted author name from profile"""
         return str(obj.author) if obj.author else "Unknown"
-    
+
     # def get_first_category(self, obj):
     #     """Get the first category of the article"""
     #     if self.context.get('list'):
@@ -102,7 +106,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     def to_representation(self, instance: Article):
         """Customize output based on context"""
         data = super().to_representation(instance)
-        
+
         # Truncate body for list views
         if self.context.get('list'):
             if instance.get_body(language_code=self.lang).strip():
@@ -114,7 +118,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             del data['slug']
             # Remove first_category field for detail view since we use categories
             # del data['first_category']
-            
+
         # Include status for preview
         if self.context.get('preview_article'):
             data['status'] = instance.status
@@ -198,6 +202,68 @@ class PlayerSerializer(serializers.ModelSerializer):
 
     def get_games(self, obj):
         return persian_digits(obj.games) if obj.games is not None else None
-    
+
     def get_position(self, obj):
         return obj.get_position(language_code=get_language())
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate_old_password(self, value):
+        request = self.context.get('request')
+        if not request.user.check_password(value):
+            raise serializers.ValidationError(_("رمز عبور فعلی صحیح نمی‌باشد."))
+        return value
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return user
+
+
+class UserProfileBlogUpdateSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source='user_profile.first_name', required=False, allow_blank=True, max_length=150)
+    last_name = serializers.CharField(source='user_profile.last_name', required=False, allow_blank=True, max_length=150)
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('user_profile', {})
+        
+        with transaction.atomic():
+            profile, created = Profile.objects.get_or_create(user=instance)
+            profile.first_name = profile_data.get('first_name', profile.first_name)
+            profile.last_name = profile_data.get('last_name', profile.last_name)
+            profile.save()
+
+        return instance
+
+
+class UserPasswordBlogChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    confirm_password = serializers.CharField(required=True, write_only=True)
+
+    def validate_old_password(self, value):
+        user = self.context.get('request').user
+        if not user.check_password(value):
+            raise serializers.ValidationError(_("رمز عبور فعلی صحیح نمی‌باشد."))
+        return value
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({
+                'confirm_password': _("رمزهای عبور جدید مطابقت ندارند.")
+            })
+        return attrs
+
+    def update(self, instance, validated_data):
+        user = self.context.get('request').user
+        user.set_password(validated_data['new_password'])
+        user.save()
+        return user

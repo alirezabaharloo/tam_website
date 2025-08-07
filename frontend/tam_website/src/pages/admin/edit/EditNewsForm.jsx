@@ -4,8 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import SpinLoader from '../../../pages/UI/SpinLoader';
-import SomethingWentWrong from '../../../pages/UI/SomethingWentWrong';
-import ArticleNotFound from '../../../pages/UI/ArticleNotFound';
+import AdminSomethingWentWrong from '../../../pages/adminUI/AdminSomethingWentWrong';
+import AdminArticleNotFound from '../../../pages/adminUi/AdminArticleNotFound';
 import { validateNewsForm } from '../../../validators/NewsValidators';
 import QuillEditor from '../../../components/admin/Editor/QuillEditor';
 import FormHeader from '../../../components/UI/FormHeader';
@@ -16,6 +16,7 @@ import ImportTranslationModal from '../../../components/admin/Modal/ImportTransl
 import SchedulePublishModal from '../../../components/admin/Modal/SchedulePublishModal';
 import { ArticleFormIcons } from '../../../data/Icons';
 import { formatJalaliDateTime } from '../../../utils/dateUtils';
+
 
 const EditNewsForm = () => {
   const navigate = useNavigate();
@@ -112,7 +113,6 @@ const EditNewsForm = () => {
         scheduled_publish_at: articleDetails.scheduled_publish_at || null
       };
       
-      console.log("Initializing form data:", initialFormData);
       
       setFormData(initialFormData);
       setOriginalData(initialFormData);
@@ -446,12 +446,12 @@ const EditNewsForm = () => {
     return <SpinLoader />;
   }
 
-  if (articleDetails?.errorContent?.detail === "No Article matches the given query.") {
-    return <ArticleNotFound />;
+  if (articleDetails?.errorContent?.detail === "page not found.") {
+    return <AdminArticleNotFound />;
   }
 
   if (articleDetailsError || filterError) {
-    return <SomethingWentWrong />;
+    return <AdminSomethingWentWrong />;
   }
 
 

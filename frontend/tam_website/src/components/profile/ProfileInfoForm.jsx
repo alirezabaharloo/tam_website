@@ -9,37 +9,61 @@ export default function ProfileInfoForm({ user, onUserUpdate, onOpenChangePasswo
   const [form, setForm] = useState({
     first_name: user.first_name || '',
     last_name: user.last_name || '',
-    phone_number: user.phone_number || '',
   });
   const [errors, setErrors] = useState({});
   const [backendError, setBackendError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { sendRequest, isLoading } = useAdminHttp();
 
+  // Initialize form data when user prop changes
   useEffect(() => {
-    setForm({
-      first_name: user.first_name || '',
-      last_name: user.last_name || '',
-      phone_number: user.phone_number || '',
-    });
+    if (user) {
+      setForm({
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+      });
+    }
   }, [user]);
 
+  // Live validation and change tracking
+  const hasChanges = Object.keys(form).some(key => form[key] !== (user[key] || ''));
+
+  useEffect(() => {
+    // Re-validate when form data changes
+    const runValidation = async () => {
+      const newErrors = validateProfileFormIntl(form, t);
+      setErrors(newErrors);
+    };
+    runValidation();
+  }, [form, t]);
+
+
   const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: undefined });
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: undefined }));
     setBackendError('');
   };
 
   const handleSave = async e => {
     e.preventDefault();
+
     const validationErrors = validateProfileFormIntl(form, t);
     setErrors(validationErrors);
     setBackendError('');
-    if (Object.keys(validationErrors).length > 0) return;
-    setLoading(true);
+
+    if (Object.keys(validationErrors).length > 0) {
+      errorNotif(t('validation:formErrors'));
+      return;
+    }
+
+    if (!hasChanges) {
+      errorNotif(t('validation:noChanges'));
+      return;
+    }
+
     try {
-      const { sendRequest } = useAdminHttp();
       const res = await sendRequest(
-        'http://localhost:8000/api/auth/profile/',
+        'http://localhost:8000/api/blog/profile/update/', // Changed API endpoint to blog app
         'PATCH',
         form
       );
@@ -47,16 +71,25 @@ export default function ProfileInfoForm({ user, onUserUpdate, onOpenChangePasswo
         successNotif(t('profileSaveSuccess'));
         onUserUpdate(res);
       } else {
+        setErrors(res?.errorContent || {});
         errorNotif(t('somethingWentWrong', { ns: 'blog' }));
         setBackendError(res?.errorContent?.detail || t('somethingWentWrong', { ns: 'blog' }));
       }
     } catch (err) {
-      setBackendError(err.message);
       errorNotif(t('somethingWentWrong', { ns: 'blog' }));
-    } finally {
-      setLoading(false);
+      console.error('Error submitting profile form:', err);
+      if (err.response && err.response.data) {
+        setErrors(err.response.data);
+        setBackendError(err.response.data.detail || t('somethingWentWrong', { ns: 'blog' }));
+      } else if (typeof err === 'object' && err !== null) {
+        setBackendError(err.message || t('somethingWentWrong', { ns: 'blog' }));
+      } else {
+        setBackendError(t('somethingWentWrong', { ns: 'blog' }));
+      }
     }
   };
+
+  const isSubmitDisabled = Object.keys(errors).length > 0 || !hasChanges || isLoading;
 
   return (
     <form className="space-y-6" onSubmit={handleSave}>
@@ -88,27 +121,49 @@ export default function ProfileInfoForm({ user, onUserUpdate, onOpenChangePasswo
           <input
             name="phone_number"
             type="text"
-            value={form.phone_number}
+            value={user.phone_number || ''}
             disabled
             className="w-full px-4 py-2 rounded-lg border border-quaternary-200 text-primary-tint-500 bg-gray-100"
           />
+        </div>
+        <div>
+          <label className="block text-primary font-medium mb-1">{t('profilePassword')}</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="password"
+              value="********"
+              disabled
+              className="w-full px-4 py-2 rounded-lg border border-quaternary-200 text-primary-tint-500 cursor-not-allowed bg-gray-100"
+            />
+            <button
+              type="button"
+              onClick={onOpenChangePassword}
+              className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 font-medium"
+            >
+              {t('profileChangePassword')}
+            </button>
+          </div>
         </div>
       </div>
       {backendError && <div className="text-red-600 text-sm mt-2">{backendError}</div>}
       <div className="flex gap-4 mt-6">
         <button
           type="submit"
-          disabled={loading}
-          className="px-6 py-2 rounded-lg bg-primary text-quinary-tint-800 font-semibold shadow hover:bg-primary-tint-100 transition disabled:opacity-60"
+          disabled={isSubmitDisabled}
+          className={`px-6 py-2 rounded-lg bg-primary text-quinary-tint-800 font-semibold shadow hover:bg-primary-tint-100 transition ${isSubmitDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          {loading ? t('loading', { ns: 'blog' }) : t('profileSave')}
+          {isLoading ? t('loading', { ns: 'blog' }) : t('profileSave')}
         </button>
         <button
           type="button"
-          onClick={onOpenChangePassword}
+          onClick={() => {
+            setForm({ first_name: user.first_name || '', last_name: user.last_name || '' });
+            setErrors({});
+            setBackendError('');
+          }}
           className="px-6 py-2 rounded-lg border border-primary text-primary font-semibold shadow hover:bg-quaternary-tint-900 transition"
         >
-          {t('profileChangePassword')}
+          {t('profileDiscard')}
         </button>
       </div>
     </form>

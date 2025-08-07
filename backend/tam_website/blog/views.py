@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.utils.translation import get_language, activate as set_language
-from blog.serializers import ArticleSerializer, ArticleDetailSerializer
-from permissions import IsAuthor, IsSuperUser
+from blog.serializers import ArticleSerializer, ArticleDetailSerializer, UserProfileBlogUpdateSerializer, UserPasswordBlogChangeSerializer
+from permissions import IsAuthor, IsSuperUser, IsAuthorAndSuperuser
 from blog.models import Article
 from accounts.mixins import LocalizationMixin, IpAddressMixin
 from .models import IpAddress
@@ -16,6 +16,12 @@ from rest_framework.pagination import PageNumberPagination
 from .models import Team, Player
 from .serializers import TeamSerializer, PlayerSerializer
 from accounts.models import Profile
+from django.core.mail import send_mail
+from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
+from accounts.models import User, Profile
+from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 
 
 class ArticlePagination(PageNumberPagination):
@@ -424,3 +430,57 @@ class ArticleFilterDataView(APIView):
             'type': article_status_options, # Frontend expects 'type' key for article statuses
             'teams': teams_data
         })
+
+
+class PlayerPreRegisterView(APIView):
+    """
+    API endpoint for player pre-registration.
+    Receives form data and sends it as an email.
+    """
+    def post(self, request, *args, **kwargs):
+        full_name = request.data.get('fullName')
+        phone_number = request.data.get('phone')
+        age = request.data.get('age')
+        sport = request.data.get('sport')
+
+        if not all([full_name, phone_number, age, sport]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        subject = 'Player Pre-Registration Form Submission'
+        message = (
+            f'بازیکن جدید پیش ثبت نام کرد:\n'
+            f'نام و نام خانوادگی: {full_name}\n'
+            f'شماره تلفن همراه: {phone_number}\n'
+            f'سن: {age}\n'
+            f'رشته ورزشی: {sport}'
+        )
+        from_email = settings.EMAIL_HOST_USER  # Use the configured email address
+        recipient_list = ['tamisfahan@gmail.com']
+
+        try:
+            send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            return Response({'message': 'Pre-registration successful!'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(f"Error sending email: {e}")
+            return Response({
+                'error': 'Failed to send pre-registration email.',
+                'detail': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserProfileBlogUpdateView(UpdateAPIView):
+    serializer_class = UserProfileBlogUpdateSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+    
+    def get_object(self):
+        return self.request.user
+
+
+class UserPasswordBlogChangeView(UpdateAPIView):
+    serializer_class = UserPasswordBlogChangeSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+
+    def get_object(self):
+        return self.request.user

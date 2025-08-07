@@ -11,13 +11,13 @@ export const validateUserForm = (formData) => {
   }
 
   // Validate first_name
-  if (formData.first_name && formData.first_name.length > 100) {
-    errors.first_name = 'نام نمی‌تواند بیشتر از ۱۰۰ کاراکتر باشد.';
+  if (formData.first_name && formData.first_name.length > 150) {
+    errors.first_name = 'نام نمی‌تواند بیشتر از ۱۵۰ کاراکتر باشد.';
   }
 
   // Validate last_name
-  if (formData.last_name && formData.last_name.length > 100) {
-    errors.last_name = 'نام خانوادگی نمی‌تواند بیشتر از ۱۰۰ کاراکتر باشد.';
+  if (formData.last_name && formData.last_name.length > 150) {
+    errors.last_name = 'نام خانوادگی نمی‌تواند بیشتر از ۱۵۰ کاراکتر باشد.';
   }
 
   return errors;
@@ -26,19 +26,19 @@ export const validateUserForm = (formData) => {
 export const validateStrongPassword = (password) => {
   const errors = [];
   if (password.length < 8) {
-    errors.push('گذرواژه باید حداقل ۸ کاراکتر باشد.');
+    errors.push(i18n.t('validation:passwordLengthError'));
   }
   if (!/[A-Z]/.test(password)) {
-    errors.push('گذرواژه باید حداقل شامل یک حرف بزرگ باشد.');
+    errors.push(i18n.t('validation:passwordUppercaseError'));
   }
   if (!/[a-z]/.test(password)) {
-    errors.push('گذرواژه باید حداقل شامل یک حرف کوچک باشد.');
+    errors.push(i18n.t('validation:passwordLowercaseError'));
   }
   if (!/[0-9]/.test(password)) {
-    errors.push('گذرواژه باید حداقل شامل یک عدد باشد.');
+    errors.push(i18n.t('validation:passwordNumberError'));
   }
   if (!/[!@#$%^&*]/.test(password)) {
-    errors.push('گذرواژه باید حداقل شامل یک کاراکتر خاص (!@#$%^&*) باشد.');
+    errors.push(i18n.t('validation:passwordSpecialCharError'));
   }
   return errors;
 };
@@ -70,12 +70,12 @@ export const validateChangePassword = (newPassword, repeatPassword) => {
 export const validateProfileFormIntl = (formData, t) => {
   const errors = {};
   // Validate first_name
-  if (formData.first_name && formData.first_name.length > 100) {
-    errors.first_name = t('profileFirstName') + ' ' + t('validation:profileFirstNameMax', { max: 100 });
+  if (formData.first_name && formData.first_name.length > 150) {
+    errors.first_name = t('validation:profileFirstNameMax', { max: 150 });
   }
   // Validate last_name
-  if (formData.last_name && formData.last_name.length > 100) {
-    errors.last_name = t('profileLastName') + ' ' + t('validation:profileLastNameMax', { max: 100 });
+  if (formData.last_name && formData.last_name.length > 150) {
+    errors.last_name = t('validation:profileLastNameMax', { max: 150 });
   }
   return errors;
 };
@@ -83,19 +83,22 @@ export const validateProfileFormIntl = (formData, t) => {
 export const validateProfileChangePasswordIntl = (fields, t) => {
   const errors = {};
   if (!fields.old_password) {
-    errors.old_password = t('profilePasswordRequired', { ns: 'validation' });
+    errors.old_password = t('validation:profilePasswordRequired');
   }
   if (!fields.new_password) {
-    errors.new_password = t('profileNewPassword', { ns: 'validation' }) + ' ' + t('profilePasswordRequired', { ns: 'validation' });
+    errors.new_password = t('validation:profilePasswordRequired');
   }
   if (!fields.confirm_password) {
-    errors.confirm_password = t('profileConfirmNewPassword', { ns: 'validation' }) + ' ' + t('profilePasswordRequired', { ns: 'validation' });
+    errors.confirm_password = t('validation:profilePasswordRequired');
   }
   if (fields.new_password && fields.confirm_password && fields.new_password !== fields.confirm_password) {
-    errors.confirm_password = t('profilePasswordsNoMatch', { ns: 'profile' });
+    errors.confirm_password = t('validation:passwordsDoNotMatch');
   }
-  if (fields.new_password && fields.new_password.length < 8) {
-    errors.new_password = t('profilePasswordTooShort', { ns: 'profile' });
+  if (fields.new_password) {
+    const strongPasswordErrors = validateStrongPassword(fields.new_password);
+    if (strongPasswordErrors.length > 0) {
+      errors.new_password = strongPasswordErrors;
+    }
   }
   return errors;
 }; 

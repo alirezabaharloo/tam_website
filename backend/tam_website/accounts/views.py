@@ -88,8 +88,12 @@ class UserInfoView(LocalizationMixin, GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+        try:
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error in UserInfoView: {e}")
+            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserProfileUpdateView(UpdateAPIView):
     serializer_class = UserInfoSerializer

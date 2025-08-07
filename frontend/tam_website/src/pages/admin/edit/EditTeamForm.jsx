@@ -4,8 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { validateTeamForm } from '../../../validators/TeamValidators';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import SomethingWentWrong from '../../UI/SomethingWentWrong';
-import TeamNotFound from '../../UI/TeamNotFound';
+import AdminSomethingWentWrong from '../../adminUI/AdminSomethingWentWrong';
+import AdminTeamNotFound from '../../adminUI/AdminTeamNotFound';
 import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
 import FormActions from '../../../components/UI/FormActions';
@@ -157,10 +157,11 @@ const EditTeamForm = () => {
       50% { opacity: 0.3; }
     }
   `;
+  console.log(teamDetails);
   
   if (isFetching) return <div className="min-h-screen bg-quinary-tint-600 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
-  if (teamDetails?.errorContent?.detail === "No Team matches the given query.") return <TeamNotFound />;
-  if (teamDetails?.isError || fetchError) return <SomethingWentWrong />;
+  if (teamDetails?.errorContent?.detail === "page not found.") return <AdminTeamNotFound />;
+  if (teamDetails?.isError || fetchError) return <AdminSomethingWentWrong />;
 
   return (
     <div className="min-h-screen bg-quinary-tint-600">

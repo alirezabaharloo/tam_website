@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import SomethingWentWrong from '../../UI/SomethingWentWrong';
+import AdminSomethingWentWrong from '../../adminUI/AdminSomethingWentWrong';
 import FormHeader from '../../../components/UI/FormHeader';
 import FormActions from '../../../components/UI/FormActions';
 import ChangePasswordModal from '../../../components/admin/Modal/ChangePasswordModal';
@@ -162,12 +162,15 @@ const EditUserForm = () => {
     );
   }
 
+  console.log(userDetails);
+  
+
   if (userDetails?.errorContent?.detail === "No User matches the given query." || userDetails?.errorContent?.detail === "page not found.") {
-    return <SomethingWentWrong message="کاربری با این مشخصات یافت نشد." />;
+    return <AdminSomethingWentWrong message="کاربری با این مشخصات یافت نشد." />;
   }
   
   if (userDetails?.isError) {
-    return <SomethingWentWrong />;
+    return <AdminSomethingWentWrong />;
   }
 
   // Check if there are any errors to disable the submit button

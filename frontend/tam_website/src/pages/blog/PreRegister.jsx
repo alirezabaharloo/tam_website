@@ -3,20 +3,22 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { successNotif } from '../../utils/customNotifs';
+import { successNotif, errorNotif } from '../../utils/customNotifs'; // Import errorNotif
+import useAdminHttp from '../../hooks/useAdminHttp'; // Import useAdminHttp
+import domainUrl from '../../utils/api'; // Import domainUrl
 
 const sportOptions = [
   { value: '', label: '' },
-  { value: 'football', label: 'Football' },
-  { value: 'basketball', label: 'Basketball' },
-  { value: 'volleyball', label: 'Volleyball' },
-  { value: 'tennis', label: 'Tennis' },
-  { value: 'swimming', label: 'Swimming' },
+  { value: 'فوتبال', label: 'Football' },
+  { value: 'بسکتبال', label: 'Basketball' },
+  { value: 'والیبال', label: 'Volleyball' },
+  { value: 'تنیس', label: 'Tennis' },
+  { value: 'شنا', label: 'Swimming' },
   // Add more as needed
 ];
 
 export default function PreRegister() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['preRegister', 'blog']); // Add 'blog' for 'loading'
   const isRTL = i18n.language === 'fa';
   const navigate = useNavigate();
 
@@ -27,12 +29,18 @@ export default function PreRegister() {
     sport: '',
   });
   const [errors, setErrors] = useState({});
+  const { isLoading, sendRequest } = useAdminHttp(); // Destructure isLoading and sendRequest
 
   const validate = () => {
     const errs = {};
     if (!fields.fullName.trim()) errs.fullName = t('required');
+    else if (fields.fullName.length > 255) errs.fullName = t('fullNameTooLong', { ns: 'preRegister' });
+
     if (!fields.phone.trim()) errs.phone = t('required');
-    if (!fields.age || isNaN(fields.age) || +fields.age < 1) errs.age = t('invalidAge');
+    else if (!/^(09)\d{9}$/.test(fields.phone)) errs.phone = t('invalidPhoneNumberFormat', { ns: 'preRegister' }); // 11 digits, starts with 09
+
+    if (!fields.age || isNaN(fields.age) || +fields.age < 1) errs.age = t('invalidAge', { ns: 'preRegister' });
+
     if (!fields.sport) errs.sport = t('required');
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -43,12 +51,30 @@ export default function PreRegister() {
     setErrors({ ...errors, [e.target.name]: undefined });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => { // Made async
     e.preventDefault();
+
+    if (i18n.language === 'en') {
+      errorNotif(t('languageChangeRequired', { ns: 'preRegister' }));
+      return;
+    }
+
     if (!validate()) return;
-    // Optionally send to API here
-    successNotif(t('preRegisterSuccess', { ns: 'preRegister' }));
-    setTimeout(() => navigate('/'), 1200);
+
+    try {
+      const response = await sendRequest(`http://${domainUrl}:8000/api/blog/pre-register-player/`, 'POST', fields);
+      if (response?.error) { // Check for custom error from backend
+        errorNotif(t('sendEmailFailed', { ns: 'preRegister' }));
+      } else if (response?.message) { // Check for success message
+        successNotif(t('preRegisterSuccess', { ns: 'preRegister' }));
+        setTimeout(() => navigate('/'), 1200);
+      } else { // Generic error for unexpected response
+        errorNotif(t('submissionError', { ns: 'preRegister' }));
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      errorNotif(t('submissionError', { ns: 'preRegister' }));
+    }
   };
 
   return (
@@ -74,6 +100,7 @@ export default function PreRegister() {
             onChange={handleChange}
             className={`w-full px-4 py-2 rounded-lg border ${errors.fullName ? 'border-red-500' : 'border-quaternary-200'} focus:border-primary outline-none transition`}
             required
+            disabled={i18n.language === 'en'} // Disable input if language is English
           />
           {errors.fullName && <span className="text-red-500 text-xs">{errors.fullName}</span>}
         </div>
@@ -86,6 +113,7 @@ export default function PreRegister() {
             onChange={handleChange}
             className={`w-full px-4 py-2 rounded-lg border ${errors.phone ? 'border-red-500' : 'border-quaternary-200'} focus:border-primary outline-none transition`}
             required
+            disabled={i18n.language === 'en'} // Disable input if language is English
           />
           {errors.phone && <span className="text-red-500 text-xs">{errors.phone}</span>}
         </div>
@@ -99,6 +127,7 @@ export default function PreRegister() {
             onChange={handleChange}
             className={`w-full px-4 py-2 rounded-lg border ${errors.age ? 'border-red-500' : 'border-quaternary-200'} focus:border-primary outline-none transition`}
             required
+            disabled={i18n.language === 'en'} // Disable input if language is English
           />
           {errors.age && <span className="text-red-500 text-xs">{errors.age}</span>}
         </div>
@@ -110,6 +139,7 @@ export default function PreRegister() {
             onChange={handleChange}
             className={`w-full px-4 py-2 rounded-lg border ${errors.sport ? 'border-red-500' : 'border-quaternary-200'} focus:border-primary outline-none transition bg-white`}
             required
+            disabled={i18n.language === 'en'} // Disable select if language is English
           >
             <option value="">{t('selectSport', { ns: 'preRegister' })}</option>
             {sportOptions.slice(1).map(opt => (
@@ -121,8 +151,16 @@ export default function PreRegister() {
         <button
           type="submit"
           className="w-full py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors duration-200 mt-2"
+          disabled={isLoading} // Disable button if loading or language is English
         >
-          {t('submit', { ns: 'preRegister' })}
+          {isLoading ? ( // Show spinner when loading
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>{t('loading', { ns: 'blog' })}</span>
+            </div>
+          ) : (
+            t('submit', { ns: 'preRegister' })
+          )}
         </button>
       </form>
     </motion.div>

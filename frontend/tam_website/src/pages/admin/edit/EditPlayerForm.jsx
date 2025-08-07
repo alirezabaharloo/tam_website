@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
-import PlayerNotFound from '../../UI/PlayerNotFound';
-import SomethingWentWrong from '../../UI/SomethingWentWrong';
+import AdminPlayerNotFound from '../../adminUI/AdminPlayerNotFound';
+import AdminSomethingWentWrong from '../../adminUI/AdminSomethingWentWrong';
 import FormHeader from '../../../components/UI/FormHeader';
 import ImagePicker from '../../../components/UI/ImagePicker';
 import FormActions from '../../../components/UI/FormActions';
@@ -223,11 +223,11 @@ const EditPlayerForm = () => {
   }
 
   if (playerDetails?.errorContent?.detail === "No Player matches the given query." || playerDetails?.errorContent?.detail === "page not found.") {
-    return <PlayerNotFound />;
+    return <AdminPlayerNotFound />;
   }
   
   if (playerDetails?.isError || positions?.isError || playerDetailsError) {
-    return <SomethingWentWrong />;
+    return <AdminSomethingWentWrong />;
   }
 
   return (

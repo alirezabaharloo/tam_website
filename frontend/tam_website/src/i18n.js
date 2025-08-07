@@ -143,6 +143,30 @@ const commonResources = {
       profileSport: "Sport/Course",
       profileDate: "Registration Date",
       profilePassword: "Password",
+      profileTabAccountInfo: "Account Information",
+      profileTabReadOnlyInfo: "Account Information", // New translation for readonly tab
+      profileRegistrationTime: "Registration Time", // New translation
+      profileLastUpdate: "Last Update", // New translation
+      profileUserRole: "User Role", // New translation
+      roleAdmin: "Admin", // New translation
+      roleAuthor: "Author", // New translation
+      roleSeller: "Seller", // New translation
+      roleNormalUser: "Normal User", // New translation
+      profileUpdateError: "Error updating profile!", // New translation
+      profileFirstNameMax: "First name cannot exceed {{max}} characters.", // Added
+      profileLastNameMax: "Last name cannot exceed {{max}} characters.", // Added
+      formErrors: "Please fix the form errors.", // Added
+      noChanges: "No changes detected to save.", // Added
+      passwordLengthError: "Password must be at least 8 characters.", // Added
+      passwordUppercaseError: "Password must contain at least one uppercase letter.", // Added
+      passwordLowercaseError: "Password must contain at least one lowercase letter.", // Added
+      passwordNumberError: "Password must contain at least one number.", // Added
+      passwordSpecialCharError: "Password must contain at least one special character (!@#$%^&*).", // Added
+      passwordsDoNotMatch: "Passwords do not match.", // Added
+      profilePasswordRequired: "Password is required.", // Added
+      profileCurrentPassword: "Current Password", // Added
+      profileNewPassword: "New Password", // Added
+      profileConfirmNewPassword: "Confirm New Password", // Added
       profileChangePassword: "Change Password",
       profileEmailNotifications: "Email Notifications",
       profileChangeEmail: "Change Email",
@@ -160,6 +184,9 @@ const commonResources = {
       profileSubmit: "Submit Changes",
       profileEmailCodeMsg: "Enter the code sent to your email",
       profileNewEmail: "New Email",
+      profileOldPasswordPlaceholder: "Enter current password",
+      profileNewPasswordPlaceholder: "Enter new password",
+      profileConfirmNewPasswordPlaceholder: "Confirm new password",
     },
     // Form and validation related translations - loaded when needed
     validation: {
@@ -236,6 +263,11 @@ const commonResources = {
       required: "This field is required",
       invalidAge: "Please enter a valid age",
       preRegisterSuccess: "Pre-registration successful! Thank you.",
+      fullNameTooLong: "Full name cannot exceed 255 characters.",
+      invalidPhoneNumberFormat: "Phone number must be 11 digits and numeric.",
+      sendEmailFailed: "Failed to send pre-registration email. Please try again later.",
+      submissionError: "An error occurred during submission.",
+      languageChangeRequired: "Please switch the site language to Persian to proceed with pre-registration.",
       football: "Football",
       basketball: "Basketball",
       volleyball: "Volleyball",
@@ -377,6 +409,30 @@ const commonResources = {
       profileSport: "رشته/کلاس",
       profileDate: "تاریخ ثبت‌نام",
       profilePassword: "رمز عبور",
+      profileTabAccountInfo: "اطلاعات حساب",
+      profileTabReadOnlyInfo: "اطلاعات حساب", // New translation for readonly tab
+      profileRegistrationTime: "زمان ثبت نام", // New translation
+      profileLastUpdate: "آخرین بروزرسانی", // New translation
+      profileUserRole: "نقش کاربر", // New translation
+      roleAdmin: "ادمین", // New translation
+      roleAuthor: "نویسنده", // New translation
+      roleSeller: "فروشنده", // New translation
+      roleNormalUser: "کاربر عادی", // New translation
+      profileUpdateError: "خطا در به‌روزرسانی پروفایل!", // New translation
+      profileFirstNameMax: "نام نمی‌تواند بیشتر از {{max}} کاراکتر باشد.", // Added
+      profileLastNameMax: "نام خانوادگی نمی‌تواند بیشتر از {{max}} کاراکتر باشد.", // Added
+      formErrors: "لطفا خطاهای فرم را برطرف کنید.", // Added
+      noChanges: "هیچ تغییری برای ذخیره یافت نشد.", // Added
+      passwordLengthError: "گذرواژه باید حداقل 8 کاراکتر باشد.", // Added
+      passwordUppercaseError: "گذرواژه باید حداقل شامل یک حرف بزرگ باشد.", // Added
+      passwordLowercaseError: "گذرواژه باید حداقل شامل یک حرف کوچک باشد.", // Added
+      passwordNumberError: "گذرواژه باید حداقل شامل یک عدد باشد.", // Added
+      passwordSpecialCharError: "گذرواژه باید حداقل شامل یک کاراکتر خاص (!@#$%^&*) باشد.", // Added
+      passwordsDoNotMatch: "رمزهای عبور مطابقت ندارند.", // Added
+      profilePasswordRequired: "رمز عبور الزامی است.", // Added
+      profileCurrentPassword: "رمز عبور فعلی", // Added
+      profileNewPassword: "رمز عبور جدید", // Added
+      profileConfirmNewPassword: "تکرار رمز عبور جدید", // Added
       profileChangePassword: "تغییر رمز عبور",
       profileEmailNotifications: "اعلان‌های ایمیلی",
       profileChangeEmail: "تغییر ایمیل",
@@ -394,68 +450,9 @@ const commonResources = {
       profileSubmit: "ثبت تغییرات",
       profileEmailCodeMsg: "کد ارسال شده به ایمیل خود را وارد کنید",
       profileNewEmail: "ایمیل جدید",
-    },
-    validation: {
-      // Login Page
-      loginWelcomeTitle: "به وبسایت خوش آمدید",
-      loginWelcomeDescription: "لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد...",
-      userLogin: "ورود کاربر",
-      userRegister: "ثبت نام کاربر",
-      phoneNumber: "شماره موبایل",
-      password: "رمز عبور",
-      confirmPassword: "تکرار رمز عبور",
-      rememberMe: "مرا به خاطر بسپار",
-      forgotPassword: "رمز عبور را فراموش کرده‌اید؟",
-      login: "ورود",
-      register: "ثبت نام",
-      or: "یا",
-      dontHaveAccount: "حساب کاربری ندارید؟",
-      alreadyHaveAccount: "قبلاً ثبت نام کرده‌اید؟",
-      // register page
-      registerWelcomeTitle: "به وبسایت خوش آمدید",
-      registerWelcomeDescription: "لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد...",
-      // Validation messages
-      invalidCredentials: "شماره موبایل یا رمز عبور اشتباه است",
-      invalidPhoneNumber: "شماره موبایل نامعتبر است",
-      passwordsDoNotMatch: "رمزهای عبور مطابقت ندارند",
-      passwordLengthError: "رمز عبور باید حداقل 8 کاراکتر باشد",
-      passwordContentError: "از حروف و اعداد استفاده کنید",
-      loginSuccessTitle: "ورود موفق",
-      loginSuccessContent: "شما با موفقیت وارد شدید!",
-      logoutSeccessTitle: "با موفقیت خارج شدید",
-      // OTP
-      otpVerification: "تایید کد یکبار مصرف",
-      otpEnterCode: "کد ارسال شده به موبایل خود را وارد کنید",
-      invalidOtpCode: "کد یکبار مصرف نامعتبر است",
-      resendCode: "ارسال مجدد کد",
-      verify: "تایید",
-      profileProfileInfo: "اطلاعات پروفایل",
-      profileEmail: "ایمیل",
-      profileEnterEmail: "ایمیل خود را وارد کنید",
-      profileUpdateEmail: "بروزرسانی ایمیل",
-      profileChangePassword: "تغییر رمز عبور",
-      profileCurrentPassword: "رمز عبور فعلی",
-      profileNewPassword: "رمز عبور جدید",
-      profileConfirmNewPassword: "تکرار رمز عبور جدید",
-      profileYourOrders: "سفارشات شما",
-      profileNoOrders: "سفارشی یافت نشد.",
-      profileYourFavorites: "علاقه‌مندی‌های شما",
-      profileNoFavorites: "مورد علاقه‌ای یافت نشد.",
-      profileAccountSettings: "تنظیمات حساب کاربری",
-      profileEmailNotifications: "اعلان‌های ایمیلی",
-      profileEmailNotificationsDesc: "دریافت به‌روزرسانی‌ها درباره سفارشات",
-      profileSmsNotifications: "اعلان‌های پیامکی",
-      profileSmsNotificationsDesc: "دریافت به‌روزرسانی‌ها از طریق پیامک",
-      profileImageSizeError: "حجم تصویر باید کمتر از 5 مگابایت باشد",
-      profileImageUpdateSuccess: "تصویر پروفایل با موفقیت به‌روز شد",
-      profilePasswordChangeSuccess: "رمز عبور با موفقیت تغییر کرد",
-      profileEmailUpdateSuccess: "ایمیل با موفقیت به‌روز شد",
-      profileShowEmailForm: "تغییر ایمیل",
-      profileHideEmailForm: "مخفی کردن فرم ایمیل",
-      profileShowPasswordForm: "تغییر رمز عبور",
-      profileHidePasswordForm: "مخفی کردن فرم رمز عبور",
-      profilePasswordRequired: "رمز عبور الزامی است",
-      profilePasswordChangeError: "خطا در تغییر رمز عبور",
+      profileOldPasswordPlaceholder: "رمز عبور فعلی را وارد کنید",
+      profileNewPasswordPlaceholder: "رمز عبور جدید را وارد کنید",
+      profileConfirmNewPasswordPlaceholder: "رمز عبور جدید را تکرار کنید",
     },
     preRegister: {
       preRegisterTitle: "پیش ثبت نام",
@@ -468,6 +465,11 @@ const commonResources = {
       required: "این فیلد الزامی است",
       invalidAge: "لطفاً سن معتبر وارد کنید",
       preRegisterSuccess: "پیش ثبت نام موفق! متشکریم.",
+      fullNameTooLong: "نام کامل نمی‌تواند بیشتر از ۲۵۵ کاراکتر باشد.",
+      invalidPhoneNumberFormat: "شماره موبایل باید ۱۱ رقم و عددی باشد.",
+      sendEmailFailed: "ارسال ایمیل پیش‌ثبت‌نام با خطا مواجه شد. لطفاً بعداً دوباره تلاش کنید.",
+      submissionError: "خطایی در هنگام ثبت نام رخ داد.",
+      languageChangeRequired: "لطفاً زبان سایت را به فارسی تغییر دهید تا بتوانید پیش ثبت نام را انجام دهید.",
       football: "فوتبال",
       basketball: "بسکتبال",
       volleyball: "والیبال",

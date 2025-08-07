@@ -15,4 +15,7 @@ urlpatterns = [
     path('preview-article/<str:slug>/', views.ArticleDetailForAuthorsView.as_view(), name='author-article-detail'),
     path('article-like/<str:slug>/', views.ArticleLikeView.as_view(), name='article-like'),
     path('home-datas/', HomeDataView.as_view(), name='home-datas'),
+    path('pre-register-player/', views.PlayerPreRegisterView.as_view(), name='pre-register-player'),
+    path('profile/update/', views.UserProfileBlogUpdateView.as_view(), name='user-profile-update'),
+    path('change_password/', views.UserPasswordBlogChangeView.as_view(), name='user-password-change'),
 ]

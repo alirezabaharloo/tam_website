@@ -5,9 +5,9 @@ import useAuth from '../hooks/useAuth';
 import SpinLoader from '../pages/UI/SpinLoader';
 import PageNotFound from '../pages/UI/PageNotFound';
 import { AdminIcons } from '../data/Icons';
-import domainUrl from '../utils/api';
-import SomethingWentWrong from '../pages/UI/SomethingWentWrong';
+import AdminSomethingWentWrong from '../pages/adminUI/AdminSomethingWentWrong';
 import AccessDenied from '../pages/UI/AccessDenied';
+import AdminAccessDenied from '../pages/AdminUI/AdminAccessDenied'
 
 const AdminLayout = () => {
   const { isAdminPannelAccess, logout, user } = useAuth(); // Get user from AuthContext
@@ -113,7 +113,7 @@ const AdminLayout = () => {
   }
 
   if (isAdminPannelAccess?.isError) {
-    <SomethingWentWrong />
+    <AdminSomethingWentWrong />
   }
 
   if (!isAdminPannelAccess) {
@@ -121,7 +121,7 @@ const AdminLayout = () => {
   }
 
   if (isAdminPannelAccess && !hasRouteAccess) {
-    return <AccessDenied />
+    return <AdminAccessDenied />
   }
 
 
