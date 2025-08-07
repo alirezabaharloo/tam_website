@@ -12,7 +12,7 @@ const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
   const [teamOptions, setTeamOptions] = useState([]);
 
   const { sendRequest: fetchFilterData, isLoading: isLoadingFilterData, isError: isErrorFilterData } = useHttp(
-    `http://${domainUrl}:8000/api/admin/article-filter-data`,
+    `http://${domainUrl}:8000/api/blog/article-filter-data`,
     true, // Send immediately on mount
     'GET'
   );

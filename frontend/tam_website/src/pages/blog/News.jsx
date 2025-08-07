@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearch } from '../../context/SearchContext'
 import { useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+// Removed motion, AnimatePresence imports from 'framer-motion'
 import NewsFilter from '../../components/blog/NewsFilter'
 import NewsBox from '../../components/blog/NewsBox'
 import SpinLoader from '../../pages/UI/SpinLoader'
@@ -13,31 +13,7 @@ import domainUrl from '../../utils/api'
 import FilterSummary from '../../components/FilterSummary'
 
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      when: "beforeChildren",
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { 
-    opacity: 0,
-    y: 20
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut"
-    }
-  }
-};
+// Removed containerVariants and itemVariants definitions
 
 export default function News() {
   const { t, i18n } = useTranslation();
@@ -50,7 +26,6 @@ export default function News() {
     const searchParam = params.get('search');
     const typeParam = params.get('type');
     const categoryParam = params.get('category');
-    const pageParam = params.get('page');
     let teamParam = params.get('team'); // Use let as we might modify it
 
     // Validate teamParam: ensure it's either empty or a string representation of a number
@@ -60,6 +35,11 @@ export default function News() {
       window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
     }
 
+    // Always reset page to 1 on initial load unless explicitly navigating to a specific page
+    // If there are other filters present, ensure page is 1. If only 'page' is present, it's a load more scenario.
+    const currentPageParam = params.get('page');
+    params.delete('page'); // Always start fresh with page 1 if filters change
+
     const searchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
     if (searchParam) {
       searchUrl.searchParams.set('search', searchParam);
@@ -67,15 +47,21 @@ export default function News() {
     if (typeParam) {
       searchUrl.searchParams.set('type', typeParam);
     }
-    if (categoryParam) {
-      searchUrl.searchParams.set('category', categoryParam);
-    }
+    // if (categoryParam) {
+    //   searchUrl.searchParams.set('category', categoryParam);
+    // }
     if (teamParam) { // This will now only be true if teamParam is a valid number string or non-empty
       searchUrl.searchParams.set('team', teamParam);
     }
-    if (pageParam) {
-      searchUrl.searchParams.set('page', pageParam);
+
+    // Add page back if it was specifically for load more scenario (only 'page' param present)
+    if (currentPageParam && params.toString() === '') {
+      searchUrl.searchParams.set('page', currentPageParam);
       searchUrl.searchParams.set('fetch-all', 'true');
+    } else {
+      // For new filters or refresh, always fetch page 1 initially
+      searchUrl.searchParams.set('page', '1');
+      searchUrl.searchParams.set('fetch-all', 'true'); // Always fetch all for now, as per pagination logic
     }
 
     return searchUrl.toString();
@@ -105,9 +91,9 @@ export default function News() {
   const handleFilterChange = (filterId, filterType) => {
     const params = new URLSearchParams(window.location.search);
 
-    // Clear search and category when type or team filter changes
+    // Clear category when type or team filter changes (search persists)
     if (filterType === 'type' || filterType === 'team') {
-      params.delete('search');
+      // params.delete('search'); // REMOVED: Allow search to persist
       params.delete('category');
       // Update searchQuery in context if needed
       // setSearchQuery('');
@@ -118,7 +104,7 @@ export default function News() {
     } else {
       params.delete(filterType);
     }
-    params.delete('page'); // Reset page when changing filter
+    params.delete('page'); // Reset page to 1 when changing filter
 
     navigate(`${window.location.pathname}?${params.toString()}`);
     setAllArticles([]); // Clear articles to show new filtered results
@@ -148,6 +134,9 @@ export default function News() {
     }
     if (pageParam) {
       newSearchUrl.searchParams.set('page', pageParam);
+      newSearchUrl.searchParams.set('fetch-all', 'true');
+    } else { // If pageParam is not present, ensure it's page 1 for new filter sets
+      newSearchUrl.searchParams.set('page', '1');
       newSearchUrl.searchParams.set('fetch-all', 'true');
     }
     setRequestUrl(newSearchUrl.toString());
@@ -180,19 +169,21 @@ export default function News() {
     const params = new URLSearchParams(window.location.search);
     params.delete('search');
     params.delete('category');
-    params.delete('page');
-    if (params.get('type')) {
-      navigate(`/news?type=${params.get('type')}`);
+    params.delete('page'); // Clear page parameter as well
+
+    const typeParamValue = params.get('type');
+    if (typeParamValue) {
+      navigate(`/news?type=${typeParamValue}`);
     } else {
       navigate('/news');
     }
-    window.location.reload();
+    // window.location.reload(); // REMOVED: Rely on useEffect for re-fetch
     setAllArticles([]);
   };
 
   const handleClearAllFilters = () => {
     navigate('/news');
-    window.location.reload();
+    // window.location.reload(); // REMOVED: Rely on useEffect for re-fetch
     setAllArticles([]);
   };
 
@@ -230,33 +221,25 @@ export default function News() {
         {
           (((isLoading || allArticles.length == 0) && response?.detail !== 'no articles found!' && (!requestUrl.includes("page") || (requestUrl.includes("page") && requestUrl.includes("fetch-all"))))) ?  <SpinLoader /> :(
             (response?.detail === 'no articles found!') ? (
-              <motion.div
-                initial={{ opacity: 0, y: 32 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              <div
                 className="flex flex-col items-center justify-center min-h-[60vh] w-full"
               >
                 <NoArticlesFound />
-              </motion.div>
+              </div>
             ) : (
-              <motion.div 
+              <div 
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
               >
-                <AnimatePresence mode="wait">
+                
                   {allArticles.length > 0 && allArticles.map((article) => (
-                    <motion.div
+                    <div
                       key={article.id}
-                      variants={itemVariants}
-                      layout
                     >
                       <NewsBox {...article} />
-                    </motion.div>
+                    </div>
                   ))}
-                </AnimatePresence>
-              </motion.div>
+                
+              </div>
             )
           )
         }

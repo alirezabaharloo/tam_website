@@ -121,7 +121,7 @@ class Command(BaseCommand):
             # Create article instance but don't save yet
             article = Article(
                 type=article_type,
-                status=Article.Status.ACCEPT,
+                status="PB",
                 video_url=fake_en.url() if article_type == Article.Type.VIDEO else None,
                 slug=slug
             )

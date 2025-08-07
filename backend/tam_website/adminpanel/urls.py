@@ -39,7 +39,7 @@ urlpatterns = [
     path('team-update/<int:team_id>/', views.UpdateTeamView.as_view(), name='team-detail'),
     
     # Article management
-    path('article-filter-data/', views.ArticleFilterDataView.as_view(), name='article-filter-data'),
+    path('article-filter-data/', views.AdminArticleFilterDataView.as_view(), name='article-filter-data'),
     path('article-create/', views.CreateArticleView.as_view(), name='article-create'),
     path('article-detail/<int:article_id>/', views.ArticleDetailView.as_view(), name='article-detail'),
     path('article-update/<int:article_id>/', views.UpdateArticleView.as_view(), name='article-update'),

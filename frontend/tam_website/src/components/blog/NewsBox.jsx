@@ -32,7 +32,6 @@ const NewsBox = ({
     e.stopPropagation();
     if (team?.id) {
       navigate(`/news?team=${team.id}`);
-      document.location.reload();
     }
   };
 

@@ -15,7 +15,7 @@ const NewsFilter = ({ activeFilter, onFilterChange, selectedTeam, onTeamChange, 
   const [teamOptions, setTeamOptions] = useState([]);
 
   const { sendRequest: fetchFilterData, isLoading: isLoadingFilterData, isError: isErrorFilterData } = useHttp(
-    `http://${domainUrl}:8000/api/admin/article-filter-data`,
+    `http://${domainUrl}:8000/api/blog/article-filter-data`,
     true, // Send immediately on mount
     'GET'
   );
@@ -65,6 +65,7 @@ const NewsFilter = ({ activeFilter, onFilterChange, selectedTeam, onTeamChange, 
   }, []);
 
   const handleFilterClick = (filterId, filterType = 'type') => {
+    console.log(filterId, filterType);
     onFilterChange(filterId, filterType);
     setIsMobileMenuOpen(false);
   };
@@ -105,7 +106,7 @@ const NewsFilter = ({ activeFilter, onFilterChange, selectedTeam, onTeamChange, 
           }`}
           role="listbox"
         >
-          {articleTypeOptions.map((filter) => (
+          {[...articleTypeOptions].reverse().map((filter) => (
             <button
               key={filter.id}
               onClick={() => activeFilter !== filter.id ? handleFilterClick(filter.id, 'type') : undefined}
@@ -123,7 +124,7 @@ const NewsFilter = ({ activeFilter, onFilterChange, selectedTeam, onTeamChange, 
         </div>
         {/* Desktop Menu (Article Type) */}
         <nav className="hidden sm:flex items-center gap-4 md:gap-6">
-          {articleTypeOptions.map((filter) => (
+          {[...articleTypeOptions].reverse().map((filter) => (
             <button
               key={filter.id}
               onClick={() => handleFilterClick(filter.id, 'type')}

@@ -344,3 +344,83 @@ class HomeDataView(LocalizationMixin, APIView):
             )
 
 
+class ArticleFilterDataView(APIView):
+    """
+    View to return all article filter options.
+    """
+
+    # Define explicit mappings for translations
+    ARTICLE_TYPE_TRANSLATIONS = {
+        'en': {
+            '': 'All Types',
+            'TX': 'Text',
+            'SS': 'Slide Show',
+            'VD': 'Video',
+        },
+        'fa': {
+            'TX': 'عادی',
+            'SS': 'اسلایدشو',
+            'VD': 'ویدیو',
+            '': 'همه نوع‌ها',
+        },
+    }
+
+    ARTICLE_STATUS_TRANSLATIONS = {
+        'en': {
+            '': 'All Statuses',
+            'ST': 'Scheduled',
+            'DR': 'Draft',
+            'PB': 'Published',
+        },
+        'fa': {
+            '': 'همه وضعیت‌ها',
+            'ST': 'زمان بندی شده',
+            'DR': 'پیش نویس',
+            'PB': 'منتشر شده',
+        },
+    }
+
+    def get(self, request, format=None):
+        """
+        Return filter options for type, status, and teams.
+        """
+        current_language = get_language()
+
+        # Article Type options (sent as 'status' in response for frontend compatibility)
+        article_type_options = {}
+        translated_article_types = self.ARTICLE_TYPE_TRANSLATIONS.get(current_language, self.ARTICLE_TYPE_TRANSLATIONS['en'])
+        for choice_key, choice_value in Article.Type.choices:
+            article_type_options[choice_key] = translated_article_types.get(choice_key, self.ARTICLE_TYPE_TRANSLATIONS['en'].get(choice_key, choice_value))
+        
+        if '' not in article_type_options:
+            article_type_options[''] = translated_article_types.get('', self.ARTICLE_TYPE_TRANSLATIONS['en'][''])
+
+        # Article Status options (sent as 'type' in response for frontend compatibility)
+        article_status_options = {}
+        translated_article_statuses = self.ARTICLE_STATUS_TRANSLATIONS.get(current_language, self.ARTICLE_STATUS_TRANSLATIONS['en'])
+        for choice_key, choice_value in Article.Status.choices:
+            if request.query_params.get("filter_page", False) and choice_key == 'ST':
+                article_status_options["ST"] = translated_article_statuses.get('ST', self.ARTICLE_STATUS_TRANSLATIONS['en']['ST'])
+            else:
+                article_status_options[choice_key] = translated_article_statuses.get(choice_key, self.ARTICLE_STATUS_TRANSLATIONS['en'].get(choice_key, choice_value))
+        
+        if '' not in article_status_options:
+            article_status_options[''] = translated_article_statuses.get('', self.ARTICLE_STATUS_TRANSLATIONS['en'][''])
+        
+        # Team options
+        teams_data = {}
+        teams_data[''] = 'All Teams' if current_language == 'en' else 'همه تیم‌ها'
+        
+        # Get all teams and add to options
+        teams = Team.objects.all()
+        for team in teams:
+            # Get translated team name based on current language
+            team_name = team.safe_translation_getter('name', language_code=current_language, default=team.safe_translation_getter('name', any_language=True))
+            
+            teams_data[str(team.id)] = team_name
+        
+        return Response({
+            'status': article_type_options, # Frontend expects 'status' key for article types
+            'type': article_status_options, # Frontend expects 'type' key for article statuses
+            'teams': teams_data
+        })

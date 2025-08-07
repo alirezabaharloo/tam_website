@@ -26,6 +26,7 @@ const commonResources = {
       latestVideos: 'Latest Videos',
       viewAll: 'VIEW ALL',
       // Team Section
+      Team: 'Team',
       tamsTeam: "TAM'S TEAM",
       football: "FOOTBALL",
       // Shop Section
@@ -259,6 +260,7 @@ const commonResources = {
       latestVideos: 'جدیدترین ویدیوها',
       viewAll: 'مشاهده همه',
       // Team Section
+      Team: 'تیم',
       tamsTeam: "تیم‌های تام",
       football: "فوتبال",
       // Shop Section
