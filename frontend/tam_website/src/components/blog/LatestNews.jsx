@@ -21,6 +21,9 @@ const LatestNews = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Helper to strip HTML tags (render plain text like NewsBox)
+  const stripHtml = (s) => (s ? String(s).replace(/<[^>]+>/g, '') : '');
+
   // Get the latest 5 articles
   const latestNews = homeData.articles;
 
@@ -30,10 +33,9 @@ const LatestNews = () => {
     latestNews.slice(2)
   ];
   
-  const handleTeamClick = (e, teamSlug) => {
+  const handleTeamClick = (e, teamId) => {
     e.stopPropagation();
-    navigate(`/news?team=${teamSlug}`);
-    window.location.reload(); 
+    navigate(`/news?team=${teamId}`);
   };
   
 
@@ -88,7 +90,7 @@ const LatestNews = () => {
                 {article.title}
               </h3>
               <p className="text-[10px] sm:text-[12px] md:text-[14px] font-medium text-secondary-tint-100 mt-2 sm:mt-4">
-                {article.body}
+                {stripHtml(article.body)}
               </p>
               <div className="mt-auto flex items-center justify-between">
                 <div className="flex items-center">
@@ -97,7 +99,7 @@ const LatestNews = () => {
                   </span>
                   <div className="h-4 w-[1px] bg-secondary mx-2 sm:mx-4"></div>
                   <span 
-                      onClick={(e)=>{handleTeamClick(e, article.team.slug)}}
+                      onClick={(e)=>{handleTeamClick(e, article.team.id)}}
                       className="pointer-auto cursor-default text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary hover:text-secondary transition-colors duration-200"
                   >
                     {article.team.name}
@@ -148,7 +150,7 @@ const LatestNews = () => {
                 {article.title}
               </h3>
               <p className="text-[8px] sm:text-[12px] md:text-[14px] font-medium text-secondary-tint-100 mt-1 sm:mt-2 line-clamp-2">
-                {article.body}
+                {stripHtml(article.body)}
               </p>
               <div className="mt-auto flex items-center justify-between">
                 <div className="flex items-center">
@@ -157,7 +159,7 @@ const LatestNews = () => {
                   </span>
                   <div className="h-4 w-[1px] bg-secondary mx-2 sm:mx-4"></div>
                   <span 
-                      onClick={(e)=>{handleTeamClick(e, article.team.slug)}}
+                      onClick={(e)=>{handleTeamClick(e, article.team.id)}}
                       className="pointer-auto cursor-default text-[10px] sm:text-[11px] md:text-[12px] font-regular text-quaternary hover:text-secondary transition-colors duration-200"
                   >
                     {article.team.name}

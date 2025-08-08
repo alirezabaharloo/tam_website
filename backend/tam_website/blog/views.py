@@ -213,8 +213,24 @@ class ArticleDetailView(IpAddressMixin, RetrieveAPIView):
             article.hits.add(ipaddress_obj[0])
             article.save()
     
-        serializer = self.get_serializer(article, context={ "client_ip": ip })
-        return Response(serializer.data)
+        # Serialize main article (detail context)
+        main_data = self.get_serializer(article, context={ "client_ip": ip }).data
+
+        # Fetch up to 3 related articles by the same team (exclude current)
+        related_qs = Article.objects.filter(status=Article.Status.PUBLISHED)
+        if article.team_id:
+            related_qs = related_qs.filter(team_id=article.team_id)
+        else:
+            related_qs = related_qs.none()
+        related_qs = related_qs.exclude(id=article.id).order_by('-created_date')[:3]
+
+        # Serialize related articles in list context so list fields (like slug) are preserved
+        related_data = ArticleSerializer(related_qs, many=True, context={ 'request': request, 'list': True }).data
+
+        # Attach related articles to the response payload
+        main_data['relatedArticles'] = related_data
+
+        return Response(main_data)
 
 
 class CreateArticleView(LocalizationMixin, CreateAPIView):

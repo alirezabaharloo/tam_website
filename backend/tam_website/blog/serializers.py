@@ -247,20 +247,12 @@ class UserProfileBlogUpdateSerializer(serializers.ModelSerializer):
 class UserPasswordBlogChangeSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True, write_only=True)
     new_password = serializers.CharField(required=True, write_only=True)
-    confirm_password = serializers.CharField(required=True, write_only=True)
 
     def validate_old_password(self, value):
         user = self.context.get('request').user
         if not user.check_password(value):
             raise serializers.ValidationError(_("رمز عبور فعلی صحیح نمی‌باشد."))
         return value
-
-    def validate(self, attrs):
-        if attrs['new_password'] != attrs['confirm_password']:
-            raise serializers.ValidationError({
-                'confirm_password': _("رمزهای عبور جدید مطابقت ندارند.")
-            })
-        return attrs
 
     def update(self, instance, validated_data):
         user = self.context.get('request').user

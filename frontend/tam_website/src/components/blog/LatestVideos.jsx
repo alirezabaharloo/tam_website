@@ -30,10 +30,9 @@ const LatestVideos = () => {
     latestVideos.slice(2)
   ];
 
-  const handleTeamClick = (e, teamSlug) => {
+  const handleTeamClick = (e, teamId) => {
     e.stopPropagation();
-    navigate(`/news?team=${teamSlug}&type=VD`);
-    window.location.reload(); 
+    navigate(`/news?team=${teamId}&type=VD`);
   };
 
   return (
@@ -92,7 +91,7 @@ const LatestVideos = () => {
               <div className="mx-1 sm:mx-2 h-4 w-[1px] bg-quinary-tint-800"></div>
               <span 
                 className="cursor-default hover:text-[white] text-[10px] sm:text-[14px] font-medium text-tertiary-tint-200"
-                onClick={(e)=>handleTeamClick(e, video.team.slug)}
+                onClick={(e)=>handleTeamClick(e, video.team.id)}
               >
                 {video.team.name}
               </span>

@@ -173,6 +173,7 @@ const commonResources = {
       profileSmsNotifications: "SMS Notifications",
       profileComingSoon: "Coming Soon",
       profileSaveSuccess: "Profile updated successfully!",
+      AdminPannelText: 'admin pannel',
       // profile modal
       profileModalTitle: "Profile Information",
       profileModalContent: "Please enter your new email address. We will send a verification code to your new email address.",
@@ -251,6 +252,7 @@ const commonResources = {
       profileHidePasswordForm: "Hide Password Form",
       profilePasswordRequired: "Password is required",
       profilePasswordChangeError: "An error occurred while changing your password",
+      passwordLengthError: "گذرواژه باید حداقل 8 کاراکتر باشد.", // Added
     },
     preRegister: {
       preRegisterTitle: "Pre-Registration",
@@ -393,6 +395,7 @@ const commonResources = {
       articleNotFoundDescription: "متأسفانه مقاله‌ای که به دنبال آن هستید وجود ندارد یا منتقل شده است.",
       articleNotFoundBackToHome: "بازگشت به خانه",
       // profile namespace
+      AdminPannelText: 'ادمین پنل',
       profileTabInfo: "اطلاعات کاربر",
       profileTabHistory: "تاریخچه پیش‌ثبت‌نام",
       profileTabSecurity: "امنیت و ورود",
