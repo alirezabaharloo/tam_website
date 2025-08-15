@@ -19,8 +19,8 @@ export default function About() {
               <div className="w-full lg:w-[790px] mt-4 sm:mt-6">
                 <div id="team-descriptions" className={`text-[18px] sm:text-[24px] md:text-[32px] font-normal text-secondary transition-all duration-300 ${
                   isExpanded ? 'h-auto' : 'h-[200px] sm:h-[300px] md:h-[400px]'
-                } overflow-hidden relative ${isRTL ? 'text-right' : 'text-left'}`}>
-                  <p className="leading-relaxed">
+                } overflow-hidden relative ${isRTL ? 'text-right' : 'text-left'} text-justify`}>
+                  <p className="leading-relaxed text-justify">
                     {t('aboutTeamDescription')}
                   </p>
                   {!isExpanded && (
@@ -29,7 +29,7 @@ export default function About() {
                 </div>
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="mt-4 text-primary hover:text-primary-tint-500 transition-colors duration-300 text-[16px] sm:text-[18px] font-medium"
+                  className="mt-4 text-primary text-justify hover:text-primary-tint-500 transition-colors duration-300 text-[16px] sm:text-[18px] font-medium"
                 >
                   {isExpanded ? t('aboutShowLess') : t('aboutReadMore')}
                 </button>

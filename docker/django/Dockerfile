@@ -1,31 +1,24 @@
-# Start of Selection
 FROM python:3.10-slim
 
 EXPOSE 8000
 
-# Keeps Python from generating .pyc files in the container
+# Prevent .pyc files and enable unbuffered logs
 ENV PYTHONDONTWRITEBYTECODE=1
-
-# Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1 
 
-# Installing system dependencies
+# Install only necessary system dependencies (PostgreSQL & i18n)
 RUN apt-get update && apt-get install -y  \
-    postgresql-contrib \
     libpq-dev \
-    python3-psycopg2 \
-    postgis \
     gettext \
     gcc \
-    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install pip requirements
+# Install Python dependencies
 COPY ./backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Copy project code
 COPY ./backend/tam_website/ .

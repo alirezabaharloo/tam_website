@@ -119,6 +119,11 @@ export default function News() {
     const pageParam = params.get('page');
     const teamParam = params.get('team');
 
+    // Reset list before fetching new results on any filter/nav change
+    setAllArticles([]);
+    // Also keep selectedTeam in sync with URL (valid numeric or empty)
+    setSelectedTeam(teamParam && !isNaN(parseInt(teamParam)) ? teamParam : '');
+
     const newSearchUrl = new URL(`http://${domainUrl}:8000/api/blog/articles`);
     if (searchParam) {
       newSearchUrl.searchParams.set('search', searchParam);

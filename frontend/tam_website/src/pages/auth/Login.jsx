@@ -79,7 +79,7 @@ export default function Login() {
             <h1 className="text-[48px] font-bold text-quinary-tint-800">
               {t('loginWelcomeTitle', { ns: 'validation' })}
             </h1>
-            <p className="text-[24px] font-normal  text-quinary-tint-800 mt-4 max-w-[90%]">
+            <p className="text-[24px] font-normal  text-quinary-tint-800 mt-4 max-w-[90%] text-justify">
               {t('loginWelcomeDescription', { ns: 'validation' })}
             </p>
           </div>

@@ -113,7 +113,7 @@ export default function Register() {
           <h1 className="text-[48px] font-bold text-quinary-tint-800">
             {t('registerWelcomeTitle', { ns: 'validation' })}
           </h1>
-          <p className="text-[24px] font-normal text-quinary-tint-800 mt-4 max-w-[600px]">
+          <p className="text-[24px] font-normal text-quinary-tint-800 mt-4 max-w-[600px] text-justify">
             {t('registerWelcomeDescription', { ns: 'validation' })}
           </p>
         </div>

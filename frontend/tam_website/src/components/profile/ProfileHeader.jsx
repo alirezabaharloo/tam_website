@@ -27,10 +27,10 @@ export default function ProfileHeader({ user }) {
         {isAdminPannelAccess && (
           <a
             href="/admin"
-            className="px-10 py-2 rounded-lg bg-secondary text-white font-semibold shadow hover:bg-secondary-tint-200 transition border border-secondary text-base"
+            className="px-5 py-2 rounded-lg bg-secondary text-white font-semibold shadow hover:bg-secondary-tint-200 transition border border-secondary text-base"
             style={{ minWidth: 120 }}
           >
-            {t('AdminPannelText', { ns: 'blog' })}
+            {t('Admin Panel', { ns: 'blog' })}
           </a>
         )}
         <button
