@@ -61,29 +61,29 @@ export const errorNotif = (message, options = {}) => {
   const isRTL = i18n.language === 'fa';
   return toast.error(
     <div
-      className={`flex items-stretch w-full max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg border border-quaternary-200 bg-quaternary text-quinary-tint-800 p-0 overflow-hidden ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+      className={`flex items-stretch w-full max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg border border-quaternary-200 bg-quaternary text-quinary-tint-800 p-0 overflow-hidden flex-row-reverse`}
       style={{ direction: isRTL ? 'rtl' : 'ltr' }}
     >
       {/* Icon */}
-      <div className="flex items-center px-4 py-4 bg-white/80">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z" className="fill-red-600"/></svg>
+      <div className="flex items-center px-4 py-4">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M1 21h22L12 2 1 21z" className="fill-quinary-tint-800"/>
+          <path d="M13 16h-2v-5h2v5zm0 3h-2v-2h2v2z" className="fill-quaternary"/>
+        </svg>
       </div>
-      {/* Vertical Divider */}
-      <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
       {/* Text content */}
       <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
-        <div className="font-bold text-lg mb-1">{i18n.t('error', { ns: 'common' })}</div>
-        <div className="text-base leading-snug break-words" title={message}>{message}</div>
+        <div className="font-bold text-lg mb-1">{message}</div>
       </div>
       {/* Vertical Divider */}
-      <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
+      <div className="w-px bg-quinary-tint-800 mx-0.5 my-2" />
       {/* Close button */}
       <button
         onClick={options.closeToast}
-        className={`flex items-center px-3 focus:outline-none text-quaternary-800 hover:text-quaternary-600 transition-colors duration-150 ${isRTL ? 'ml-0 mr-2' : 'mr-0 ml-2'}`}
+        className={`flex items-center px-3 focus:outline-none text-quinary-tint-800 hover:text-quinary-tint-600 transition-colors duration-150 ${isRTL ? 'ml-0 mr-2' : 'mr-0 ml-2'}`}
         aria-label="Close notification"
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" className="fill-quaternary-800 hover:fill-quaternary-600 transition-all"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" className="fill-quinary-tint-800 hover:fill-quinary-tint-600 transition-all"/></svg>
       </button>
     </div>,
     {
@@ -107,29 +107,26 @@ export const infoNotif = (message, options = {}) => {
   const isRTL = i18n.language === 'fa';
   return toast.info(
     <div
-      className={`flex items-stretch w-full max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg border border-quaternary-200 bg-quaternary text-quinary-tint-800 p-0 overflow-hidden ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+      className={`flex items-stretch w-full max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg border border-quaternary-200 bg-quaternary text-quinary-tint-800 p-0 overflow-hidden flex-row-reverse`}
       style={{ direction: isRTL ? 'rtl' : 'ltr' }}
     >
       {/* Icon */}
-      <div className="flex items-center px-4 py-4 bg-white/80">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-6h2v6zm0-8h-2V7h2v2z" className="fill-secondary"/></svg>
+      <div className="flex items-center px-4 py-4">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-6h2v6zm0-8h-2V7h2v2z" className="fill-quinary-tint-800"/></svg>
       </div>
-      {/* Vertical Divider */}
-      <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
       {/* Text content */}
       <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
-        <div className="font-bold text-lg mb-1">{i18n.t('info', { ns: 'common' })}</div>
-        <div className="text-base leading-snug break-words" title={message}>{message}</div>
+        <div className="font-bold text-lg mb-1" title={message}>{message}</div>
       </div>
       {/* Vertical Divider */}
-      <div className="w-px bg-quaternary-200 mx-0.5 my-2" />
+      <div className="w-px bg-quinary-tint-800 mx-0.5 my-2" />
       {/* Close button */}
       <button
         onClick={options.closeToast}
-        className={`flex items-center px-3 focus:outline-none text-quaternary-800 hover:text-quaternary-600 transition-colors duration-150 ${isRTL ? 'ml-0 mr-2' : 'mr-0 ml-2'}`}
+        className={`flex items-center px-3 focus:outline-none text-quinary-tint-800 hover:text-quinary-tint-600 transition-colors duration-150 ${isRTL ? 'ml-0 mr-2' : 'mr-0 ml-2'}`}
         aria-label="Close notification"
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" className="fill-quaternary-800 hover:fill-quaternary-600 transition-all"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" className="fill-quinary-tint-800 hover:fill-quinary-tint-600 transition-all"/></svg>
       </button>
     </div>,
     {

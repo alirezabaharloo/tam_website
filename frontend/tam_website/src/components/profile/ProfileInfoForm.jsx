@@ -128,17 +128,17 @@ export default function ProfileInfoForm({ user, onUserUpdate, onOpenChangePasswo
         </div>
         <div>
           <label className="block text-primary font-medium mb-1">{t('profilePassword')}</label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
             <input
               type="password"
               value="********"
               disabled
-              className="w-full px-4 py-2 rounded-lg border border-quaternary-200 text-primary-tint-500 cursor-not-allowed bg-gray-100"
+              className="h-10 px-4 rounded-lg border border-quaternary-200 text-primary-tint-500 cursor-not-allowed bg-gray-100 w-full sm:flex-1 min-w-0 sm:min-w-[180px]"
             />
             <button
               type="button"
               onClick={onOpenChangePassword}
-              className="px-4 py-2 bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 font-medium"
+              className="h-10 px-4 inline-flex items-center justify-center whitespace-nowrap bg-primary text-quinary-tint-800 rounded-lg hover:bg-primary-tint-100 transition-colors duration-300 font-medium text-sm shrink-0 w-full sm:w-auto"
             >
               {t('profileChangePassword')}
             </button>
