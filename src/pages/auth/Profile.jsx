@@ -1,32 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import ProfileHeader from '../../components/profile/ProfileHeader';
 import ProfileInfoForm from '../../components/profile/ProfileInfoForm';
 import ChangePasswordModal from '../../components/profile/ChangePasswordModal';
-import useAdminHttp from '../../hooks/useAdminHttp';
 import { errorNotif } from '../../utils/customNotifs';
 import SomethingWentWrong from '../UI/SomethingWentWrong';
 import SpinLoader from '../UI/SpinLoader';
-import { API_PREFIX } from '../../reverse_proxy';
+import api from '../../api';
 
 export default function Profile() {
   const { t } = useTranslation('profile');
 
-  const [user, setUser] = useState(null);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
-  const { data, isLoading, isError, sendRequest } = useAdminHttp(`${API_PREFIX}/auth/user/`);
-
-  useEffect(() => {
-    if (data && !data.isError) {
-      setUser(data);
-    } else if (data && data.isError) {
+  const { data: user, isLoading, isError } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const response = await api.get('/auth/user/');
+      return response.data;
+    },
+    onError: () => {
       errorNotif(t('somethingWentWrong', { ns: 'blog' }));
-    }
-  }, [data, t]);
+    },
+  });
 
   const handleUserUpdate = updatedFields => {
-    setUser(prev => ({ ...prev, ...updatedFields }));
+    // This will be handled by react-query cache invalidation in ProfileInfoForm
   };
 
   if (isLoading || !user) {

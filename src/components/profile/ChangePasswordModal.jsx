@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMutation } from '@tanstack/react-query';
 import ProfileModal from './ProfileModal';
 import { validateStrongPassword } from '../../validators/UserValidators';
-import useAdminHttp from '../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../utils/customNotifs';
-import { API_PREFIX } from '../../reverse_proxy';
+import api from '../../api';
 
 export default function ChangePasswordModal({ isOpen, onClose }) {
   const { t } = useTranslation(['profile', 'validation']);
@@ -15,10 +15,37 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
   });
   const [errors, setErrors] = useState({});
   const [backendError, setBackendError] = useState('');
-  const { sendRequest, isLoading } = useAdminHttp();
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (payload) => {
+      const response = await api.patch('/blog/change_password/', payload);
+      return response.data;
+    },
+    onSuccess: () => {
+      successNotif(t('profileModalChangePasswordSuccess'));
+      onClose();
+      setFields({ old_password: '', new_password: '', confirm_password: '' });
+      setErrors({});
+      setBackendError('');
+    },
+    onError: (err) => {
+      errorNotif(t('somethingWentWrong', { ns: 'blog' }));
+      console.error('Error submitting change password form:', err);
+      if (err.response && err.response.data) {
+        setErrors(err.response.data);
+        setBackendError(err.response.data.detail || t('somethingWentWrong', { ns: 'blog' }));
+      } else if (typeof err === 'object' && err !== null) {
+        setBackendError(err.message || t('somethingWentWrong', { ns: 'blog' }));
+      } else {
+        setBackendError(t('somethingWentWrong', { ns: 'blog' }));
+      }
+    },
+  });
+
+  const isLoading = changePasswordMutation.isPending;
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -52,35 +79,8 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
       return;
     }
 
-    try {
-      const payload = { old_password: fields.old_password, new_password: fields.new_password };
-      const res = await sendRequest(
-        `${API_PREFIX}/blog/change_password/`,
-        'PATCH',
-        payload
-      );
-      if (res && !res.isError) {
-        successNotif(t('profileModalChangePasswordSuccess'));
-        onClose();
-        setFields({ old_password: '', new_password: '', confirm_password: '' });
-        setErrors({});
-      } else {
-        setErrors(res?.errorContent || {});
-        errorNotif(t('somethingWentWrong', { ns: 'blog' }));
-        setBackendError(res?.errorContent?.detail || t('somethingWentWrong', { ns: 'blog' }));
-      }
-    } catch (err) {
-      errorNotif(t('somethingWentWrong', { ns: 'blog' }));
-      console.error('Error submitting change password form:', err);
-      if (err.response && err.response.data) {
-        setErrors(err.response.data);
-        setBackendError(err.response.data.detail || t('somethingWentWrong', { ns: 'blog' }));
-      } else if (typeof err === 'object' && err !== null) {
-        setBackendError(err.message || t('somethingWentWrong', { ns: 'blog' }));
-      } else {
-        setBackendError(t('somethingWentWrong', { ns: 'blog' }));
-      }
-    }
+    const payload = { old_password: fields.old_password, new_password: fields.new_password };
+    changePasswordMutation.mutate(payload);
   };
 
   const hasErrors = Object.values(errors).some(Boolean);

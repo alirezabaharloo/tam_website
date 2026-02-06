@@ -1,18 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { validateProfileFormIntl } from '../../validators/UserValidators';
-import useAdminHttp from '../../hooks/useAdminHttp';
 import { successNotif, errorNotif } from '../../utils/customNotifs';
+import api from '../../api';
 
 export default function ProfileInfoForm({ user, onUserUpdate, onOpenChangePassword }) {
   const { t, i18n } = useTranslation(['profile', 'validation']);
+  const queryClient = useQueryClient();
   const [form, setForm] = useState({
     first_name: user.first_name || '',
     last_name: user.last_name || '',
   });
   const [errors, setErrors] = useState({});
   const [backendError, setBackendError] = useState('');
-  const { sendRequest, isLoading } = useAdminHttp();
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (formData) => {
+      const response = await api.patch('/blog/profile/update/', formData);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      successNotif(t('profileSaveSuccess'));
+      // Invalidate and refetch user query to update the UI
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      onUserUpdate(data);
+    },
+    onError: (err) => {
+      errorNotif(t('somethingWentWrong', { ns: 'blog' }));
+      console.error('Error submitting profile form:', err);
+      if (err.response && err.response.data) {
+        setErrors(err.response.data);
+        setBackendError(err.response.data.detail || t('somethingWentWrong', { ns: 'blog' }));
+      } else if (typeof err === 'object' && err !== null) {
+        setBackendError(err.message || t('somethingWentWrong', { ns: 'blog' }));
+      } else {
+        setBackendError(t('somethingWentWrong', { ns: 'blog' }));
+      }
+    },
+  });
+
+  const isLoading = updateProfileMutation.isPending;
 
   // Initialize form data when user prop changes
   useEffect(() => {
@@ -61,32 +89,7 @@ export default function ProfileInfoForm({ user, onUserUpdate, onOpenChangePasswo
       return;
     }
 
-    try {
-      const res = await sendRequest(
-        'http://localhost:8000/api/blog/profile/update/', // Changed API endpoint to blog app
-        'PATCH',
-        form
-      );
-      if (res && !res.isError) {
-        successNotif(t('profileSaveSuccess'));
-        onUserUpdate(res);
-      } else {
-        setErrors(res?.errorContent || {});
-        errorNotif(t('somethingWentWrong', { ns: 'blog' }));
-        setBackendError(res?.errorContent?.detail || t('somethingWentWrong', { ns: 'blog' }));
-      }
-    } catch (err) {
-      errorNotif(t('somethingWentWrong', { ns: 'blog' }));
-      console.error('Error submitting profile form:', err);
-      if (err.response && err.response.data) {
-        setErrors(err.response.data);
-        setBackendError(err.response.data.detail || t('somethingWentWrong', { ns: 'blog' }));
-      } else if (typeof err === 'object' && err !== null) {
-        setBackendError(err.message || t('somethingWentWrong', { ns: 'blog' }));
-      } else {
-        setBackendError(t('somethingWentWrong', { ns: 'blog' }));
-      }
-    }
+    updateProfileMutation.mutate(form);
   };
 
   const isSubmitDisabled = Object.keys(errors).length > 0 || !hasChanges || isLoading;

@@ -6,7 +6,7 @@ import useAuth from '../../hooks/useAuth';
 export default function ProfileHeader({ user }) {
   const { t, i18n } = useTranslation('profile');
   const isRTL = i18n.language === 'fa';
-  const fullName = (user.first_name && user.last_name)
+  const fullName = (user.first_name || user.last_name)
     ? `${user.first_name} ${user.last_name}`
     : (isRTL ? t('profileGuestUser', { ns: 'profile' }) : t('profileGuestUser', { ns: 'profile' }));
   const { logout, isAdminPannelAccess } = useAuth();
@@ -30,7 +30,7 @@ export default function ProfileHeader({ user }) {
             className="px-5 py-2 rounded-lg bg-secondary text-white font-semibold shadow hover:bg-secondary-tint-200 transition border border-secondary text-base"
             style={{ minWidth: 120 }}
           >
-            {t('Admin Panel', { ns: 'blog' })}
+            {t('profileAdminPannelText', { ns: 'blog' })}
           </a>
         )}
         <button
