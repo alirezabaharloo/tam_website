@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearch } from '../../context/SearchContext'
 import { useNavigate } from 'react-router-dom'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import api from '../../api'
 import NewsFilter from '../../components/blog/NewsFilter'
 import NewsBox from '../../components/blog/NewsBox'
 import SpinLoader from '../../pages/UI/SpinLoader'
 import SomethingWentWrong from '../../pages/UI/SomethingWentWrong'
 import NoArticlesFound from '../../pages/UI/NoArticlesFound'
-import useHttp from '../../hooks/useHttp'
 import FilterSummary from '../../components/FilterSummary'
-import { API_PREFIX } from '../../reverse_proxy'
 
 export default function News() {
   const { t, i18n } = useTranslation();
@@ -17,72 +17,86 @@ export default function News() {
   const { searchQuery } = useSearch();
   const navigate = useNavigate();
 
-  const [requestUrl, setRequestUrl] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    const searchParam = params.get('search');
-    const typeParam = params.get('type');
-    const categoryParam = params.get('category');
-    let teamParam = params.get('team'); // Use let as we might modify it
+  // Read and normalize URL search parameters (source of truth)
+  const initialParams = new URLSearchParams(window.location.search);
+  const rawTeamParam = initialParams.get('team');
 
-    // Validate teamParam: ensure it's either empty or a string representation of a number
-    if (teamParam && isNaN(parseInt(teamParam))) {
-      teamParam = ''; // Treat invalid team param as empty
-      params.delete('team'); // Also remove it from params for the URL in the address bar
-      window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
-    }
+  // Validate teamParam: ensure it's either empty or a string representation of a number
+  if (rawTeamParam && isNaN(parseInt(rawTeamParam))) {
+    initialParams.delete('team');
+    window.history.replaceState({}, '', `${window.location.pathname}?${initialParams.toString()}`);
+  }
 
-    // Always reset page to 1 on initial load unless explicitly navigating to a specific page
-    // If there are other filters present, ensure page is 1. If only 'page' is present, it's a load more scenario.
-    const currentPageParam = params.get('page');
-    params.delete('page'); // Always start fresh with page 1 if filters change
+  const params = new URLSearchParams(window.location.search);
+  const activeFilter = params.get('type');
+  const searchParam = params.get('search');
+  const categoryParam = params.get('category');
+  const currentPage = params.get('page') || '1';
+  const teamParam = params.get('team');
 
-    let searchUrl = `${API_PREFIX}/blog/articles`
-    let searchParams = new URLSearchParams();
-    if (searchParam) {
-      searchParams.set('search', searchParam);
-    }
-    if (typeParam) {
-      searchParams.set('type', typeParam);
-    }
-    // if (categoryParam) {
-    //   searchUrl.searchParams.set('category', categoryParam);
-    // }
-    if (teamParam) { // This will now only be true if teamParam is a valid number string or non-empty
-      searchParams.set('team', teamParam);
-    }
-
-    // Add page back if it was specifically for load more scenario (only 'page' param present)
-    if (currentPageParam && params.toString() === '') {
-      searchParams.set('page', currentPageParam);
-      searchParams.set('fetch-all', 'true');
-    } else {
-      // For new filters or refresh, always fetch page 1 initially
-      searchParams.set('page', '1');
-      searchParams.set('fetch-all', 'true'); // Always fetch all for now, as per pagination logic
-    }
-
-    return `${searchUrl}?${searchParams.toString()}`;
-  });
-  const [allArticles, setAllArticles] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(() => {
     const teamFromUrl = new URLSearchParams(window.location.search).get('team');
     // Also validate selectedTeam initial state
     return (teamFromUrl && !isNaN(parseInt(teamFromUrl))) ? teamFromUrl : '';
   });
 
-  const activeFilter = new URLSearchParams(window.location.search).get("type");
-  const searchParam = new URLSearchParams(window.location.search).get("search");
-  const categoryParam = new URLSearchParams(window.location.search).get("category");
-  const currentPage = new URLSearchParams(window.location.search).get("page") || "1";
-  const teamParam = new URLSearchParams(window.location.search).get("team");
+  const filters = {
+    type: activeFilter || '',
+    team: teamParam || '',
+    search: searchParam || '',
+    category: categoryParam || '',
+  };
 
   const {
+    data,
     isLoading,
     isError,
-    data: response,
-    errorMessage,
-    sendRequest
-  } = useHttp(requestUrl, false);
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['articles', filters],
+    queryFn: async ({ pageParam = parseInt(currentPage, 10) || 1, queryKey }) => {
+      const [, currentFilters] = queryKey;
+      const { search, type, category, team } = currentFilters;
+
+      const searchParams = new URLSearchParams();
+      if (search) {
+        searchParams.set('search', search);
+      }
+      if (type) {
+        searchParams.set('type', type);
+      }
+      if (category) {
+        searchParams.set('category', category);
+      }
+      if (team) {
+        searchParams.set('team', team);
+      }
+
+      searchParams.set('page', pageParam.toString());
+      searchParams.set('fetch-all', 'true');
+
+      const response = await api.get(`blog/articles?${searchParams.toString()}`);
+      return response.data;
+    },
+    initialPageParam: parseInt(currentPage, 10) || 1,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage?.next) return undefined;
+      try {
+        const url = new URL(lastPage.next);
+        const nextPage = url.searchParams.get('page');
+        return nextPage ? Number(nextPage) : undefined;
+      } catch {
+        return undefined;
+      }
+    },
+  });
+
+  const latestPage = data?.pages?.[data.pages.length - 1];
+  const allArticles = latestPage?.articles || [];
+  const hasNext = !!latestPage?.next;
+  const noArticlesFound = latestPage?.detail === 'no articles found!';
 
   const handleFilterChange = (filterId, filterType) => {
     const params = new URLSearchParams(window.location.search);
@@ -104,75 +118,16 @@ export default function News() {
 
     const newSearchParams = params.toString();
     navigate(`${window.location.pathname}?${newSearchParams}`);
-    setCurrentSearchParams(newSearchParams); // Update the state to trigger useEffect
-    setAllArticles([]); // Clear articles to show new filtered results
   };
 
-  const [currentSearchParams, setCurrentSearchParams] = useState(window.location.search);
-
-  // Effect to update articles when URL changes (after navigation)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const searchParam = params.get('search');
-    const typeParam = params.get('type');
-    const categoryParam = params.get('category');
-    const pageParam = params.get('page');
-    const teamParam = params.get('team');
-
-    // Reset list before fetching new results on any filter/nav change
-    setAllArticles([]);
-    // Also keep selectedTeam in sync with URL (valid numeric or empty)
-    setSelectedTeam(teamParam && !isNaN(parseInt(teamParam)) ? teamParam : '');
-
-    let newSearchUrl = `${API_PREFIX}/blog/articles`
-    let newSearchParams = new URLSearchParams();
-    if (searchParam) {
-      newSearchParams.set('search', searchParam);
-    }
-    if (typeParam) {
-      newSearchParams.set('type', typeParam);
-    }
-    if (categoryParam) {
-      newSearchParams.set('category', categoryParam);
-    }
-    if (teamParam) {
-      newSearchParams.set('team', teamParam);
-    }
-    if (pageParam) {
-      newSearchParams.set('page', pageParam);
-      newSearchParams.set('fetch-all', 'true');
-    } else { // If pageParam is not present, ensure it's page 1 for new filter sets
-      newSearchParams.set('page', '1');
-      newSearchParams.set('fetch-all', 'true');
-    }
-    setRequestUrl(`${newSearchUrl}?${newSearchParams.toString()}`);
-    setCurrentSearchParams(window.location.search);
-  }, [currentSearchParams]); // Depend on currentSearchParams state instead of window.location.search directly
-
-  // This useEffect handles setting allArticles when response changes and clears articles
-  // when response is null (e.g. on new filter apply)
-  useEffect(() => {
-    if (response?.articles) {
-      setAllArticles(prev => [...prev, ...response.articles]);
-    } else if (response?.detail === 'no articles found!') {
-      setAllArticles([]); // Clear articles if no articles found for the filter
-    }
-  }, [response]);
-
-
-  const hasNext = response?.next || false;
-
   const handleLoadMore = () => {
-    if (hasNext) {
+    if (hasNext && hasNextPage && !isFetchingNextPage) {
       const nextPage = parseInt(currentPage) + 1;
       const params = new URLSearchParams(window.location.search);
       params.set('page', nextPage.toString());
       const newSearchParams = params.toString();
       window.history.replaceState({}, '', `${window.location.pathname}?${newSearchParams}`);
-      setCurrentSearchParams(newSearchParams); // Update the state to trigger useEffect
-      // Handle response.next - if it's a relative URL, prepend API_PREFIX, otherwise use as is
-      const nextUrl = response.next?.startsWith('https') ? response.next : `${API_PREFIX}${response.next}`;
-      setRequestUrl(nextUrl);
+      fetchNextPage();
     }
   };
 
@@ -188,14 +143,11 @@ export default function News() {
     } else {
       navigate('/news');
     }
-    // window.location.reload(); // REMOVED: Rely on useEffect for re-fetch
-    setAllArticles([]);
   };
 
   const handleClearAllFilters = () => {
     navigate('/news');
-    // window.location.reload(); // REMOVED: Rely on useEffect for re-fetch
-    setAllArticles([]);
+    setSelectedTeam('');
   };
 
   const handleTeamChange = (teamId) => {
@@ -230,8 +182,10 @@ export default function News() {
           onClearAllFilters={handleClearAllFilters}
         />
         {
-          (((isLoading || allArticles.length == 0) && response?.detail !== 'no articles found!' && (!requestUrl.includes("page") || (requestUrl.includes("page") && requestUrl.includes("fetch-all"))))) ?  <SpinLoader /> :(
-            (response?.detail === 'no articles found!') ? (
+          (isLoading && !noArticlesFound) ? (
+            <SpinLoader />
+          ) : (
+            noArticlesFound ? (
               <div
                 className="flex flex-col items-center justify-center min-h-[60vh] w-full"
               >
@@ -259,10 +213,10 @@ export default function News() {
           <div className="mt-6 sm:mt-8 flex justify-center">
             <button
               onClick={handleLoadMore}
-              disabled={isLoading}
+              disabled={isFetchingNextPage}
               className="px-6 py-2 sm:px-8 sm:py-3 bg-quinary-tint-800 hover:bg-quinary-tint-700 rounded-lg text-secondary hover:text-quaternary transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
+              {isFetchingNextPage ? (
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 border-2 border-secondary border-t-transparent rounded-full animate-spin"></div>
                   <span className="text-[16px] sm:text-[18px] md:text-[20px] font-medium">{t('newsLoadMore')}</span>

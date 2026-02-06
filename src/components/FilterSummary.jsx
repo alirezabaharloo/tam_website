@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import useHttp from '../hooks/useHttp';
+import useArticleFilterData from '../hooks/useArticleFilterData';
 
 
 const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
@@ -10,38 +10,32 @@ const FilterSummary = ({ contentType, team, search, onClearAllFilters }) => {
   const [articleTypeOptions, setArticleTypeOptions] = useState([]);
   const [teamOptions, setTeamOptions] = useState([]);
 
-  const { sendRequest: fetchFilterData, isLoading: isLoadingFilterData, isError: isErrorFilterData } = useHttp(
-    `/api/blog/article-filter-data`,
-    true, // Send immediately on mount
-    'GET'
-  );
+  const {
+    data: filterData,
+    isLoading: isLoadingFilterData,
+    isError: isErrorFilterData,
+  } = useArticleFilterData();
 
   useEffect(() => {
-    const loadFilterData = async () => {
-      try {
-        const data = await fetchFilterData();
-        if (data) {
-          // Backend now sends article types under the 'status' key
-          const formattedArticleTypes = Object.entries(data.status).map(([key, value]) => ({
-            id: key,
-            label: value,
-          }));
-          setArticleTypeOptions(formattedArticleTypes);
+    if (!filterData) return;
 
-          const formattedTeams = Object.entries(data.teams).map(([key, value]) => ({
-            id: key,
-            label: value,
-          }));
-          setTeamOptions(formattedTeams);
+    try {
+      // Backend now sends article types under the 'status' key
+      const formattedArticleTypes = Object.entries(filterData.status).map(([key, value]) => ({
+        id: key,
+        label: value,
+      }));
+      setArticleTypeOptions(formattedArticleTypes);
 
-        }
-      } catch (error) {
-        console.error("Failed to fetch filter data:");
-      }
-    };
-
-    loadFilterData();
-  }, [fetchFilterData]);
+      const formattedTeams = Object.entries(filterData.teams).map(([key, value]) => ({
+        id: key,
+        label: value,
+      }));
+      setTeamOptions(formattedTeams);
+    } catch (error) {
+      console.error("Failed to process filter data:");
+    }
+  }, [filterData]);
 
   const getContentTypeLabel = (typeId) => {
     const option = articleTypeOptions.find(option => option.id === typeId);

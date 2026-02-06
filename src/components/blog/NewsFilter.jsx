@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import useHttp from '../../hooks/useHttp';
+import useArticleFilterData from '../../hooks/useArticleFilterData';
 
 const NewsFilter = ({ activeFilter, onFilterChange, selectedTeam, onTeamChange, onApplyTeamFilter }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,39 +13,32 @@ const NewsFilter = ({ activeFilter, onFilterChange, selectedTeam, onTeamChange, 
   const [articleTypeOptions, setArticleTypeOptions] = useState([]);
   const [teamOptions, setTeamOptions] = useState([]);
 
-  const { sendRequest: fetchFilterData, isLoading: isLoadingFilterData, isError: isErrorFilterData } = useHttp(
-    `/api/blog/article-filter-data`,
-    true, // Send immediately on mount
-    'GET'
-  );
+  const {
+    data: filterData,
+    isLoading: isLoadingFilterData,
+    isError: isErrorFilterData,
+  } = useArticleFilterData();
 
   useEffect(() => {
-    const loadFilterData = async () => {
-      try {
-        const data = await fetchFilterData();
-        if (data) {
-          // The backend now sends article types under the 'status' key and statuses under the 'type' key
-          const formattedArticleTypes = Object.entries(data.status).map(([key, value]) => ({
-            id: key === '' ? 'all' : key,
-            label: value,
-          }));
-          setArticleTypeOptions(formattedArticleTypes);
+    if (!filterData) return;
 
-          const formattedTeams = Object.entries(data.teams).map(([key, value]) => ({
-            id: key,
-            label: value,
-          }));
-          setTeamOptions(formattedTeams);
+    try {
+      // The backend now sends article types under the 'status' key and statuses under the 'type' key
+      const formattedArticleTypes = Object.entries(filterData.status).map(([key, value]) => ({
+        id: key === '' ? 'all' : key,
+        label: value,
+      }));
+      setArticleTypeOptions(formattedArticleTypes);
 
-        }
-      } catch (error) {
-        console.error("Failed to fetch filter data:");
-        // Handle error, e.g., show a message to the user
-      }
-    };
-
-    loadFilterData();
-  }, [fetchFilterData, t]);
+      const formattedTeams = Object.entries(filterData.teams).map(([key, value]) => ({
+        id: key,
+        label: value,
+      }));
+      setTeamOptions(formattedTeams);
+    } catch (error) {
+      console.error("Failed to process filter data:");
+    }
+  }, [filterData]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
