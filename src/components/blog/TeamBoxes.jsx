@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHome } from '../../context/HomeContext';
 import LazyImage from '../UI/LazyImage';
 
-const TeamBoxes = () => {
+const TeamBoxes = ( { tam_teams = [] } ) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
-  const { homeData } = useHome();
-  const totalSlides = Math.ceil(homeData.tam_teams.length / 5);
+  const totalSlides = Math.ceil(tam_teams.length / 5);
   const slidesPerView = 5;
 
   // Reset slide when language changes
@@ -35,7 +33,7 @@ const TeamBoxes = () => {
     <>
       <div className="w-full max-w-[1300px] mx-auto mt-8 flex flex-row justify-between items-center px-2 sm:px-4">
         <h2 className="text-[28px] sm:text-[36px] md:text-[48px] font-regular text-secondary order-1">{t('tamsTeam')}</h2>
-        { homeData.tam_teams.length > 5 ? (
+        { tam_teams.length > 5 ? (
           <div className="flex items-center gap-2 sm:gap-4 mt-2 lg:mt-0 order-2">
           <button 
             onClick={handlePrevSlide}
@@ -88,7 +86,7 @@ const TeamBoxes = () => {
               direction: isRTL ? 'rtl' : 'ltr'
             }}
           >
-            {homeData.tam_teams.map((team) => (
+            {tam_teams.map((team) => (
               <div 
                 key={team.id} 
                 className={`relative w-[140px] sm:w-[200px] h-[220px] sm:h-[340px] rounded-[16px] overflow-hidden group cursor-pointer flex-shrink-0 ${

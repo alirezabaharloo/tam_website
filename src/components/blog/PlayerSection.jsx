@@ -1,12 +1,10 @@
 import React from 'react';
 import PlayerBoxes from './PlayerBoxes';
 import { useTranslation } from 'react-i18next';
-import { useHome } from '../../context/HomeContext.jsx';
 
-const PlayerSection = () => {
+const PlayerSection = ({ players = [] }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
-  const { homeData } = useHome();
 
   return (
     <>
@@ -14,7 +12,7 @@ const PlayerSection = () => {
         <div className="flex-1"></div>
         <h2 className="text-[28px] sm:text-[32px] md:text-[40px] font-bold text-secondary absolute left-1/2 transform -translate-x-1/2">{t('player')}</h2>
         {
-          homeData.players.length > 5 ? (
+          players.length > 5 ? (
             <div className="flex items-center gap-2 sm:gap-4">
               <button 
                 onClick={() => document.dispatchEvent(new CustomEvent('prevSlide'))}
@@ -58,7 +56,7 @@ const PlayerSection = () => {
           ) : <span className='mb-[6rem]'></span>
         }
       </div>
-      <PlayerBoxes />
+      <PlayerBoxes players={players} />
     </>
   );
 };

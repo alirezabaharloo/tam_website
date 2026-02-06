@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useHome } from '../../context/HomeContext';
 import LazyImage from '../UI/LazyImage';
 
-const LatestVideos = () => {
+const LatestVideos = ({ videos = [] }) => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
-  const currentLang = i18n.language;
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const { homeData } = useHome();
 
   useEffect(() => {
     const handleResize = () => {
@@ -22,7 +19,7 @@ const LatestVideos = () => {
   }, []);
 
   // Get the latest 5 videos
-  const latestVideos = homeData.videos.slice(0, 5);
+  const latestVideos = videos.slice(0, 5);
 
   // Split into two groups: first two and last three
   const [firstTwo, lastThree] = [

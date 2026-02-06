@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHome } from '../../context/HomeContext';
 import LazyImage from '../UI/LazyImage';
 
-const PlayerBoxes = () => {
+const PlayerBoxes = ({ players = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'fa';
-  const { homeData } = useHome();
-  const totalSlides = Math.ceil(homeData.players.length / 5);
+  const totalSlides = Math.ceil(players.length / 5);
   const slidesPerView = 5;
 
   useEffect(() => {
@@ -51,7 +49,7 @@ const PlayerBoxes = () => {
             direction: isRTL ? 'rtl' : 'ltr'
           }}
         >
-          {homeData.players.map((player) => (
+          {players.map((player) => (
             <div 
               key={player.id} 
               className={`relative w-[140px] sm:w-[220px] md:w-[320px] h-[220px] sm:h-[320px] md:h-[480px] rounded-lg overflow-hidden group cursor-pointer flex-shrink-0 ${
