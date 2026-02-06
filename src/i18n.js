@@ -127,6 +127,8 @@ const commonResources = {
       articleNotFoundDescription: "We couldn't find the article you're looking for. It might have been moved or deleted.",
       articleNotFoundBackToHome: "Back to Home",
       // profile namespace
+      profileGuestUser: "Unknowkn",
+      profileAdminPannelText: "Admin Pannel",
       profileTabInfo: "User Information",
       profileTabHistory: "Class Pre-Registration History",
       profileTabSecurity: "Security & Login",
@@ -368,6 +370,8 @@ const commonResources = {
       welcomeModalTitle: "به تام اسپرت خوش آمدید",
       welcomeModalContent: "از حضور شما در وبسایت ما خوشحالیم. برای مشاهده آخرین اخبار، اطلاعات تیم و محتوای اختصاصی تام اسپرت، وبسایت ما را کاوش کنید.",
       // Basic profile
+      profileGuestUser: "بدون نام",
+      profileAdminPannelText: "ادمین پنل",
       profileWelcomeBack: "خوش آمدید!",
       profileLogout: "خروج",
       profileProfile: "پروفایل",
