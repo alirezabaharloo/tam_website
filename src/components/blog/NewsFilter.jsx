@@ -61,6 +61,10 @@ const NewsFilter = ({ activeFilter, onFilterChange, selectedTeam, onTeamChange, 
   const selectedArticleTypeLabel = articleTypeOptions.find(f => f.id === activeFilter)?.label || t('newsAll');
   const selectedTeamLabel = teamOptions.find(t => t.id === selectedTeam)?.label || t('All Teams');
 
+
+  console.log(filterData);
+  
+
   return (
     <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 relative" ref={menuRef}>
       {/* Main Filters (Article Type) */}

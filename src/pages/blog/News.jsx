@@ -76,6 +76,8 @@ export default function News() {
       searchParams.set('fetch-all', 'true');
 
       const response = await api.get(`blog/articles?${searchParams.toString()}`);
+      console.log(response.data);
+      
       return response.data;
     },
     initialPageParam: parseInt(currentPage, 10) || 1,
@@ -90,6 +92,9 @@ export default function News() {
       }
     },
   });
+
+  console.log(data);
+  
 
   const latestPage = data?.pages?.[data.pages.length - 1];
   const allArticles = latestPage?.articles || [];
