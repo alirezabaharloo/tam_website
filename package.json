@@ -12,6 +12,7 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.6",
+    "axios": "^1.13.4",
     "framer-motion": "^12.11.0",
     "i18next": "^25.1.3",
     "jalaali-js": "^1.2.8",
