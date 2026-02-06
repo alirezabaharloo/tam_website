@@ -7,14 +7,13 @@ import ContactBoxes from "./components/blog/ContactBoxes.jsx";
 import LogoSection from "./components/blog/LogoSection.jsx";
 import './i18n';
 import { loadNamespaces } from './i18n';
-import { AuthProvider } from './context/AuthContext';
 import { WebsiteRoutes } from './router.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from 'react-i18next';
 import useLanguageChange from './hooks/useLanguageChange';
-import { SearchProvider } from './context/SearchContext';
 import SpinLoader from './pages/UI/SpinLoader.jsx';
+import { AuthProvider } from './context/AuthContext';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -92,13 +91,11 @@ function InnerApp() {
 
 function App() {
   return (
-    <SearchProvider>
-      <Router>
-        <AuthProvider>
-          <InnerApp />
-        </AuthProvider>
-      </Router>
-    </SearchProvider>
+    <Router>
+      <AuthProvider>
+        <InnerApp />
+      </AuthProvider>
+    </Router>
   );
 }
 

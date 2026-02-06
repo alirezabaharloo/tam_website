@@ -13,8 +13,6 @@ import FilterSummary from '../../components/FilterSummary'
 
 export default function News() {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'fa';
-  const { searchQuery } = useSearch();
   const navigate = useNavigate();
 
   // Read and normalize URL search parameters (source of truth)
