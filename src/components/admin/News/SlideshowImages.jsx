@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { ArticleFormIcons } from '../../data/Icons';
+import { ArticleFormIcons } from '../../../data/Icons';
 
 const Icons = ArticleFormIcons;
 

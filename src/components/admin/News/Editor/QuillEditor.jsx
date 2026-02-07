@@ -1,5 +1,5 @@
 import React from 'react';
-import QuillWrapper, { Quill } from '../../../utils/quillFix.jsx';
+import QuillWrapper, { Quill } from '../../../../utils/quillFix.jsx';
 import 'react-quill/dist/quill.snow.css'; // Using the snow theme
 import './QuillEditor.css'; // Custom styles for light theme
 

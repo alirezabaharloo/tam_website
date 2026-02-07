@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import TeamTable from '../../../components/admin/Table/TeamTable';
-import TeamFilter from '../../../components/admin/Filter/TeamFilter';
+import TeamTable from '../../../components/admin/team/TeamTable';
+import TeamFilter from '../../../components/admin/team/TeamFilter';
 import AdminPagination from '../../../components/admin/AdminPagination';
 import useAdminHttp from '../../../hooks/useAdminHttp';
 import SpinLoader from '../../../pages/UI/SpinLoader';

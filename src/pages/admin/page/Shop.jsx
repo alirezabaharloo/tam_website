@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import AdminShopTab from '../../../components/admin/AdminShopTab';
 import { useNavigate } from 'react-router-dom';
 
 const Shop = () => {
