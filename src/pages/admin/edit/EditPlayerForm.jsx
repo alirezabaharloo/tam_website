@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate, useParams } from 'react-router-dom';
-import useAdminHttp from '../../../hooks/useAdminHttp';
+import { useParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { successNotif, errorNotif } from '../../../utils/customNotifs';
 import AdminPlayerNotFound from '../../AdminUI/AdminPlayerNotFound';
 import AdminSomethingWentWrong from '../../AdminUI/AdminSomethingWentWrong';
 import FormHeader from '../../../components/UI/FormHeader';
-import ImagePicker from '../../../components/UI/ImagePicker';
-import FormActions from '../../../components/UI/FormActions';
 import { validatePlayerForm } from '../../../validators/PlayerValidators';
-import { API_PREFIX } from '../../../reverse_proxy';
+import PlayerFormFields from '../../../components/admin/players/PlayerFormFields';
+import api from '../../../api';
 
 const EditPlayerForm = () => {
-  const navigate = useNavigate();
   const { playerId } = useParams();
   const [activeTab, setActiveTab] = useState('persian');
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   const [positionOptions, setPositionOptions] = useState({});
   const [originalData, setOriginalData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const queryClient = useQueryClient();
   
   const [formData, setFormData] = useState({
     name_fa: '',
@@ -34,19 +31,50 @@ const EditPlayerForm = () => {
   
   const {
     data: positions,
-  } = useAdminHttp(`${API_PREFIX}/admin/player-positions/`);
-  
+    isError: positionsError,
+  } = useQuery({
+    queryKey: ['player-positions'],
+    queryFn: async () => {
+      const response = await api.get('/admin/player-positions/');
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
   const {
     data: playerDetails,
     isLoading: playerDetailsLoading,
     isError: playerDetailsError,
-    sendRequest: fetchPlayers,
-  } = useAdminHttp(`${API_PREFIX}/admin/player-detail/${playerId}/`);
-  
-  const {
-    isLoading: submitLoading,
-    sendRequest
-  } = useAdminHttp();
+    error: playerDetailsErrorObj,
+  } = useQuery({
+    queryKey: ['player-detail', playerId],
+    queryFn: async () => {
+      const response = await api.get(`/admin/player-detail/${playerId}/`);
+      return response.data;
+    },
+    enabled: !!playerId,
+    refetchOnWindowFocus: false,
+  });
+
+  const updatePlayerMutation = useMutation({
+    mutationFn: async (formDataToSend) => {
+      const response = await api.patch(`/admin/player-update/${playerId}/`, formDataToSend, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      successNotif('اطلاعات بازیکن با موفقیت بروزرسانی شد');
+      setErrors({});
+      queryClient.invalidateQueries({ queryKey: ['player-detail', playerId] });
+    },
+    onError: (error) => {
+      const backendErrors = error?.response?.data || {};
+      setErrors(prevErrors => ({ ...prevErrors, ...backendErrors }));
+      errorNotif('خطا در بروزرسانی بازیکن');
+    },
+  });
   
   useEffect(() => {
     if (playerDetails) {
@@ -139,20 +167,17 @@ const EditPlayerForm = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
 
     // Final validation before submission
     const finalValidationErrors = validatePlayerForm({ ...formData, image: formData.image || imagePreview });
     setErrors(finalValidationErrors);
     if (Object.keys(finalValidationErrors).length > 0) { // Only check newly generated errors
       errorNotif('لطفاً خطاهای فرم را برطرف کنید');
-      setIsLoading(false);
       return;
     }
 
     if (!hasChanges) {
       errorNotif('لطفا حداقل یکی از فیلدها را تغییر دهید.');
-      setIsLoading(false);
       return;
     }
 
@@ -171,32 +196,7 @@ const EditPlayerForm = () => {
       formDataToSend.append('image', ''); // Send empty string to clear image
     }
 
-    try {
-      const response = await sendRequest(`${API_PREFIX}/admin/player-update/${playerId}/`, 'PATCH', formDataToSend);
-      if (response?.isError) {
-        // Set backend errors and merge with any existing ones
-        const backendErrors = response?.errorContent || {};
-        setErrors(prevErrors => ({ ...prevErrors, ...backendErrors }));
-        errorNotif('خطا در بروزرسانی بازیکن');
-      } else {
-        successNotif('اطلاعات بازیکن با موفقیت بروزرسانی شد');
-        setErrors({}); // Clear frontend errors on successful submission
-        fetchPlayers(); // Reload player details to update originalData
-      }
-    } catch (error) {
-      errorNotif('خطا در ارتباط با سرور');
-      // Ensure we set errors in a consistent way, preferably from error.response.data if available
-      if (error && error.response && error.response.data) {
-        setErrors(error.response.data);
-      } else if (typeof error === 'object' && error !== null) {
-        setErrors(error);
-      } else {
-        setErrors({ general: 'خطایی رخ داد.' });
-      }
-      console.error('Error submitting form:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    updatePlayerMutation.mutate(formDataToSend);
   };
   
   const handleBack = () => {
@@ -208,13 +208,6 @@ const EditPlayerForm = () => {
     { id: 'english', label: 'English', lang: 'en' }
   ];
 
-  const flashingDotCSS = `
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-  `;
-
   if (playerDetailsLoading) {
     return (
       <div className="min-h-screen bg-quinary-tint-600 flex items-center justify-center">
@@ -223,17 +216,22 @@ const EditPlayerForm = () => {
     );
   }
 
-  if (playerDetails?.errorContent?.detail === "No Player matches the given query." || playerDetails?.errorContent?.detail === "page not found.") {
+  const playerNotFound =
+    playerDetailsError &&
+    (playerDetailsErrorObj?.response?.status === 404 ||
+      playerDetailsErrorObj?.response?.data?.detail === 'No Player matches the given query.' ||
+      playerDetailsErrorObj?.response?.data?.detail === 'page not found.');
+
+  if (playerNotFound) {
     return <AdminPlayerNotFound />;
   }
   
-  if (playerDetails?.isError || positions?.isError || playerDetailsError) {
+  if (playerDetailsError || positionsError) {
     return <AdminSomethingWentWrong />;
   }
 
   return (
     <div className="min-h-screen bg-quinary-tint-600">
-      <style>{flashingDotCSS}</style>
       <div className="max-w-[1200px] mx-auto px-4 mt-[1rem]">
         <FormHeader
           title="ویرایش بازیکن"
@@ -242,188 +240,23 @@ const EditPlayerForm = () => {
         />
 
         <div className="bg-quinary-tint-800 rounded-2xl shadow-[0_0_16px_rgba(0,0,0,0.25)] p-6">
-          <motion.form
+          <PlayerFormFields
+            activeTab={activeTab}
+            tabs={tabs}
+            tabErrors={tabErrors}
+            onTabChange={handleTabChange}
+            formData={formData}
+            errors={errors}
+            onInputChange={handleInputChange}
+            onImageChange={handleImageChange}
+            positionOptions={positionOptions}
+            imagePreview={imagePreview}
             onSubmit={handleSubmit}
-            className="space-y-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="space-y-6">
-              <div className="flex border-b border-quinary-tint-500 justify-between">
-               <div>
-               {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`px-6 py-3 text-[16px] font-medium transition-all duration-300 border-b-2 relative ${
-                      activeTab === tab.id
-                        ? 'text-primary border-primary'
-                        : 'text-secondary border-transparent hover:text-primary hover:border-quinary-tint-400'
-                    }`}
-                  >
-                    {tab.label}
-                    {activeTab !== tab.id && tabErrors[tab.id] && (
-                      <span 
-                        className="absolute -top-1 -right-1 w-3 h-3 bg-quaternary rounded-full" 
-                        style={{ animation: 'flash 1s infinite ease-in-out' }}
-                      />
-                    )}
-                  </button>
-                ))}
-                </div>
-              </div>
-              <div className="space-y-6">
-                {activeTab === 'persian' && (
-                  <div>
-                    <label className="block text-[16px] text-secondary mb-2 text-right">
-                      نام بازیکن (فارسی) *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={formData.name_fa}
-                        onChange={(e) => handleInputChange('name_fa', e.target.value)}
-                        className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                          errors.name_fa ? 'border-quaternary' : 'border-quinary-tint-500'
-                        } focus:border-primary outline-none transition-colors duration-300`}
-                        placeholder="نام بازیکن به فارسی"
-                        dir="rtl"
-                      />
-                    </div>
-                    {errors.name_fa && (
-                      <p className="text-quaternary text-[14px] mt-1 text-right">{errors.name_fa}</p>
-                    )}
-                  </div>
-                )}
-                {activeTab === 'english' && (
-                  <div>
-                    <label className="block text-[16px] text-secondary mb-2 text-right">
-                      نام بازیکن (انگلیسی) *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={formData.name_en}
-                        onChange={(e) => handleInputChange('name_en', e.target.value)}
-                        className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                          errors.name_en ? 'border-quaternary' : 'border-quinary-tint-500'
-                        } focus:border-primary outline-none transition-colors duration-300`}
-                        placeholder="Player name in English"
-                        dir="ltr"
-                      />
-                    </div>
-                    {errors.name_en && (
-                      <p className="text-quaternary text-[14px] mt-1 text-right">{errors.name_en}</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[16px] text-secondary mb-2 text-right">
-                  شماره پیراهن *
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={formData.number}
-                    onChange={(e) => handleInputChange('number', e.target.value)}
-                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                      errors.number ? 'border-quaternary' : 'border-quinary-tint-500'
-                    } focus:border-primary outline-none transition-colors duration-300`}
-                    placeholder="شماره پیراهن (1-99)"
-                    min="1"
-                    max="99"
-                  />
-                </div>
-                {errors.number && (
-                  <p className="text-quaternary text-[14px] mt-1 text-right">{errors.number}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-[16px] text-secondary mb-2 text-right">
-                  پست بازیکن *
-                </label>
-                <div className="relative">
-                  <select
-                    value={formData.position}
-                    onChange={(e) => handleInputChange('position', e.target.value)}
-                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                      errors.position ? 'border-quaternary' : 'border-quinary-tint-500'
-                    } focus:border-primary outline-none transition-colors duration-300`}
-                  >
-                    <option value="">انتخاب پست بازیکن</option>
-                    {Object.entries(positionOptions).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {errors.position && (
-                  <p className="text-quaternary text-[14px] mt-1 text-right">{errors.position}</p>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[16px] text-secondary mb-2 text-right">
-                  تعداد گل *
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={formData.goals}
-                    onChange={(e) => handleInputChange('goals', e.target.value)}
-                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                      errors.goals ? 'border-quaternary' : 'border-quinary-tint-500'
-                    } focus:border-primary outline-none transition-colors duration-300`}
-                    placeholder="تعداد گل"
-                    min="0"
-                  />
-                </div>
-                {errors.goals && (
-                  <p className="text-quaternary text-[14px] mt-1 text-right">{errors.goals}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-[16px] text-secondary mb-2 text-right">
-                  تعداد بازی *
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={formData.games}
-                    onChange={(e) => handleInputChange('games', e.target.value)}
-                    className={`w-full px-4 py-3 bg-quinary-tint-600 text-primary rounded-lg border-2 ${
-                      errors.games ? 'border-quaternary' : 'border-quinary-tint-500'
-                    } focus:border-primary outline-none transition-colors duration-300`}
-                    placeholder="تعداد بازی"
-                    min="0"
-                  />
-                </div>
-                {errors.games && (
-                  <p className="text-quaternary text-[14px] mt-1 text-right">{errors.games}</p>
-                )}
-              </div>
-            </div>
-            <ImagePicker
-              imagePreview={imagePreview}
-              onImageChange={handleImageChange}
-              error={errors.image}
-              label="تصویر بازیکن"
-            />
-            <FormActions
-              onCancel={handleBack}
-              onSubmit={handleSubmit}
-              isSubmitting={submitLoading || isLoading}
-              isSubmitDisabled={Object.keys(errors).length > 0 || submitLoading || isLoading || playerDetailsLoading}
-              submitText="ذخیره تغییرات"
-            />
-          </motion.form>
+            onCancel={handleBack}
+            isSubmitting={updatePlayerMutation.isPending}
+            isSubmitDisabled={Object.keys(errors).length > 0 || updatePlayerMutation.isPending || playerDetailsLoading}
+            submitText="ذخیره تغییرات"
+          />
         </div>
       </div>
     </div>
