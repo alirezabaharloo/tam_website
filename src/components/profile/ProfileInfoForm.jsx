@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { validateProfileFormIntl } from '../../validators/UserValidators';
 import { successNotif, errorNotif } from '../../utils/customNotifs';
-import api from '../../api';
+import {apiAuth} from '../../api';
 
-export default function ProfileInfoForm({ user, onUserUpdate, onOpenChangePassword }) {
+export default function ProfileInfoForm({ user, onOpenChangePassword }) {
   const { t, i18n } = useTranslation(['profile', 'validation']);
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
@@ -17,18 +17,15 @@ export default function ProfileInfoForm({ user, onUserUpdate, onOpenChangePasswo
 
   const updateProfileMutation = useMutation({
     mutationFn: async (formData) => {
-      const response = await api.patch('/blog/profile/update/', formData);
+      const response = await apiAuth.patch('/blog/profile/update/', formData);
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       successNotif(t('profileSaveSuccess'));
-      // Invalidate and refetch user query to update the UI
       queryClient.invalidateQueries({ queryKey: ['user'] });
-      onUserUpdate(data);
     },
     onError: (err) => {
       errorNotif(t('somethingWentWrong', { ns: 'blog' }));
-      console.error('Error submitting profile form:', err);
       if (err.response && err.response.data) {
         setErrors(err.response.data);
         setBackendError(err.response.data.detail || t('somethingWentWrong', { ns: 'blog' }));

@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import ProfileModal from './ProfileModal';
 import { validateStrongPassword } from '../../validators/UserValidators';
 import { successNotif, errorNotif } from '../../utils/customNotifs';
-import api from '../../api';
+import {apiAuth} from '../../api';
 
 export default function ChangePasswordModal({ isOpen, onClose }) {
   const { t } = useTranslation(['profile', 'validation']);
@@ -21,7 +21,7 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
 
   const changePasswordMutation = useMutation({
     mutationFn: async (payload) => {
-      const response = await api.patch('/blog/change_password/', payload);
+      const response = await apiAuth.patch('/blog/change_password/', payload);
       return response.data;
     },
     onSuccess: () => {

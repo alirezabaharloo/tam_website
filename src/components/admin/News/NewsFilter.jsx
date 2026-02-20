@@ -78,8 +78,6 @@ const NewsFilter = ({
   if (filterLoading) return <SpinLoader />;
   if (filterError) return <SomethingWentWrong />;
 
-  console.log(teamOptions);
-
   return (
     <div className="bg-quinary-tint-700 rounded-xl p-4 shadow-sm">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-4">

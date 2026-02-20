@@ -7,35 +7,51 @@ import ChangePasswordModal from '../../components/profile/ChangePasswordModal';
 import { errorNotif } from '../../utils/customNotifs';
 import SomethingWentWrong from '../UI/SomethingWentWrong';
 import SpinLoader from '../UI/SpinLoader';
-import api from '../../api';
+import { apiAuth } from '../../api';
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
-  const { t } = useTranslation('profile');
+  const navigate = useNavigate();
 
+  const { t } = useTranslation('profile');
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const { data: user, isLoading, isError } = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
-      const response = await api.get('/auth/user/');
+      const response = await apiAuth.get('/auth/user/');
       return response.data;
     },
-    onError: () => {
-      errorNotif(t('somethingWentWrong', { ns: 'blog' }));
+    retry: false,
+    onError: (err) => {
+      if (err?.response?.status === 401) {
+        navigate("/login");
+        return;
+      }
+  
+      throw new Error(err);
+      
     },
   });
 
-  const handleUserUpdate = updatedFields => {
-    // This will be handled by react-query cache invalidation in ProfileInfoForm
-  };
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return <SpinLoader />;
   }
 
   if (isError) {
     return <SomethingWentWrong />;
   }
+
+  if (!user) {
+    return <SomethingWentWrong />
+  }
+
+
+  const handleUserUpdate = (data) =>{
+    // sadf
+  }
+
 
   return (
     <div className="min-h-screen bg-quinary-tint-600 py-8 px-2">
